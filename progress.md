@@ -5,9 +5,9 @@
 - Raíz del repositorio: `factory-yate/`, la que contiene `AGENTS.md`.
 - Arranque estándar: `./init.sh`.
 - Verificación estándar: `./scripts/check.sh`.
-- OpenSpec: specs principales en `openspec/specs/` (15 capacidades). Cambios archivados: `2026-10-27-add-harness-loop-engine`, `2026-10-28-extend-factory-pipeline`, `2026-10-28-add-knowledge-brains`, `2026-10-29-add-library-map` y `2026-10-30-add-equipo-ideal` (sesión 007). Cambio activo: `add-panel` (sesión 008): sus tres features están en `passing` y quedan la parte visual de la prueba de humo (5.3) y el archivado.
+- OpenSpec: specs principales en `openspec/specs/` (18 capacidades). Cambios archivados: `2026-10-27-add-harness-loop-engine`, `2026-10-28-extend-factory-pipeline`, `2026-10-28-add-knowledge-brains`, `2026-10-29-add-library-map`, `2026-10-30-add-equipo-ideal` (sesión 007) y `2026-10-30-add-panel` (sesiones 008 y 009). No hay ningún cambio activo.
 - Feature activa / siguiente: ver `.venv/bin/factory features list`.
-- Commits: `d7c3d5b` (commit inicial) y `9d74594` (evidencia de las features con hash real).
+- Commits: ver `git log`. HEAD de la última sesión verificada: `b70d745`.
 - Bloqueos actuales: la prueba live (9.2) no está aprobada. El contrato de `--json-schema` se valida con el dogfooding (9.3).
 
 ## Registro de sesiones
@@ -326,3 +326,33 @@
   - **Después de 5.3:** archivar con `/opsx:archive add-panel` y subir a 18 las capacidades del README y de este archivo.
   - **Push:** no hecho; decisión humana.
 - Mejor próximo paso: la parte visual de 5.3 y, después, archivar `add-panel`.
+
+### Sesión 009 — 2026-10-30 (`add-panel`, tarea 5.3)
+
+- Objetivo: validar qué quedaba del proyecto y cerrar lo que faltara.
+- Estado encontrado: 26 features en `passing`, árbol limpio sobre `b70d745`, `add-panel` con 18/19 tareas y solo la 5.3 abierta. El clon no tenía `.venv` ni `.factory/`.
+- Arranque: `./init.sh` → código 0 (verificación de referencia en verde).
+- Límites de los "datos reales" en este clon (no se sustituyeron por fixtures):
+  - al arrancar no existía `.factory/`; el hook lo creó durante esta misma prueba, así que hay revisiones reales pero `tokens.loops` sigue vacío (no hay `runs/`) y se perdió el `events.jsonl` con la revisión del paso 5.2;
+  - `~/.claude/projects/-Users-cyate-PycharmProjects-factory-novo` solo tiene la transcripción de esta sesión (1), de modo que los tokens de sesiones son los de hoy. Las cifras de la sesión 008 (5 sesiones y 2 loops) se midieron en otro equipo (`/Users/camiloyateyara/…`, ver sesión 005): el slug del proyecto es distinto y por eso aquí no aparecen;
+  - `add-equipo-ideal` está archivado, así que no aparece en la pestaña Tareas. Lo mismo que ya anotó la sesión 008; la tarea 5.3 lo pedía, pero su archivado era una tarea cerrada de ese mismo cambio.
+  - Para la prueba se generó una revisión real nueva con el `checker` y el hook instalado, en lugar de la del paso 5.2.
+- Prueba de humo (5.3): `factory panel --port 8777 --open`, con el navegador del usuario sobre `http://127.0.0.1:8777/`.
+  - Confirmado en el navegador, con el panel abierto y sin recargar la página:
+    - pestaña **Tokens**: la sesión de hoy con entrada, caché y salida (loops vacíos, por lo dicho arriba);
+    - pestaña **Revisiones**: la revisión real del `checker` de esta sesión apareció sola, en estado `en_curso` y con el contador corriendo, mientras la página ya estaba abierta — esa es la prueba del tiempo real;
+    - pestaña **Tareas**: `add-panel` con su avance y el detalle por grupo, más las 26 features en `passing`.
+  - Evidencia por API del mismo instante: `/api/snapshot` → `reviews[0]` con `source: hook`, `reviewer: checker`, `status: en_curso`, `tool_use_id` real y `warnings: []`; `.factory/hooks/events.jsonl` con el `PreToolUse` correspondiente (`review: true`).
+  - **Salto en vivo observado** (criterio que la sesión 008 dejó abierto): la misma revisión pasó sola de `en_curso` (14:12:20 UTC) a su veredicto `fail` con `critical 0 / medium 2 / minor 3` y 175 s de duración (14:15:15 UTC), sin recargar la página. `.factory/hooks/events.jsonl` quedó con las dos líneas, `PreToolUse` y `SubagentStop`.
+  - Traza del propio SSE, capturada a la vez con `curl -sN /api/stream`: `event: hello` con `sections: [tokens, reviews, tasks]` y, durante la revisión, varios `event: change` con `data: {"sections": ["reviews"]}` — el refresco llega por sección, no por recarga.
+  - No sirvió Chrome headless para capturar el DOM: el `EventSource` del SSE deja la carga abierta y `--dump-dom` nunca retorna. La comprobación visual la hizo la persona.
+- Revisión independiente (`checker`): `fail` con 2 `medium` y 3 `minor`, sobre el borrador de esta entrada. Los dos `medium` eran que la entrada se cortaba antes de registrar lo observado y que faltaba el criterio de aceptación del "sin recargar"; ambos quedaron cubiertos al añadir lo de arriba. De los `minor`: se reescribió en pasado lo de `.factory/`, se anotó que las cifras de la 008 son de otro equipo y se actualizó el encabezado "Estado verificado actual".
+- Con eso, 5.3 queda marcada y `add-panel` cierra 19/19.
+- Archivado: `openspec archive add-panel --yes` → `2026-10-30-add-panel`. Specs nuevas: `observability-panel` (7 requisitos), `review-hooks` (6) y `token-usage` (6). El repo pasa de 15 a 18 capacidades; se actualizó el conteo en `README.md` y en el encabezado de este archivo.
+- Verificación ejecutada: `./init.sh` → 0; `./scripts/check.sh` → 0 (antes y después del archivado); `openspec validate add-panel --strict` → válido; `openspec list` → sin cambios activos; 26 features en `passing`.
+- Riesgos / pendientes:
+  - **Push:** no hecho; decisión humana.
+  - **Commit:** esta sesión deja el árbol con el archivado y los documentos sin commitear.
+  - **Límite del panel en este clon:** sin `.factory/runs/`, la pestaña Tokens no muestra loops. Se verá en cuanto corra un `factory goal run` aquí.
+  - **Comprobaciones visuales que no se repitieron:** temas claro y oscuro y ancho de móvil (criterio de la tarea 4.5, ya cerrada en la sesión 008).
+- Mejor próximo paso: commitear y decidir el push. Siguientes cambios propuestos: el equipo dentro de `factory goal run` (fase 2), fichar las vacantes del roster y refactorizar la deuda de complejidad (`parse_intake` 35, `parse_goal_text` 32, `cmd_brain` 30, `render_loop_state` 30).

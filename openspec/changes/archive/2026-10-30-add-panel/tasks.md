@@ -54,7 +54,7 @@
 
 - [x] 5.1 Ejecutar `./scripts/check.sh` (código 0) y `openspec validate add-panel --strict` (válido). Ejecutar `factory features verify` de `token-usage`, `review-hooks` y `observability-panel`, una a una (WIP=1), hasta `passing`.
 - [x] 5.2 Captura real sin coste extra: con el hook instalado, la revisión independiente del `checker` de este cambio debe dejar en `.factory/hooks/events.jsonl` un inicio y un fin reales. Compararlos con los fixtures de `tests/test_panel_hooks.py`; si la forma difiere, ajustar los fixtures y el código y repetir 5.1. Registrar los campos observados en `design.md` (Open Questions) y en `progress.md`.
-- [ ] 5.3 Prueba de humo con los datos reales: `factory panel --open`. Comprobar que se ven los tokens de las sesiones y los loops, la revisión del paso 5.2 y el avance de `add-panel` y `add-equipo-ideal`, y que una revisión nueva aparece sin recargar. Registrarlo en `progress.md`.
+- [x] 5.3 Prueba de humo con los datos reales: `factory panel --open`. Comprobar que se ven los tokens de las sesiones y los loops, la revisión del paso 5.2 y el avance de `add-panel` y `add-equipo-ideal`, y que una revisión nueva aparece sin recargar. Registrarlo en `progress.md`.
 
 ## Workflow follow-up
 
