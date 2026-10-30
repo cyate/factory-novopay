@@ -8,7 +8,7 @@
 - OpenSpec: specs principales en `openspec/specs/` (18 capacidades). Cambios archivados: `2026-10-27-add-harness-loop-engine`, `2026-10-28-extend-factory-pipeline`, `2026-10-28-add-knowledge-brains`, `2026-10-29-add-library-map`, `2026-10-30-add-equipo-ideal` (sesión 007) y `2026-10-30-add-panel` (sesiones 008 y 009). No hay ningún cambio activo.
 - Feature activa / siguiente: ver `.venv/bin/factory features list`.
 - Commits: ver `git log`. HEAD de la última sesión verificada: `b70d745`.
-- Bloqueos actuales: la prueba live (9.2) no está aprobada. El contrato de `--json-schema` se valida con el dogfooding (9.3).
+- Bloqueos actuales: el push de `main` es una decisión humana pendiente. La prueba live (9.2) nunca se aprobó y quedó superada por el dogfooding de la sesión 003 (9.3), que confirmó el contrato de `--json-schema`.
 
 ## Registro de sesiones
 
@@ -347,7 +347,7 @@
   - Traza del propio SSE, capturada a la vez con `curl -sN /api/stream`: `event: hello` con `sections: [tokens, reviews, tasks]` y, durante la revisión, varios `event: change` con `data: {"sections": ["reviews"]}` — el refresco llega por sección, no por recarga.
   - No sirvió Chrome headless para capturar el DOM: el `EventSource` del SSE deja la carga abierta y `--dump-dom` nunca retorna. La comprobación visual la hizo la persona.
 - Revisión independiente (`checker`): `fail` con 2 `medium` y 3 `minor`, sobre el borrador de esta entrada. Los dos `medium` eran que la entrada se cortaba antes de registrar lo observado y que faltaba el criterio de aceptación del "sin recargar"; ambos quedaron cubiertos al añadir lo de arriba. De los `minor`: se reescribió en pasado lo de `.factory/`, se anotó que las cifras de la 008 son de otro equipo y se actualizó el encabezado "Estado verificado actual".
-- Con eso, 5.3 queda marcada y `add-panel` cierra 19/19.
+- Con eso, 5.3 queda marcada y `add-panel` cierra 19/19. Trazabilidad por sub-criterio: los tokens de loops y el camino HTTP/SSE vienen de la sesión 008 por API (5 sesiones y 2 loops, en otro equipo); el "sin recargar" y las tres pestañas, de esta sesión en el navegador; la revisión del paso 5.2 se sustituyó por una nueva, y `add-equipo-ideal` ya estaba archivado.
 - Archivado: `openspec archive add-panel --yes` → `2026-10-30-add-panel`. Specs nuevas: `observability-panel` (7 requisitos), `review-hooks` (6) y `token-usage` (6). El repo pasa de 15 a 18 capacidades; se actualizó el conteo en `README.md` y en el encabezado de este archivo.
 - Verificación ejecutada: `./init.sh` → 0; `./scripts/check.sh` → 0 (antes y después del archivado); `openspec validate add-panel --strict` → válido; `openspec list` → sin cambios activos; 26 features en `passing`.
 - Riesgos / pendientes:

@@ -6,7 +6,7 @@
 - **revisiones en tiempo real**, capturadas con hooks;
 - **estado de implementación** de features, cambios OpenSpec y ejecuciones.
 
-No necesita red ni dependencias y no llama a la API: lee los archivos que ya dejan factory, OpenSpec y Claude Code. Requisitos y diseño: cambio OpenSpec `add-panel`.
+No necesita red ni dependencias y no llama a la API: lee los archivos que ya dejan factory, OpenSpec y Claude Code. Requisitos en `openspec/specs/{observability-panel,review-hooks,token-usage}/`; diseño en `openspec/changes/archive/2026-10-30-add-panel/`.
 
 ## Uso
 
