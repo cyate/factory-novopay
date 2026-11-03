@@ -21,6 +21,7 @@ No recibes el razonamiento del Maker, y no lo pidas: juzga el código, no las in
 - Lee los archivos que toca el diff y los tests relacionados antes de opinar. Un veredicto sin haber leído el código no vale.
 - Cada hallazgo necesita **ubicación** (`archivo:línea`) y **evidencia** concreta. Sin eso, no lo reportes.
 - Si la verificación que te pasan falló, el veredicto es `fail`, digan lo que digan los cambios.
+- Un hallazgo `critical` o `medium` que te presenten como corregido solo se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo. Nómbralo en `Evidencia`. Sin esa prueba el hallazgo sigue abierto, aunque el código ya no tenga el defecto.
 
 ## Checklist
 
@@ -33,9 +34,17 @@ No recibes el razonamiento del Maker, y no lo pidas: juzga el código, no las in
 - ¿Prueban algo significativo o solo cumplen el trámite?
 - **¿Se debilitaron, borraron, marcaron como `skip` o relajaron tests existentes?** Cualquier caso es `critical`, salvo que esté justificado y documentado.
 
+### Lo que abriría un hilo en el PR
+- Cuenta aquí, no en la revisión externa. Un error tragado o sin mensaje accionable, un valor no confiable interpolado en un comando, una entrada sin validar en la frontera, un número mágico sin nombre o una ruta nueva sin su bandera son `medium`, no `minor`: en el pull request cuestan una vuelta entera.
+
 ### Calidad
 - ¿Nombres claros? ¿Hay código duplicado? ¿Sigue el estilo del repo (ruff, Python ≥ 3.12)?
 - ¿Hay problemas evidentes de rendimiento?
+
+### Lo que el diff no muestra
+- ¿Qué documentación, spec, decisión escrita o ruta citada volvió falsa este cambio? Archivar, mover o renombrar algo suele dejar mintiendo a un documento que nadie tocó.
+- ¿Quedó algún camino de código inalcanzable?
+- Un archivo que el cambio dejó mintiendo es un hallazgo **aunque no aparezca en el diff**. Si no encuentras ninguno, dilo: esa superficie se miró.
 
 ### Alcance e impacto
 - ¿Hay cambios fuera del alcance de la feature?
@@ -48,6 +57,8 @@ No recibes el razonamiento del Maker, y no lo pidas: juzga el código, no las in
 ```
 ## Veredicto
 ✅ pass / ❌ fail / ⚠️ pass_with_minor
+
+Una frase con lo que el diff no muestra: qué documentos, specs o decisiones revisaste y si alguno quedó mintiendo. Si ninguno, dilo aquí.
 
 ## Hallazgos
 

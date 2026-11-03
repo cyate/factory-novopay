@@ -14,6 +14,13 @@ cat .factory/runs/<run-id>/loop-state.md     # por qué: rondas, hallazgos, deci
 .venv/bin/factory inbox ack <run-id>         # marcar como revisada
 ```
 
+Al leer los hallazgos, dos cosas no se dan por hechas:
+
+- **Un hallazgo corregido sin prueba de mutación sigue abierto.** Si la ronda arregló algo pero ningún test falla al revertir el arreglo, lo que hay es una opinión con commit.
+- **Lo que el diff no muestra cuenta.** Un documento, una spec o una decisión escrita que el cambio volvió falsa es un hallazgo, aunque el archivo no aparezca en el diff.
+
+Las reglas de oficio y dónde vive cada una están en [roles.md](roles.md).
+
 ## Integrar: `factory land`
 
 Integrar es una decisión humana, y el comando para hacerlo es `factory land`. `goal run` y `tick` nunca lo invocan.

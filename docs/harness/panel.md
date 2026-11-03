@@ -1,12 +1,13 @@
 # Panel de observabilidad
 
-`factory panel` abre un panel gráfico local con tres vistas:
+`factory panel` abre un panel gráfico local con cuatro vistas:
 
 - **consumo de tokens** de los loops y de las sesiones de Claude Code;
 - **revisiones en tiempo real**, capturadas con hooks;
-- **estado de implementación** de features, cambios OpenSpec y ejecuciones.
+- **estado de implementación** de features, cambios OpenSpec y ejecuciones;
+- **pull requests** del repositorio: tuyos y los que te toca revisar, con sus tiempos y alertas.
 
-No necesita red ni dependencias y no llama a la API: lee los archivos que ya dejan factory, OpenSpec y Claude Code. Requisitos en `openspec/specs/{observability-panel,review-hooks,token-usage}/`; diseño en `openspec/changes/archive/2026-10-30-add-panel/`.
+Las tres primeras no necesitan red ni dependencias y no llaman a la API: leen los archivos que ya dejan factory, OpenSpec y Claude Code. La cuarta consulta GitHub con el CLI `gh`, y se apaga con `--no-pulls`. Requisitos en `openspec/specs/{observability-panel,review-hooks,token-usage}/`; diseño en `openspec/changes/archive/2026-10-30-add-panel/`.
 
 ## Uso
 
@@ -16,15 +17,17 @@ No necesita red ni dependencias y no llama a la API: lee los archivos que ya dej
 .venv/bin/factory panel --port 9000     # otro puerto
 .venv/bin/factory panel --json          # imprime la instantánea JSON y termina
 .venv/bin/factory panel --projects-dir DIR   # transcripciones en otro sitio
+.venv/bin/factory panel --no-pulls      # sin consultar GitHub: el panel no sale a la red
 ```
 
-La página tiene tres pestañas: **Tokens**, **Revisiones** y **Tareas**. Encima de ellas, una fila de indicadores:
+La página tiene cuatro pestañas: **Tokens**, **Revisiones**, **Tareas** y **Pull requests**. Encima de ellas, una fila de indicadores:
 
 - tokens de hoy y totales;
 - proporción de caché;
 - USD registrado por los loops;
 - revisiones en curso;
-- feature activa y bandeja.
+- feature activa y bandeja;
+- pull requests con alerta.
 
 El punto «En vivo» indica que el navegador recibe los avisos del servidor. Si se corta, la página se reconecta sola.
 
@@ -35,6 +38,7 @@ El punto «En vivo» indica que el navegador recibe los avisos del servidor. Si 
 | `tokens` | `.factory/runs/*/events.jsonl` y transcripciones de Claude Code del proyecto |
 | `reviews` | `.factory/hooks/events.jsonl` y `.factory/runs/*/state.json` |
 | `tasks` | `feature_list.json`, `openspec/changes/*/tasks.md` (sin `archive/`), `.factory/runs/*/state.json` y `.factory/inbox/` |
+| `pulls` | ningún archivo: tres consultas de `gh pr list` cada 60 s, en memoria |
 
 Si un archivo falta, su parte queda vacía sin más: un repo sin ejecuciones ni hooks es normal. Si existe pero no se puede leer, también queda vacía y el problema aparece en `warnings`, arriba de la página.
 
@@ -140,6 +144,48 @@ Pulsar una feature abre su detalle, también enlazable como `#tareas/<id>`. El d
 - las tareas de su grupo, casilla a casilla;
 - las ejecuciones y las revisiones que la mencionan.
 
+## Pull requests
+
+La pestaña **Pull requests** responde a una pregunta que el resto del panel no cubre: qué pasa con el trabajo **después** de que el `checker` dé `pass`.
+
+**Qué consulta** (tres llamadas a `gh pr list` sobre el repositorio del panel, cada 60 s):
+
+| Consulta | Para qué |
+|---|---|
+| `--state open --author @me` | lo que abriste y sigue vivo |
+| `--state open --search review-requested:@me` | lo que te bloquea a ti revisar |
+| `--state merged --author @me` (10 últimos) | el ciclo completo; alimenta las dos medianas, la de ciclo y la de primera revisión |
+
+Un pull request que salga en dos consultas figura una sola vez, con el rol `autor`.
+
+**Estado de cada uno:** `borrador`, `sin_revisar`, `en_revision`, `cambios_pedidos`, `aprobado` o `fusionado`.
+
+**Tiempos** (en horas, y en días a partir de 48):
+
+- **abierto**: desde que se creó;
+- **sin actividad**: desde el último movimiento, el que destapa los PR olvidados;
+- **hasta la primera revisión**: la primera revisión **humana**. Un escáner que responde en treinta segundos no cuenta, o la mediana diría que todo se revisa al instante. Su mediana se calcula sobre **todos** los pull requests, también los fusionados: son los únicos con el dato ya completo, y dejarlos fuera la sesgaba hacia abajo;
+- **de ciclo**: creación → fusión, solo en los fusionados.
+
+**Alertas** (vacío si no hay ninguna):
+
+| Alerta | Cuándo |
+|---|---|
+| `checks_fallando` | algún check en rojo |
+| `cambios_pedidos` | `reviewDecision` es `CHANGES_REQUESTED` |
+| `conflictos` | la rama choca con la base |
+| `sin_revisor` | nadie humano pedido ni revisando (un borrador no alerta) |
+| `parado` | más de 24 h sin actividad |
+| `sin_coderabbit` | ni el comentario `@coderabbitai review` ni una revisión del bot |
+| `sin_cifra` | el equipo `cifra` no figura entre los revisores |
+| `demasiado_grande` | más de 10 archivos o 600 líneas |
+
+Las tres últimas son reglas de oficio de `CLAUDE.md` y solo se le piden al **autor**: en un PR ajeno no son accionables.
+
+**Lo que no hace:** ninguna escritura. Ni crea, ni comenta, ni revisa, ni fusiona. Las consultas son de solo lectura y el resultado vive en memoria: no se escribe caché en disco.
+
+**Si falla:** sin `gh`, sin sesión iniciada (`gh auth login`), sin red o con `--no-pulls`, la sección queda vacía con el motivo escrito en la propia pestaña. El resto del panel no se entera.
+
 ## Tiempo real
 
 - **Vigilancia:** el servidor sondea cada segundo la huella (`mtime` y tamaño) de los archivos de cada sección. No usa inotify ni FSEvents, que serían dependencias o código por plataforma.
@@ -147,10 +193,12 @@ Pulsar una feature abre su detalle, también enlazable como `#tareas/<id>`. El d
 - **Recarga:** mientras recarga, mantiene lo que ya muestra con menos opacidad, sin saltos.
 - **Tiempo de las revisiones:** el de las revisiones en curso avanza en el navegador sin pedir datos.
 - **Coste de cada refresco:** las transcripciones se leen de forma incremental (ver arriba), así que solo cuesta lo que se añadió.
+- **Pull requests:** un hilo aparte los consulta cada 60 s y avisa **solo cuando cambian**, de modo que un sondeo sin novedad no repinta la página.
 
 ## Privacidad
 
 - **Todo es local:** el panel lee archivos de tu equipo y solo los sirve en `127.0.0.1`. No envía nada fuera.
+- **Única salida a la red:** las consultas de pull requests, con tu sesión de `gh`, al repositorio en el que corre el panel. `--no-pulls` las quita.
 - **Transcripciones:** solo modelo, `usage`, marcas de tiempo, identificadores y el tipo y la descripción de los subagentes (ver *Consumo de tokens*). Nunca el texto de los mensajes ni de las herramientas.
 - **Hooks:** nunca el prompt del subagente. De los revisores, un extracto de 4.000 caracteres como máximo de su respuesta final, en `.factory/hooks/events.jsonl`, que no se versiona.
 
@@ -161,11 +209,14 @@ Pulsar una feature abre su detalle, también enlazable como `#tareas/<id>`. El d
 - **Métodos:** solo `GET` y `HEAD`; cualquier otro recibe 405. No hay cabeceras CORS.
 - **Cabeceras de respuesta:** `Content-Security-Policy` restringida al propio origen, `X-Content-Type-Options: nosniff` y `Cache-Control: no-store`.
 - **Página:** no carga recursos externos (CSS, JS y gráficos SVG van en línea). Inserta todos los datos con `textContent`, nunca como HTML, porque los extractos de las revisiones vienen de agentes.
-- **Solo lectura:** ni el servidor ni `--json` crean, modifican o borran archivos. La única escritura de todo el cambio es la línea que añade el hook al registro.
+- **Solo lectura:** ni el servidor ni `--json` crean, modifican o borran archivos. La única escritura de todo el cambio es la línea que añade el hook al registro. Las consultas de pull requests tampoco escriben: ni en disco ni en GitHub.
 
 ## Límites
 
 - **USD:** solo el que registran los loops. Las sesiones interactivas se miden en tokens.
 - **Formatos de Claude Code:** las transcripciones y los payloads de los hooks son formatos internos de Claude Code. El parser ignora lo que no entiende, y cada evento del hook guarda los nombres de los campos que llegaron (`payload_keys`, sin valores) para detectar cambios.
-- **Pull requests de GitHub:** no los mira. En este repo, «revisión» es la del `checker` o la de un jugador revisor sobre un diff o una rama local.
+- **Pull requests:** solo los del repositorio donde corre el panel. Si trabajas en varios repos, abre un panel en cada uno. Los límites son 30 pull requests abiertos por consulta y 10 fusionados.
+- **Primera revisión:** `gh pr list` devuelve la **última** revisión de cada revisor, no todas. Si alguien revisó dos veces, el tiempo medido es el de su última pasada, no el de la primera.
+- **`sin_cifra`:** mira a quién se le **pidió** revisión. Cuando una persona del equipo revisa, GitHub retira la petición del equipo y deja la revisión a su nombre, así que la alerta puede quedarse encendida en un PR que `cifra` ya revisó. Se apaga al fusionar.
+- **Bots:** se reconocen por nombre (`coderabbitai`, `orca-security-us`, `makeplane`, `github-actions`, `dependabot`, `renovate`) y por los sufijos `[bot]` y `-bot`. Uno nuevo contaría como revisor humano hasta añadirlo a `BOTS`, en `src/factory/panel/pulls.py`.
 - **Protección del hook:** `.claude/settings.json` y `.claude/hooks/**` son rutas críticas del harness desde `add-equipo-ideal` (`src/factory/protection.py`): la rama de un loop no puede modificar, borrar ni renombrar esos archivos, y ningún objetivo puede liberarlos.

@@ -1,4 +1,4 @@
-"""Instantánea del panel: `{generated, repo, tokens, reviews, tasks, warnings}` (solo lectura)."""
+"""Instantánea: `{generated, repo, tokens, reviews, tasks, pulls, warnings}` (solo lectura)."""
 
 from __future__ import annotations
 
@@ -7,11 +7,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from factory.panel import reviews, state_dir, tasks, tokens, unreadable
+from factory.panel import pulls, reviews, state_dir, tasks, tokens, unreadable
 from factory.state import RunState, RunStore
 from factory.util import now_iso
 
-SECTIONS = ("tokens", "reviews", "tasks")
+SECTIONS = ("tokens", "reviews", "tasks", "pulls")
 
 
 def load_runs(state: Path, warnings: list[str]) -> list[RunState]:
@@ -37,8 +37,12 @@ def _section(name: str, build: Callable[[], Any], empty: Any, warnings: list[str
 
 
 def build(
-    root: Path, projects: Path, reader: tokens.TranscriptReader | None = None
+    root: Path,
+    projects: Path,
+    reader: tokens.TranscriptReader | None = None,
+    pull_requests: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    """`pull_requests` lo trae quien consultó a GitHub (el servidor o `--json`); sin él, vacía."""
     warnings: list[str] = []
     state = state_dir(root, warnings)
     runs = load_runs(state, warnings)
@@ -55,6 +59,7 @@ def build(
         "tasks": _section(
             "tasks", lambda: tasks.collect(root, state, runs, warnings), {}, warnings
         ),
+        "pulls": pull_requests if pull_requests is not None else pulls.empty(),
         "warnings": warnings,
     }
 

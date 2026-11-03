@@ -7,6 +7,32 @@ from pathlib import Path
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def sin_salida_a_la_red(monkeypatch: pytest.MonkeyPatch):
+    """Ningún test consulta GitHub: o pasa `--no-pulls`, o inyecta su propio runner.
+
+    Un test `live` que quiera salir de verdad tiene que deshacer este parche
+    (`monkeypatch.undo()`), no quitar el fixture.
+    """
+    intentos: list[str] = []
+
+    def prohibido(args, root):
+        intentos.append(" ".join(args))
+        # `pytest.fail` levanta `Failed`, que es `BaseException`: por eso atraviesa el
+        # `except Exception` de `pulls.collect` en vez de acabar escondido en `error`.
+        # No lo cambies por una excepción corriente.
+        pytest.fail(
+            f"este test ejecutó `gh {' '.join(args)}`. "
+            "Pasa --no-pulls o inyecta un runner falso en pulls.collect."
+        )
+
+    monkeypatch.setattr("factory.panel.pulls._run", prohibido)
+    yield
+    # En el hilo del sondeador, `Failed` solo sería un warning y el test seguiría verde.
+    # Este teardown corre en el hilo principal, así que ahí sí se pone rojo.
+    assert not intentos, f"un test ejecutó `gh {intentos[0]}` desde un hilo"
+
+
 def make_feature(fid: str, status: str = "not_started", **overrides) -> dict:
     feature = {
         "id": fid,

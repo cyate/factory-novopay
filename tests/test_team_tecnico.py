@@ -18,11 +18,11 @@ JUGADORES = [
     "metricas",
     "producto",
     "ingeniero-software",
+    "arquitecto-api",
+    "entrega-qa",
 ]
 VACANTES = {
-    7: "rendimiento-costes",
     8: "bibliotecario",
-    10: "arquitecto",
     11: "experiencia-cli",
 }
 
@@ -185,6 +185,33 @@ def test_documento_del_equipo_lista_las_vacantes():
     for dorsal, perfil in VACANTES.items():
         assert re.search(rf"\|\s*{dorsal}\s*\|[^\n]*vacante", texto), f"falta la vacante {dorsal}"
         assert f"`{perfil}`" in texto, f"falta el perfil sugerido {perfil}"
+
+
+def test_como_fichar_nombra_las_superficies_y_el_cambio_openspec():
+    """La spec `team-match` ("Fichajes posteriores") exige coherencia en cuatro superficies."""
+    texto = EQUIPO.read_text(encoding="utf-8")
+    pasos = texto.split("## Cómo fichar", 1)[1].split("## El partido", 1)[0]
+    superficies = ("`README.md`", "`.claude/skills/equipo/SKILL.md`", "`docs/harness/roles.md`")
+    for superficie in superficies:
+        assert superficie in pasos, superficie
+    assert "Coste" in pasos and "vacantes" in pasos
+    # El cambio OpenSpec deja de ser opcional si el fichaje toca un requisito de `team-match`.
+    assert "toca un requisito de `team-match`" in pasos
+    assert "Solo es opcional cuando ningún requisito cambia." in pasos
+
+
+def test_las_tres_superficies_dicen_las_mismas_vacantes():
+    """Los dorsales que nombra cada superficie son los de VACANTES, sea cual sea la redacción."""
+    repo = EQUIPO.parents[2]
+    superficies = {
+        "equipo.md": (EQUIPO.read_text(encoding="utf-8"), "están libres"),
+        "README.md": ((repo / "README.md").read_text(encoding="utf-8"), "están vacantes"),
+        "SKILL.md": (SKILL.read_text(encoding="utf-8"), "vacantes ("),
+    }
+    for nombre, (texto, marca) in superficies.items():
+        linea = next(x for x in texto.splitlines() if marca in x)
+        # Por conjunto de dorsales, no por frase literal: así el singular no rompe el test.
+        assert {int(n) for n in re.findall(r"\d+", linea)} == set(VACANTES), nombre
 
 
 def test_documento_del_equipo_sin_enlaces_a_agentes():

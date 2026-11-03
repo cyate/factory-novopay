@@ -13,10 +13,12 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 
 - Arranque (entorno + verificación de referencia): `./init.sh`
 - Verificación completa (lint, formato, tests y auditoría del harness): `./scripts/check.sh`
+- Puerta previa a un pull request (árbol limpio, commits sobre la base, verificación, tamaño, complejidad y CodeRabbit en local): `./scripts/pre-pr.sh [base]`
 - Auditoría del harness: `.venv/bin/factory doctor`
 - Features: `.venv/bin/factory features list | start <id> | verify <id>`
 - Equipo ideal (plantilla y convocatoria sugerida): `.venv/bin/factory team list | validate | lineup`
 - Complejidad ciclomática por función: `.venv/bin/factory complexity [rutas] [--base REF] [--max N]`
+- Recomendaciones de los revisores de un PR: `.venv/bin/factory feedback <pr> [--revisor <login>]`
 
 ## Inicio de sesión
 
@@ -34,6 +36,7 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 - **No hagas push, merge ni PRs** desde un agente. `factory land` y `factory goal promote --yes` son decisiones humanas: no los ejecutes sin una petición explícita.
 - **No cambies las reglas de verificación** (`scripts/check.sh` y la configuración de ruff/pytest) sin una petición explícita.
 - **No uses modos que omiten permisos** (`bypassPermissions`, `--dangerously-skip-permissions`).
+- **Consulta a los expertos antes de proponer.** Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta contra la biblioteca técnica (`factory brain search "<consulta en inglés>"`) y se **cita** (`Libro · cap. N · pp. A–B`), sin copiar su texto. Si no hay nada aplicable, se dice. Mandan `AGENTS.md`, `docs/harness/` y `openspec/specs/` sobre cualquier nota que los contradiga; la contradicción se anota (`docs/harness/cerebros.md`).
 - **Respeta el alcance** de la feature activa. Un arreglo de soporte solo se permite si bloquea, y debe quedar anotado.
 
 ## Definición de terminado
@@ -44,6 +47,7 @@ Una feature está terminada solo si se cumple todo lo siguiente:
 - `./scripts/check.sh` termina en 0;
 - `factory features verify <id>` la promovió a `passing` con evidencia;
 - la revisión independiente (subagente `checker`) no deja hallazgos `critical` ni `medium` abiertos;
+- si el trabajo va a un pull request, `./scripts/pre-pr.sh` termina en 0 **antes** de abrirlo;
 - `progress.md` registra lo hecho, la verificación ejecutada y el siguiente paso.
 
 ## Cierre de sesión
@@ -67,10 +71,11 @@ Léelos solo cuando la tarea lo requiera:
 - [Observabilidad](docs/harness/observabilidad.md): estado de cada ejecución, bandeja y costes silenciosos.
 - [Intake](docs/harness/intake.md): triaje de peticiones, borradores y `factory goal promote`.
 - [Revisión](docs/harness/revision.md): leer resultados, `factory goal rework` y `factory land`.
+- [Recomendaciones](docs/harness/recomendaciones.md): `factory feedback` y la skill `recomendaciones`, para atender los hilos de los revisores de un pull request.
 - [Vigilancia](docs/harness/vigilancia.md): `factory tick`, guardas y programación.
 - [Cerebros](docs/harness/cerebros.md): cerebro principal (libros, fuera de git) y diario; `factory brain …`.
 - [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo` y `factory team …`.
-- [Panel](docs/harness/panel.md): `factory panel` (tokens, revisiones y tareas en tiempo real) y los hooks que registran las revisiones.
+- [Panel](docs/harness/panel.md): `factory panel` (tokens, revisiones, tareas y pull requests en tiempo real), los hooks que registran las revisiones y `--no-pulls`.
 - [Cambios OpenSpec](openspec/changes/): requisitos y tareas del cambio en curso.
 
 ## Estructura
@@ -78,7 +83,9 @@ Léelos solo cuando la tarea lo requiera:
 - `src/factory/`: paquete y CLI `factory`.
 - `tests/`: pytest; `conftest.py` tiene utilidades para crear repos git temporales.
 - `init.sh` y `scripts/check.sh`: rutas estándar de arranque y verificación.
+- `scripts/pre-pr.sh` y `.coderabbit.yaml`: la puerta previa a un pull request y las reglas con las que el bot revisa.
 - `feature_list.json`, `progress.md` y `session-handoff.md`: estado del harness.
+- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por `entrega-qa`. Se versionan: nunca llevan secretos ni datos reales.
 - `openspec/`: specs y cambios. No edites specs fuera del flujo de OpenSpec.
 
 ---

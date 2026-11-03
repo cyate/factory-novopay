@@ -44,6 +44,8 @@ Solo puedes dirigir desde la sesión principal (`/equipo`) o como agente princip
 3. **Ajusta la sugerencia con el contexto** y justifica cada alta o baja frente a ella. Por ejemplo:
    - amplía con `seguridad` si la petición habla de autenticación, secretos, permisos, red o ejecución de comandos, aunque el diff aún no toque código;
    - amplía con `producto` si hay un cambio OpenSpec en curso que el diff debería cumplir;
+   - amplía con `arquitecto-api` si la petición o el diff hablan de una API, de llamadas a un servicio externo, de concurrencia contra una base de datos o de AWS, aunque sus rutas no casen;
+   - amplía con `entrega-qa` si la petición trae un ticket de una HU de API cuyo PR ya se aprobó y toca preparar la entrega al QA humano, aunque todavía no exista la carpeta `entregas/<TICKET>/`;
    - da de baja a un jugador solo si su riesgo ya está cubierto, y escribe por qué.
 4. **Las vacantes nunca se convocan.** El `checker` tampoco: es el árbitro, no un jugador. Si falta el archivo `.claude/agents/<name>.md` de un jugador, márcalo como no disponible y no lo sustituyas por un agente genérico.
 5. **Publica la alineación antes de invocar a nadie**, con una fila por jugador de la plantilla:
@@ -54,7 +56,7 @@ Solo puedes dirigir desde la sesión principal (`/equipo`) o como agente princip
    | 1 | portero | `seguridad` | sí (alta) | la petición menciona secretos; la sugerencia no lo incluía |
    | 2 | lateral-derecho | `qa` | no | el diff no toca `src/**` ni `tests/**` |
 
-   Debajo, una línea con las vacantes (7, 8, 10 y 11) y el tipo de partido.
+   Debajo, una línea con las vacantes (8 y 11) y el tipo de partido.
 
 ## 2. Pre-partido (solo con petición)
 
@@ -69,6 +71,8 @@ Solo puedes dirigir desde la sesión principal (`/equipo`) o como agente princip
 
 Invoca a `ingeniero-software` con la petición, los criterios WHEN/THEN, el plan de pruebas, las respuestas del humano y la feature activa. En las vueltas siguientes, pásale solo los hallazgos `critical` y `medium` del acta, junto con los criterios.
 
+Si `entrega-qa` está convocado, invócalo **después** del constructor, con el ticket, la historia de usuario, la rama aprobada y las rutas del servicio. Escribe únicamente en `entregas/<TICKET>/`: su paquete no entra en el diff que reciben los revisores.
+
 ## 4. Verificación determinista
 
 La ejecutas **tú**, nunca un revisor:
@@ -76,7 +80,10 @@ La ejecutas **tú**, nunca un revisor:
 ```bash
 ./scripts/check.sh                                       # guarda el código de salida y la salida
 .venv/bin/factory complexity --base <ref> --json         # solo si metricas está convocado
+python entregas/<TICKET>/escenarios.py --list            # solo si entrega-qa está convocado
 ```
+
+El `--list` no lanza ninguna petición: comprueba que el paquete carga y qué criterio de la historia prueba cada escenario. Pega su salida en el acta.
 
 - `<ref>` es la misma base de la convocatoria. En un partido de revisión, la merge-base (ver abajo).
 - Si `./scripts/check.sh` falla tras construir, vuelve a construcción con la salida, sin gastar revisores. Esa vuelta cuenta para el límite.
@@ -84,7 +91,7 @@ La ejecutas **tú**, nunca un revisor:
 
 ## 5. Revisión en paralelo
 
-1. **Prepara la lista de archivos cambiados:** `git diff --name-only <base>` más los `??` de `git status --porcelain`. Así los archivos nuevos también entran. Para el diff de cada archivo nuevo sin seguimiento, usa `git diff --no-index /dev/null <archivo>` (no ejecutes `git add -N`).
+1. **Prepara la lista de archivos cambiados:** `git diff --name-only <base>` más los `??` de `git status --porcelain`. Así los archivos nuevos también entran. **Excluye `entregas/**`**: el paquete del QA no se juzga con los criterios de la feature, su verificación es el `--list` de la fase 4. Para el diff de cada archivo nuevo sin seguimiento, usa `git diff --no-index /dev/null <archivo>` (no ejecutes `git add -N`).
 2. **Guarda `git status --porcelain`** antes de invocar a los revisores.
 3. **Invoca a todos los revisores convocados en un mismo mensaje**, una llamada a la herramienta Agent por jugador, con `subagent_type` = su `name`. Cada uno recibe solo esta plantilla, nunca el razonamiento ni el informe del constructor:
 
@@ -193,7 +200,7 @@ Revisa una rama ya hecha: propia, ajena o una `factory/<run-id>` antes de `facto
 ## Coste
 
 - Cada convocado es una invocación, y cada vuelta o petición de concreción, otra más. Convoca lo mínimo que cubra el riesgo.
-- Los jugadores ligeros (`qa`, `documentador`, `metricas` e `ingeniero-software`) usan sonnet; `seguridad`, `revisor-pr` y `producto`, opus. No cambies el modelo de un jugador.
+- Los jugadores ligeros (`qa`, `documentador`, `metricas`, `ingeniero-software` y `entrega-qa`) usan sonnet; `seguridad`, `revisor-pr`, `producto` y `arquitecto-api`, opus. No cambies el modelo de un jugador.
 - Ver `docs/harness/equipo.md`.
 
 ---

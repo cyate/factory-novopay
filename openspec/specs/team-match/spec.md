@@ -2,9 +2,7 @@
 
 ## Purpose
 Define cómo juega el equipo ideal en una sesión interactiva de Claude Code. El técnico decide la convocatoria y dirige el partido; cada jugador cumple un contrato de entrada, salida y permisos; el resultado se consolida en un acta. El árbitro (`checker`) sigue siendo independiente del equipo.
-
 ## Requirements
-
 ### Requirement: Técnico y reglamento
 El equipo SHALL tener un técnico (`.claude/agents/tecnico.md`) y un reglamento (`.claude/skills/equipo/SKILL.md`), invocable con `/equipo` desde la sesión principal o con `claude --agent tecnico`. El técnico MUST NOT editar archivos: construir corresponde a los constructores.
 
@@ -77,9 +75,15 @@ La plantilla inicial SHALL incluir estos revisores:
 - `metricas` (#5): el informe de complejidad;
 - `producto` (#6): preguntas y respuestas, criterios y matriz petición→diff.
 
+"Inicial" es la plantilla con la que se integró `add-equipo-ideal`: describe el punto de partida, no un tope. Los fichajes posteriores ocupan dorsales libres y se rigen por el requisito "Fichajes posteriores".
+
 #### Scenario: Plantilla inicial completa
-- **WHEN** se ejecuta `factory team list` tras integrar el cambio
+- **WHEN** se ejecuta `factory team list` sobre la plantilla con la que se integró `add-equipo-ideal`
 - **THEN** aparecen el técnico, los siete jugadores en sus dorsales y los dorsales 7, 8, 10 y 11 como vacantes
+
+#### Scenario: La plantilla crece con un fichaje
+- **WHEN** se añade `.claude/agents/arquitecto-api.md` con `dorsal: 10` y se ejecuta `factory team list`
+- **THEN** la mediapunta deja de ser una vacante, el fichaje aparece en su puesto y las vacantes que se informan son las que quedan libres
 
 ### Requirement: Gravedad en métricas
 `metricas` SHALL clasificar como `minor` una función que empeora y queda en el rango C o por debajo. Como `medium`, una función nueva o empeorada que queda en el rango D o superior. Una función sin cambios MUST NOT generar hallazgos.
@@ -93,7 +97,7 @@ La plantilla inicial SHALL incluir dos constructores:
 - `ingeniero-software` (#9): implementa siguiendo AGENTS.md, sin editar `status` ni `evidence`, sin debilitar tests y dentro del alcance;
 - `documentador` (#3): actualiza solo documentación (`*.md`).
 
-Los dorsales 7, 8, 10 y 11 MUST quedar vacantes, con perfiles sugeridos en `docs/harness/equipo.md`.
+Los dorsales que ningún agente declara SHALL informarse como vacantes, con perfiles sugeridos en `docs/harness/equipo.md`. La lista de vacantes vive en ese documento y en la salida de `factory team list`, no en esta spec.
 
 #### Scenario: El documentador no toca código
 - **WHEN** el `documentador` recibe un diff que cambia un subcomando del CLI
@@ -133,3 +137,39 @@ El acta SHALL NOT sustituir al árbitro. Antes de dar por terminada una feature 
 #### Scenario: Acta en verde antes de terminar la feature
 - **WHEN** el acta termina en `pass`
 - **THEN** el técnico recuerda que falta la revisión del `checker` antes de `factory features verify`
+
+### Requirement: Fichajes posteriores
+Un fichaje SHALL añadir un único archivo `.claude/agents/<name>.md` con un `dorsal` libre de 1 a 11 y el frontmatter completo (`name`, `description` en una línea con `(#<dorsal>)`, `tools`, `model`, `dorsal`, `tipo` y `convocatoria`). Un revisor MUST declarar `tools` dentro de `Read, Grep, Glob` y responder con el formato común, empezando por `## Jugador: <name> (#<dorsal>)` y con exactamente una línea de veredicto.
+
+El fichaje MUST traer su propio test (`tests/test_team_<name>.py`) y dejar coherentes las cuatro superficies que lo nombran: `README.md`, `docs/harness/equipo.md` (plantilla, formación, vacantes y costes), `.claude/skills/equipo/SKILL.md` (vacantes y coste) y `docs/harness/roles.md` (enumeración por tipo). Un fichaje MUST NOT aceptarse sin `factory team validate` en 0.
+
+#### Scenario: Fichaje con un dorsal ya ocupado
+- **WHEN** un agente nuevo declara un `dorsal` que ya usa otro jugador
+- **THEN** `factory team validate` falla y el fichaje no se acepta
+
+#### Scenario: El fichaje deja una superficie mintiendo
+- **WHEN** se ficha a un jugador y `README.md` sigue contando su dorsal entre las vacantes
+- **THEN** es un hallazgo de revisión, y el test del jugador falla al revertir la corrección
+
+### Requirement: Paquete de entrega al QA humano
+Cuando el PR de una API se aprueba y la revisa una persona de QA, el equipo SHALL poder producir un paquete de entrega bajo `entregas/<TICKET>/`, escrito por el jugador `entrega-qa` (#7) y por nadie más. El paquete SHALL contener:
+- `<TICKET>.md`: el briefing que lee Cowork design, con la historia de usuario, qué hace cada API, el contrato por endpoint, las reglas de negocio, los mensajes de error, las tablas afectadas, los límites del alcance, la concurrencia, la seguridad, las rutas del proyecto y las preguntas abiertas;
+- `escenarios.py`: los requests por escenario, con la biblioteca estándar de Python y sin dependencias, con `--list`, `--only` y `--base-url`, salida legible con esperado frente a obtenido, y código de salida 0 o 1;
+- `README.md`: cómo lo corre la persona de QA.
+
+El plan de desarrollo (`plan-desarrollo.md`) lo escribe Cowork design en esa misma carpeta: el briefing y el plan MUST ser archivos distintos, para que reescribir el plan no destruya el prompt que lo genera.
+
+El paquete MUST NOT contener secretos ni datos reales de personas o de tarjetas, ni endpoints, campos o códigos de error que no estén en el código o en la historia de usuario: lo que no se pueda anclar en `archivo:línea` va a "Preguntas abiertas". `entrega-qa` MUST NOT escribir fuera de `entregas/<TICKET>/`.
+
+#### Scenario: Entrega preparada tras aprobarse el PR
+- **WHEN** el técnico convoca a `entrega-qa` con un ticket, su historia de usuario y la rama aprobada
+- **THEN** la carpeta `entregas/<TICKET>/` queda con el briefing, los escenarios y el README, y ningún archivo fuera de ella cambia
+
+#### Scenario: Regla que no está en el código
+- **WHEN** la historia de usuario menciona una regla que no aparece en el código de la rama
+- **THEN** esa regla se registra en "Preguntas abiertas" del briefing y no se escribe como afirmación ni como escenario
+
+#### Scenario: Verificación determinista del paquete
+- **WHEN** el técnico ejecuta `python entregas/<TICKET>/escenarios.py --list`
+- **THEN** se listan los escenarios con el criterio de la historia de usuario que prueba cada uno, sin lanzar ninguna petición
+

@@ -558,6 +558,131 @@
         }
       ],
       "notes": "OpenSpec add-panel, grupo 4"
+    },
+    {
+      "id": "reglas-de-oficio",
+      "priority": 27,
+      "area": "harness",
+      "title": "Reglas de oficio de los roles",
+      "user_visible_behavior": "Los prompts de maker, checker e intake, el subagente `checker` y la documentación del harness fijan cinco reglas: la prueba de mutación que cierra un hallazgo, la revisión de lo que el diff no muestra, comprobar contra `origin/main` antes de afirmar que algo no existe, separar lo contado de lo supuesto, y la precedencia entre los cerebros y la documentación del repositorio.",
+      "status": "passing",
+      "verification": [
+        "python -m pytest -q tests/test_reglas_de_oficio.py"
+      ],
+      "manual_checks": [],
+      "evidence": [
+        {
+          "command": "python -m pytest -q tests/test_reglas_de_oficio.py",
+          "exit_code": 0,
+          "date": "2026-10-30T16:07:33+00:00",
+          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
+        }
+      ],
+      "notes": "OpenSpec add-reglas-de-oficio"
+    },
+    {
+      "id": "team-arquitecto-api",
+      "priority": 28,
+      "area": "equipo",
+      "title": "Arquitecto de APIs e integraciones (#10)",
+      "user_visible_behavior": "El equipo ideal tiene un jugador en la mediapunta, `arquitecto-api`, revisor de solo lectura con opus: revisa el contrato de una API, la seguridad de la frontera, la concurrencia contra servicios externos y bases de datos, y el encaje con AWS, citando el cerebro principal. `factory team list` lo muestra en el dorsal 10 y `factory team lineup` lo convoca por rutas.",
+      "status": "passing",
+      "verification": [
+        "python -m pytest -q tests/test_team_arquitecto_api.py tests/test_team_tecnico.py"
+      ],
+      "manual_checks": [],
+      "evidence": [
+        {
+          "command": "python -m pytest -q tests/test_team_arquitecto_api.py tests/test_team_tecnico.py",
+          "exit_code": 0,
+          "date": "2026-10-30T16:44:35+00:00",
+          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
+        }
+      ],
+      "notes": "OpenSpec fichar-arquitecto-api"
+    },
+    {
+      "id": "team-entrega-qa",
+      "priority": 29,
+      "area": "equipo",
+      "title": "Preparador de entregas a QA (#7)",
+      "user_visible_behavior": "El equipo ideal tiene un constructor en el extremo derecho, `entrega-qa`, que tras aprobarse el PR de una API escribe `entregas/<TICKET>/` con el briefing para Cowork design, los escenarios ejecutables en Python de la biblioteca estándar y el README para el QA humano, sin tocar nada fuera de esa carpeta.",
+      "status": "passing",
+      "verification": [
+        "python -m pytest -q tests/test_team_entrega_qa.py tests/test_team_tecnico.py"
+      ],
+      "manual_checks": [],
+      "evidence": [
+        {
+          "command": "python -m pytest -q tests/test_team_entrega_qa.py tests/test_team_tecnico.py",
+          "exit_code": 0,
+          "date": "2026-10-30T17:33:00+00:00",
+          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
+        }
+      ],
+      "notes": "OpenSpec fichar-entrega-qa"
+    },
+    {
+      "id": "panel-pulls",
+      "priority": 30,
+      "area": "observabilidad",
+      "title": "Pull requests en el panel",
+      "user_visible_behavior": "El panel muestra una pestaña Pull requests con los PR abiertos que creó el usuario y aquellos en los que se le pidió revisión, con su estado de revisión, los checks, el tamaño, los tiempos (abierto, sin actividad, hasta la primera revisión y de ciclo) y las alertas accionables; se actualiza en vivo cada 60 s y `factory panel --no-pulls` apaga las consultas a GitHub.",
+      "status": "passing",
+      "verification": [
+        "python -m pytest -q tests/test_panel_pulls.py tests/test_panel_server.py"
+      ],
+      "manual_checks": [
+        "factory panel --json con sesión de gh iniciada: la sección pulls trae los PR propios"
+      ],
+      "evidence": [
+        {
+          "command": "python -m pytest -q tests/test_panel_pulls.py tests/test_panel_server.py",
+          "exit_code": 0,
+          "date": "2026-10-30T21:01:53+00:00",
+          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
+        }
+      ],
+      "notes": "OpenSpec add-panel-pulls"
+    },
+    {
+      "id": "pr-feedback",
+      "priority": 31,
+      "area": "revision",
+      "title": "Recomendaciones de los revisores de un PR",
+      "user_visible_behavior": "`factory feedback <pr>` imprime las recomendaciones de los revisores de un pull request —hilos en línea y cuerpos de revisión— agrupadas por revisor, con archivo:línea, el estado del hilo y el comando `gh` para responderlo; acepta número o URL, filtra con `--revisor <trozo-del-login>`, oculta los hilos resueltos salvo `--resueltos`, tiene salida `--json` y no escribe nada. La skill `recomendaciones` dirige el ciclo: leer, comprobar, arreglar lo aceptado y responder cada hilo con aprobación humana.",
+      "status": "passing",
+      "verification": [
+        "python -m pytest -q tests/test_feedback.py tests/test_cli_help.py"
+      ],
+      "manual_checks": [
+        "factory feedback <url-de-un-PR> --revisor <login> con sesión de gh: salen sus hilos sin resolver con el comando de respuesta"
+      ],
+      "evidence": [
+        {
+          "command": "python -m pytest -q tests/test_feedback.py tests/test_cli_help.py",
+          "exit_code": 0,
+          "date": "2026-10-30T21:19:13+00:00",
+          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
+        }
+      ],
+      "notes": "OpenSpec add-pr-feedback"
+    },
+    {
+      "id": "puerta-pre-pr",
+      "priority": 32,
+      "area": "revision",
+      "title": "Puerta previa al pull request y consulta a la biblioteca",
+      "user_visible_behavior": "`./scripts/pre-pr.sh [base]` corre contra el diff, antes de abrir un pull request, lo mismo que correrá el revisor: árbol limpio y commits sobre la base, `./scripts/check.sh`, tamaño del PR, complejidad ciclomática con umbral y `coderabbit review --base <base> --gate major`. Termina en 0 solo si el PR se puede abrir; sin el CLI de CodeRabbit lo dice, y `PRE_PR_STRICT=1` convierte esa ausencia en fallo. `.coderabbit.yaml` lleva las reglas con las que el bot revisa este repositorio. El maker, el intake y los diez jugadores del equipo contrastan su propuesta contra la biblioteca técnica y la citan (`Libro · cap. N · pp. A–B`); el `checker` queda fuera a propósito.",
+      "status": "not_started",
+      "verification": [
+        "python -m pytest -q tests/test_reglas_de_oficio.py"
+      ],
+      "manual_checks": [
+        "./scripts/pre-pr.sh main con el árbol sucio: termina distinto de 0 y dice que lo que no está en un commit no llega al PR",
+        "./scripts/pre-pr.sh main desde una rama con commits y el árbol limpio: recorre las cuatro comprobaciones"
+      ],
+      "evidence": []
     }
   ]
 }

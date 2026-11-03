@@ -229,7 +229,9 @@ def test_instantanea_sin_efectos(tmp_path: Path):
 
 
 def panel_json(root: Path, capsys) -> tuple[int, dict]:
-    argv = ["--root", str(root), "panel", "--json", "--projects-dir", str(root / "projects")]
+    # `--no-pulls`: ningún test consulta GitHub con `gh`.
+    argv = ["--root", str(root), "panel", "--json", "--no-pulls"]
+    argv += ["--projects-dir", str(root / "projects")]
     code = main(argv)
     return code, json.loads(capsys.readouterr().out)
 
@@ -237,7 +239,7 @@ def panel_json(root: Path, capsys) -> tuple[int, dict]:
 def test_cli_json_en_un_repo_sin_factory(tmp_path: Path, capsys):
     code, snap = panel_json(tmp_path, capsys)
     assert code == 0
-    assert {"tokens", "reviews", "tasks", "warnings"} <= set(snap)
+    assert {"tokens", "reviews", "tasks", "pulls", "warnings"} <= set(snap)
     assert snap["reviews"] == [] and snap["tasks"]["runs"] == []
     assert not (tmp_path / ".factory").exists()
 

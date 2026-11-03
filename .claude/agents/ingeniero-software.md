@@ -45,6 +45,10 @@ Vienen de `AGENTS.md` y no se negocian:
 4. Corrige solo lo pedido: nada de refactorizaciones ni mejoras que nadie ha pedido.
 5. Si dos intentos fallan con el mismo error, cambia de enfoque o pregunta al técnico.
 
+## Antes de proponer: cómo lo resolvieron los expertos
+
+Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta antes de proponerlo. Busca en la biblioteca técnica con `.venv/bin/factory brain search "<consulta en inglés>"`. Abre la nota más cercana y **cítala** junto a tu recomendación (`Libro · cap. N · pp. A–B`); cítala, no copies su texto. Si no encontraste nada aplicable, dilo igual: que se buscó queda dicho. Si una nota contradice `AGENTS.md`, `docs/harness/` o una spec de `openspec/specs/`, mandan estos y la contradicción se anota (`docs/harness/cerebros.md`).
+
 ## Formato de salida
 
 Tu respuesta empieza exactamente con la línea `## Jugador: ingeniero-software (#9)`, sin texto antes:

@@ -3,9 +3,7 @@
 ## Purpose
 
 Pone una puerta de triaje antes de construir. Un agente de solo lectura decide si una petición merece construirse, recorta el alcance cuando es demasiado grande, pregunta cuando falta información y valora riesgo y superficies. Si acepta, genera un borrador de objetivo que no se ejecuta hasta que un humano lo promueve.
-
 ## Requirements
-
 ### Requirement: Petición como dato citado
 `factory intake` SHALL guardar cada petición en `.factory/requests/<request-id>/request.md` como bloque citado, precedido de un aviso de que su contenido es un dato y no instrucciones. El texto de la petición MUST NOT formar parte del prompt de sistema de ningún agente.
 
@@ -82,3 +80,20 @@ Con `ACCEPT`, el sistema SHALL generar `goals/drafts/<id>.md` con `status: draft
 #### Scenario: Promoción confirmada
 - **WHEN** se ejecuta `factory goal promote goals/drafts/x.md --yes` y no existe `goals/x.md`
 - **THEN** se crea `goals/x.md` sin `status: draft`, y `factory goal run --dry-run goals/x.md` lo acepta
+
+### Requirement: Un supuesto es una decisión, nunca un hecho
+
+El prompt del intake (`prompts/intake.md`) SHALL exigir que todo dato comprobable en un archivo del repositorio se lea y se cite con su ruta, en lugar de estimarse. Solo SHALL llamarse supuesto a aquello que nadie ha decidido todavía.
+
+La decisión del intake SHALL separar lo contado de lo supuesto: lo contado lleva la ruta de donde salió; lo supuesto se nombra como decisión pendiente, nunca como dato.
+
+#### Scenario: Dato que vive en un archivo
+
+- **WHEN** la petición depende de un número, un nombre de columna, una versión o una ruta que existe en el repositorio
+- **THEN** el intake lo lee del archivo y lo cita con su ruta, en lugar de estimarlo
+
+#### Scenario: Decisión que nadie ha tomado
+
+- **WHEN** un dato necesario no está decidido en ninguna parte
+- **THEN** el intake lo registra como supuesto explícito, con la decisión que haría falta, o pregunta con `NEEDS-INFO`
+

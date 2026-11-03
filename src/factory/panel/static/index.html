@@ -210,6 +210,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
       <button role="tab" data-tab="tokens" aria-selected="true">Tokens</button>
       <button role="tab" data-tab="revisiones" aria-selected="false">Revisiones</button>
       <button role="tab" data-tab="tareas" aria-selected="false">Tareas</button>
+      <button role="tab" data-tab="pulls" aria-selected="false">Pull requests</button>
     </nav>
   </div>
 </header>
@@ -219,6 +220,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
   <section id="view-tokens" role="tabpanel"></section>
   <section id="view-revisiones" role="tabpanel" hidden></section>
   <section id="view-tareas" role="tabpanel" hidden></section>
+  <section id="view-pulls" role="tabpanel" hidden></section>
 </main>
 <div class="tooltip" id="tooltip" role="tooltip"></div>
 <script>
@@ -238,13 +240,32 @@ const STATUS = {
   sin_veredicto: { tone: "muted", icon: "?", label: "sin veredicto" },
   sin_cierre: { tone: "muted", icon: "○", label: "sin cierre" },
 };
+const PR_STATUS = {
+  sin_revisar: { tone: "warning", icon: "○", label: "sin revisar" },
+  en_revision: { tone: "active", icon: "●", label: "en revisión" },
+  cambios_pedidos: { tone: "critical", icon: "✗", label: "cambios pedidos" },
+  aprobado: { tone: "good", icon: "✓", label: "aprobado" },
+  borrador: { tone: "muted", icon: "·", label: "borrador" },
+  fusionado: { tone: "muted", icon: "✓", label: "fusionado" },
+};
+const ALERTAS = {
+  checks_fallando: ["checks en rojo", "critical"],
+  cambios_pedidos: ["cambios pedidos", "critical"],
+  conflictos: ["conflictos con la base", "critical"],
+  sin_revisor: ["sin revisor humano", "warning"],
+  parado: ["parado más de 24 h", "warning"],
+  sin_coderabbit: ["sin @coderabbitai review", "warning"],
+  sin_cifra: ["sin el equipo cifra", "warning"],
+  demasiado_grande: ["pasado de tamaño (10 archivos / 600 líneas)", "warning"],
+};
+const PULL_FILTERS = [["todos", "Todos"], ["autor", "Míos"], ["revisor", "Por revisar"], ["alerta", "Con alerta"]];
 const FEATURE_STATUS = [
   ["in_progress", "En curso"],
   ["blocked", "Bloqueadas"],
   ["not_started", "Sin empezar"],
   ["passing", "Terminadas (passing)"],
 ];
-const state = { snap: null, tab: "tokens", feature: null, origin: "todas", fetchedAt: 0, open: new Set() };
+const state = { snap: null, tab: "tokens", feature: null, origin: "todas", pull: "todos", fetchedAt: 0, open: new Set() };
 const numberFmt = new Intl.NumberFormat("es");
 const compactFmt = new Intl.NumberFormat("es", { notation: "compact", maximumFractionDigits: 1 });
 const usdFmt = new Intl.NumberFormat("es", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
@@ -440,6 +461,7 @@ function renderKpis(snap) {
   const reviews = snap.reviews || [];
   const running = reviews.filter((r) => r.status === "en_curso").length;
   const tasks = snap.tasks || {};
+  const pulls = (snap.pulls && snap.pulls.resumen) || {};
   kpis.append(
     tile("Tokens de hoy (sesiones)", todayRow ? compactFmt.format(tokensOf(todayRow)) : "0", today),
     tile("Tokens totales (sesiones)", compactFmt.format(sessions.total ? tokensOf(sessions.total) : 0), `${numberFmt.format((sessions.total || {}).messages || 0)} mensajes`),
@@ -447,6 +469,7 @@ function renderKpis(snap) {
     tile("Coste registrado (loops)", usdFmt.format((loops.total || {}).cost_usd || 0), `${numberFmt.format((loops.runs || []).length)} ejecuciones`),
     tile("Revisiones en curso", numberFmt.format(running), `${numberFmt.format(reviews.length)} en el feed`),
     tile("Feature en curso", (tasks.in_progress || []).join(", ") || "ninguna", tasks.inbox ? `${tasks.inbox.pending} en la bandeja` : "", true),
+    tile("PR con alerta", numberFmt.format(pulls.con_alerta || 0), `${numberFmt.format(pulls.abiertos || 0)} abiertos`),
   );
 }
 
@@ -519,8 +542,8 @@ function subagentSummary(subagents) {
   return `${subagents.length}: ${parts.join(" · ")}`;
 }
 
-function chip(status) {
-  const info = STATUS[status] || { tone: "muted", icon: "·", label: status || "?" };
+function chip(status, map) {
+  const info = (map || STATUS)[status] || { tone: "muted", icon: "·", label: status || "?" };
   return h("span", { class: "chip", "data-tone": info.tone }, h("span", { class: "dot" }), `${info.icon} ${info.label}`);
 }
 function severityText(sev) {
@@ -552,6 +575,60 @@ function renderReviews(snap) {
     h("p", { class: "sub", text: "checker (árbitro) y jugadores revisores, capturados con hooks; más el checker de cada ronda de los loops. Se actualiza solo." }),
     reviews.length ? h("ul", { class: "feed" }, reviews.map(reviewItem))
       : h("p", { class: "empty", text: "Aún no hay revisiones. Lanza el checker o un revisor del equipo y aparecerá aquí." })));
+}
+
+// --- pull requests -----------------------------------------------------------------------
+function fmtHoras(hours) {
+  if (hours === null || hours === undefined) return "—";
+  if (hours >= 48) return `${Math.round(hours / 24)} d`;
+  return `${numberFmt.format(Math.round(hours * 10) / 10)} h`;
+}
+function alertChip(code) {
+  const [label, tone] = ALERTAS[code] || [code, "warning"];
+  return h("span", { class: "chip", "data-tone": tone }, h("span", { class: "dot" }), label);
+}
+function pullTimes(p) {
+  if (p.estado === "fusionado") return `ciclo ${fmtHoras(p.horas_ciclo)}`;
+  return `abierto ${fmtHoras(p.horas_abierto)} · sin actividad ${fmtHoras(p.horas_sin_actividad)}`;
+}
+function pullItem(p) {
+  const name = `#${p.numero} ${p.titulo}`;
+  const title = p.url
+    ? h("a", { class: "who", href: p.url, target: "_blank", rel: "noopener noreferrer", text: name })
+    : h("span", { class: "who", text: name });
+  return h("li", {},
+    h("div", { class: "row" }, chip(p.estado, PR_STATUS), title,
+      h("span", { class: "meta", text: p.rol }),
+      h("span", { class: "meta", text: `${numberFmt.format(p.archivos)} archivos · ${numberFmt.format(p.lineas)} líneas` }),
+      p.checks ? h("span", { class: "meta", text: `checks: ${p.checks}` }) : null,
+      h("span", { class: "meta", text: pullTimes(p) }),
+      h("span", { class: "meta", text: `1ª revisión ${fmtHoras(p.horas_primera_revision)}` })),
+    p.alertas.length ? h("div", { class: "row" }, p.alertas.map(alertChip)) : null,
+    p.revisores.length ? h("div", { class: "desc", text: `revisores: ${p.revisores.join(", ")}` }) : null);
+}
+function pullMatches(p) {
+  if (state.pull === "alerta") return p.alertas.length > 0;
+  if (state.pull === "todos") return true;
+  return p.rol === state.pull;
+}
+function renderPulls(snap) {
+  const view = clear(document.getElementById("view-pulls"));
+  const section = snap.pulls || {};
+  const all = section.pulls || [];
+  const resumen = section.resumen || {};
+  const select = h("select", { "aria-label": "Filtro", onchange: (e) => { state.pull = e.target.value; withOpen("view-pulls", renderPulls, state.snap); } },
+    PULL_FILTERS.map(([v, text]) => h("option", { value: v, selected: state.pull === v, text })));
+  view.append(h("div", { class: "filters" }, select,
+    h("span", { class: "meta", text: `${numberFmt.format(resumen.abiertos || 0)} abiertos · ${numberFmt.format(resumen.con_alerta || 0)} con alerta` }),
+    h("span", { class: "meta", text: `mediana hasta la 1ª revisión: ${fmtHoras(resumen.mediana_primera_revision_h)}` }),
+    h("span", { class: "meta", text: `mediana de ciclo: ${fmtHoras(resumen.mediana_ciclo_h)}` })));
+  const rows = all.filter(pullMatches);
+  const sub = section.error
+    ? section.error
+    : "Los que creaste y aquellos en los que te pidieron revisión, con sus tiempos. Se consulta con gh cada 60 s; --no-pulls lo apaga.";
+  view.append(h("div", { class: "card" }, h("h2", { text: "Pull requests" }), h("p", { class: "sub", text: sub }),
+    rows.length ? h("ul", { class: "feed" }, rows.map(pullItem))
+      : h("p", { class: "empty", text: section.error ? "Sin datos de pull requests." : "Ningún pull request que mostrar con este filtro." })));
 }
 
 function meter(done, total) {
@@ -657,7 +734,7 @@ function withOpen(id, renderView, snap) {
   restoreOpen(root, scrolls);
 }
 
-const ALL_SECTIONS = ["tokens", "reviews", "tasks"];
+const ALL_SECTIONS = ["tokens", "reviews", "tasks", "pulls"];
 function render(sections = ALL_SECTIONS) {
   const snap = state.snap;
   if (!snap) return;
@@ -670,13 +747,14 @@ function render(sections = ALL_SECTIONS) {
   if (sections.includes("tokens") && state.tab === "tokens") withOpen("view-tokens", renderTokens, snap);
   if (sections.includes("reviews")) withOpen("view-revisiones", renderReviews, snap);
   if (sections.includes("tasks") || (sections.includes("reviews") && state.feature)) withOpen("view-tareas", renderTasks, snap);
+  if (sections.includes("pulls")) withOpen("view-pulls", renderPulls, snap);
 }
 
 // --- pestañas, tema y datos --------------------------------------------------------------
 function selectTab(tab) {
   state.tab = tab;
   for (const button of document.querySelectorAll("nav button")) button.setAttribute("aria-selected", String(button.dataset.tab === tab));
-  for (const name of ["tokens", "revisiones", "tareas"]) document.getElementById(`view-${name}`).hidden = name !== tab;
+  for (const name of ["tokens", "revisiones", "tareas", "pulls"]) document.getElementById(`view-${name}`).hidden = name !== tab;
   safeStorage("set", "panel-tab", tab);
   if (tab === "tokens") withOpen("view-tokens", renderTokens, state.snap || {}); // los gráficos necesitan el ancho visible
 }
@@ -700,7 +778,7 @@ try {
 } catch (error) { // un hash mal formado no debe impedir que arranque la página
   state.feature = null;
 }
-selectTab(["tokens", "revisiones", "tareas"].includes(hashTab) ? hashTab : (safeStorage("get", "panel-tab") || "tokens"));
+selectTab(["tokens", "revisiones", "tareas", "pulls"].includes(hashTab) ? hashTab : (safeStorage("get", "panel-tab") || "tokens"));
 
 let pending = null;
 let pendingSections = new Set();

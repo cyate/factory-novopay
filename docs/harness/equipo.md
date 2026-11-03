@@ -19,10 +19,10 @@ No hay registro central: fichar es añadir un archivo y dar de baja es borrarlo.
 | 4 | central-derecho | `revisor-pr` | revisor | opus | `siempre` | revisa una rama o PR completos, propios o ajenos |
 | 5 | central-izquierdo | `metricas` | revisor | sonnet | `**/*.py` | lee el informe de `factory complexity` |
 | 6 | pivote | `producto` | revisor | opus | `peticion, openspec/changes/**` | preguntas y respuestas, criterios WHEN/THEN y matriz petición→diff |
-| 7 | extremo-derecho | *vacante* | — | — | — | — |
+| 7 | extremo-derecho | `entrega-qa` | constructor | sonnet | `entregas/**` | paquete de entrega al QA humano y briefing del plan de desarrollo |
 | 8 | interior-derecho | *vacante* | — | — | — | — |
 | 9 | delantero-centro | `ingeniero-software` | constructor | sonnet | `peticion` | implementa siguiendo AGENTS.md |
-| 10 | mediapunta | *vacante* | — | — | — | — |
+| 10 | mediapunta | `arquitecto-api` | revisor | opus | `src/factory/panel/**, src/factory/agents/**, src/factory/engine.py, src/factory/tick.py, src/factory/gitops.py, **/*.go, **/*.java, **/*.tf, **/*.sql, **/openapi*.yaml, **/openapi*.yml` | contrato de la API, seguridad de la frontera, concurrencia con servicios externos y bases de datos, y encaje con AWS |
 | 11 | extremo-izquierdo | *vacante* | — | — | — | — |
 
 - **Revisores:** solo lectura (`Read, Grep, Glob`); nunca ejecutan comandos.
@@ -32,9 +32,9 @@ No hay registro central: fichar es añadir un archivo y dar de baja es borrarlo.
 ## Formación (4-3-3)
 
 ```text
-     11 vacante          9 ingeniero-software          7 vacante
+     11 vacante          9 ingeniero-software          7 entrega-qa
 
-               10 vacante                  8 vacante
+            10 arquitecto-api              8 vacante
                             6 producto
 
    3 documentador   5 metricas      4 revisor-pr     2 qa
@@ -46,13 +46,11 @@ No hay registro central: fichar es añadir un archivo y dar de baja es borrarlo.
 
 ## Vacantes
 
-Los dorsales 7, 8, 10 y 11 están libres y se irán llenando a medida que lleguen nuevas necesidades. Estos perfiles son solo sugerencias:
+Los dorsales 8 y 11 están libres y se irán llenando a medida que lleguen nuevas necesidades. Estos perfiles son solo sugerencias:
 
 | # | Posición | Perfil sugerido | Para qué |
 |---|---|---|---|
-| 7 | extremo-derecho | `rendimiento-costes` | complejidad algorítmica, E/S y coste de tokens en los loops |
 | 8 | interior-derecho | `bibliotecario` | cura los cerebros, propone `factory brain learn` y cita el principal |
-| 10 | mediapunta | `arquitecto` | coherencia con OpenSpec y con `design.md` |
 | 11 | extremo-izquierdo | `experiencia-cli` | ayuda, mensajes de error accionables y ergonomía |
 
 ## Cómo fichar
@@ -77,14 +75,26 @@ Los dorsales 7, 8, 10 y 11 están libres y se irán llenando a medida que llegue
    - `convocatoria`: globs relativos al repo (`**`, `*`, `?`) y los tokens `siempre` y `peticion`, separados por comas.
    - Un revisor responde con el formato común: `## Jugador: <name> (#<dorsal>)`, una línea de veredicto y hallazgos con `archivo:línea` y evidencia (como el `checker`).
 2. **Valida la plantilla:** `.venv/bin/factory team validate` debe terminar en 0, y `factory team list` debe mostrar el fichaje en su puesto.
-3. **Haz una prueba real barata con haiku** y comprueba que el agente carga y que, si es revisor, `git status --porcelain` no cambia:
+3. **Haz una prueba real barata con haiku** y comprueba que el agente carga y que respeta su terreno. El modo de permisos depende del tipo:
 
    ```bash
+   # Revisor: dontAsk deniega toda escritura. `git status --porcelain` no debe cambiar.
    claude -p --agent <name> --model haiku --max-budget-usd 0.05 \
      --permission-mode dontAsk --no-session-persistence --output-format json "<tarea mínima>"
+
+   # Constructor: con dontAsk sus `Write` quedan en `permission_denials` y no escribe nada,
+   # así que la prueba no prueba nada. Usa acceptEdits y comprueba que `git status --porcelain`
+   # solo muestra rutas de su terreno.
+   claude -p --agent <name> --model haiku --max-budget-usd 0.10 \
+     --permission-mode acceptEdits --no-session-persistence --output-format json "<tarea mínima>"
    ```
 4. **Añade su test** autocontenido (`tests/test_team_<name>.py`), que lea el frontmatter y compruebe su contrato.
-5. **Opcional:** si el fichaje cambia el reglamento, propónlo como cambio OpenSpec (`/opsx:propose`).
+5. **Deja coherentes las cuatro superficies que nombran la plantilla.** Ninguna puede seguir contando ese dorsal entre las vacantes, y cada una se ancla en el test del jugador para que revertirla falle:
+   - `README.md`: la tabla del equipo y la línea de vacantes;
+   - este documento: plantilla, formación, vacantes y costes;
+   - `.claude/skills/equipo/SKILL.md`: la línea de vacantes de la alineación y la sección "Coste";
+   - `docs/harness/roles.md`: la enumeración de revisores o de constructores.
+6. **Propónlo como cambio OpenSpec** (`/opsx:propose`) si el fichaje toca un requisito de `team-match` — por ejemplo, ocupar un dorsal que la spec daba por vacante. Solo es opcional cuando ningún requisito cambia.
 
 ## El partido
 
@@ -94,8 +104,8 @@ El reglamento está en `.claude/skills/equipo/SKILL.md`. Resumen:
 |---|---|---|
 | 1. Convocatoria | técnico | reúne el contexto, ejecuta `factory team lineup`, ajusta justificando cada alta o baja y **publica la alineación antes de invocar a nadie** |
 | 2. Pre-partido | `producto`, `qa` | preguntas, criterios WHEN/THEN y plan de pruebas; las preguntas abiertas van al humano **antes de construir** |
-| 3. Construcción | `ingeniero-software` | implementa con los criterios, el plan y las respuestas |
-| 4. Verificación | técnico | `./scripts/check.sh` y, si juega `metricas`, `factory complexity --base <ref> --json` |
+| 3. Construcción | `ingeniero-software`, `entrega-qa` | implementa con los criterios, el plan y las respuestas; si juega `entrega-qa`, escribe el paquete en `entregas/<TICKET>/` |
+| 4. Verificación | técnico | `./scripts/check.sh`; si juega `metricas`, `factory complexity --base <ref> --json`; si juega `entrega-qa`, `python entregas/<TICKET>/escenarios.py --list` |
 | 5. Revisión | revisores convocados | en paralelo; cada uno recibe solo criterios, diff y verificación |
 | 6. Documentación | `documentador` | actualiza los `*.md` afectados |
 | 7. Acta | técnico | tabla por jugador y veredicto global; `fail` vuelve a construcción, **máximo 3 vueltas** |
@@ -144,8 +154,8 @@ No lances al técnico como subagente (`subagent_type: tecnico`). Un subagente no
 
 - Los subcomandos `factory team` y `factory complexity` son deterministas y no cuestan nada.
 - Cada convocado es una invocación de subagente, y cada vuelta o petición de concreción, otra más. Por eso existe la convocatoria: el técnico convoca lo mínimo que cubra el riesgo.
-- `seguridad`, `revisor-pr`, `producto` y el técnico usan opus; `qa`, `documentador`, `metricas` e `ingeniero-software`, sonnet.
-- Las pruebas reales de cada agente usan haiku con `--max-budget-usd 0.05`.
+- `seguridad`, `revisor-pr`, `producto`, `arquitecto-api` y el técnico usan opus; `qa`, `documentador`, `metricas`, `ingeniero-software` y `entrega-qa`, sonnet.
+- Las pruebas reales de cada agente usan haiku: `--max-budget-usd 0.05` para un revisor y `0.10` para un constructor, que además escribe archivos.
 
 ## Protección
 

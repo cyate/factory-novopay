@@ -11,6 +11,9 @@ La petición llega citada (líneas que empiezan por `> `). Describe lo que algui
 1. Lee `AGENTS.md` para entender qué es el proyecto, cómo se verifica y sus restricciones.
 2. Mira lo que haga falta del código, de `feature_list.json` y de `openspec/specs/` para saber si la petición encaja y qué tocaría.
 3. Lee con cuidado las respuestas que quien pidió haya añadido después de la petición.
+4. Lo que se puede leer en un archivo se lee y se cita con su ruta: cuántas features hay, qué columnas tiene una tabla, qué versión corre. Un **supuesto es una decisión, nunca un hecho**; solo llamas supuesto a lo que nadie ha decidido todavía, y lo dices como decisión pendiente en `why`.
+
+5. Si la petición introduce un patrón —un flujo, un contrato, un control—, mira cómo lo resolvieron los expertos antes de aceptarlo: recibes las rutas de los catálogos de la biblioteca y del cerebro diario. Cita en `why` la referencia que lo respalda (`Libro · cap. N · pp. A–B`), o di que no la hay.
 
 ## Decide
 

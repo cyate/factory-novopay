@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import http.client
 import json
+import queue
 import re
 import threading
+import time
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -13,9 +15,9 @@ import pytest
 from conftest import make_feature, write_features
 
 from factory.cli import main
-from factory.panel import PanelError
+from factory.panel import PanelError, pulls
 from factory.panel.hooks import LOG
-from factory.panel.server import PanelServer, host_allowed, page
+from factory.panel.server import PULLS_OFF, PanelServer, host_allowed, page
 from factory.panel.tokens import slug
 from factory.state import RunState, RunStore
 
@@ -25,7 +27,8 @@ def panel(tmp_path: Path) -> Iterator[PanelServer]:
     root = tmp_path / "repo"
     root.mkdir()
     write_features(root, make_feature("a"))
-    server = PanelServer(root, tmp_path / "projects", port=0, interval=0.05)
+    # `pull_requests=False`: ningún test sale a la red a preguntar por pull requests.
+    server = PanelServer(root, tmp_path / "projects", port=0, interval=0.05, pull_requests=False)
     thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.05})
     thread.start()
     try:
@@ -247,3 +250,107 @@ def test_umbral_sin_cierre_igual_en_la_pagina():
 
     found = re.search(r"const UNCLOSED_AFTER_S = (\d+) \* (\d+);", page().decode("utf-8"))
     assert found and int(found.group(1)) * int(found.group(2)) == UNCLOSED_AFTER_S
+
+
+# --- pull requests -----------------------------------------------------------------------
+
+
+def test_la_instantanea_trae_la_seccion_de_pull_requests(panel: PanelServer):
+    status, _, body = request(panel, "GET", "/api/snapshot")
+    assert status == 200
+    seccion = json.loads(body)["pulls"]
+    assert seccion["pulls"] == [] and seccion["resumen"]["abiertos"] == 0
+
+
+def test_sin_pulls_la_seccion_dice_por_que_esta_vacia(panel: PanelServer, capsys):
+    assert main(["--root", str(panel.root), "panel", "--json", "--no-pulls"]) == 0
+    assert json.loads(capsys.readouterr().out)["pulls"]["error"] == PULLS_OFF
+
+
+def test_el_sondeo_avisa_solo_cuando_los_pull_requests_cambian(panel: PanelServer):
+    """Un sondeo que devuelve lo mismo no debe repintar la página de quien la tiene abierta."""
+    seccion = pulls.empty()
+    seccion["pulls"] = [{"numero": 1}]
+    panel.collect = lambda root: dict(seccion, updated="cada vez distinto")
+    cliente = panel.watcher.subscribe()
+    hilo = threading.Thread(target=panel._poll_pulls, args=(0.01,))
+    hilo.start()
+    try:
+        assert cliente.get(timeout=5)["sections"] == ["pulls"]
+        with pytest.raises(queue.Empty):  # mismos datos, aunque cambie la marca de tiempo
+            cliente.get(timeout=0.3)
+        seccion["pulls"] = [{"numero": 1}, {"numero": 2}]
+        assert cliente.get(timeout=5)["sections"] == ["pulls"]
+    finally:
+        panel.stopping.set()
+        hilo.join(timeout=5)
+        panel.watcher.unsubscribe(cliente)
+        panel.stopping.clear()
+
+
+def test_un_sondeo_que_falla_no_tumba_el_panel(panel: PanelServer):
+    def explota(root):
+        raise RuntimeError("sin red")
+
+    panel.collect = explota
+    hilo = threading.Thread(target=panel._poll_pulls, args=(0.01,))
+    hilo.start()
+    panel.stopping.set()
+    hilo.join(timeout=5)
+    panel.stopping.clear()
+    assert panel.pulls["pulls"] == []
+    assert "sin red" in panel.pulls["error"]
+
+
+def test_sin_pulls_el_servidor_no_consulta_github(tmp_path: Path):
+    """El hilo del sondeo ni siquiera arranca: `--no-pulls` deja el panel sin salida a la red."""
+    llamadas = []
+    server = PanelServer(
+        tmp_path,
+        tmp_path / "projects",
+        port=0,
+        pull_requests=False,
+        collect=lambda root: llamadas.append(root) or pulls.empty(),
+    )
+    try:
+        assert llamadas == []
+        assert not server._pulls.is_alive()
+        assert server.pulls["error"] == PULLS_OFF
+        assert server.snapshot()["pulls"]["error"] == PULLS_OFF
+    finally:
+        server.server_close()
+
+
+def test_con_pulls_el_servidor_consulta_al_arrancar(tmp_path: Path):
+    seccion = pulls.empty()
+    seccion["pulls"] = [{"numero": 1}]
+    llamadas = []
+
+    def espia(root: Path):
+        llamadas.append(root)
+        return seccion
+
+    server = PanelServer(
+        tmp_path,
+        tmp_path / "projects",
+        port=0,
+        pull_requests=True,
+        pulls_interval=0.01,
+        collect=espia,
+    )
+    try:
+        limite = time.monotonic() + 5
+        while not llamadas and time.monotonic() < limite:
+            time.sleep(0.02)
+        assert llamadas and llamadas[0] == tmp_path
+        assert server.snapshot()["pulls"]["pulls"] == [{"numero": 1}]
+    finally:
+        server.stopping.set()
+        server.server_close()
+
+
+def test_intervalo_del_sondeo_igual_en_la_pagina():
+    from factory.panel.server import PULLS_S
+
+    found = re.search(r"con gh cada (\d+) s", page().decode("utf-8"))
+    assert found and int(found.group(1)) == int(PULLS_S)

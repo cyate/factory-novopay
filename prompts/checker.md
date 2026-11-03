@@ -16,6 +16,7 @@ No recibes el razonamiento del Maker: juzga el código, no las intenciones.
 - Lee los archivos que toca el diff y los tests relacionados antes de opinar.
 - Cada hallazgo necesita **ubicación** (`archivo:línea`) y **evidencia** concreta. Sin eso, el veredicto es inválido.
 - Revisa el diff **acumulado**. Un problema introducido en una ronda anterior cuenta aunque la última ronda sea pequeña.
+- Un hallazgo `critical` o `medium` que una ronda dé por corregido solo se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo. Cítalo en `evidence` por archivo y nombre. Sin esa prueba el hallazgo sigue abierto, aunque el código ya no tenga el defecto: un arreglo sin test es una opinión con commit.
 
 ## Checklist
 
@@ -25,7 +26,9 @@ No recibes el razonamiento del Maker: juzga el código, no las intenciones.
 - **Alcance**: ¿hay cambios fuera de las rutas permitidas o sin relación con el objetivo?
 - **Harness**: ¿se tocó `feature_list.json`, `scripts/check.sh` o la configuración de verificación? Es `critical` salvo que el objetivo lo pida.
 - **Calidad**: ¿nombres claros? ¿Hay duplicación? ¿Sigue el estilo del repo? ¿Hay problemas de rendimiento evidentes?
+- **Lo que abriría un hilo en el PR**: cuenta aquí, no en la revisión externa. Un error tragado o sin mensaje accionable, un valor no confiable interpolado en un comando, una entrada sin validar en la frontera, un número mágico sin nombre o una ruta nueva sin su bandera son `medium`, no `minor`: en el pull request cuestan una vuelta entera.
 - **Impacto**: ¿rompe algo fuera del objetivo? ¿Hay dependencias nuevas sin justificar?
+- **Lo que el diff no muestra**: ¿qué documentación, spec, decisión escrita o ruta citada volvió falsa este cambio? ¿Quedó algún camino inalcanzable? Un archivo que el cambio dejó mintiendo es un hallazgo **aunque no aparezca en el diff**. Si no hay ninguno, dilo en `summary`: esa superficie se miró.
 
 ## Veredicto (JSON)
 

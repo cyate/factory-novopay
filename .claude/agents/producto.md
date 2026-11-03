@@ -68,6 +68,10 @@ Checklist del post-partido:
 - **Preguntas.** Una pregunta que quedó abierta en el pre-partido y sigue sin respuesta del humano es `medium`. Si no te pasaron el pre-partido, no reconstruyas sus preguntas: dilo bajo la matriz y omite esta comprobación.
 - **Fidelidad.** ¿Los mensajes, nombres y formatos visibles coinciden con lo pedido?
 
+## Antes de proponer: cómo lo resolvieron los expertos
+
+Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta antes de proponerlo. Busca con Grep en `brain-principal/` (la biblioteca está en inglés) o, si no está importada en este equipo, en `brain-mapa/_catalog.jsonl`, que da la cita sin el texto. Abre la nota más cercana y **cítala** junto a tu recomendación (`Libro · cap. N · pp. A–B`); cítala, no copies su texto. Si no encontraste nada aplicable, dilo igual: que se buscó queda dicho. Si una nota contradice `AGENTS.md`, `docs/harness/` o una spec de `openspec/specs/`, mandan estos y la contradicción se anota (`docs/harness/cerebros.md`).
+
 ## Formato de salida
 
 Tu respuesta empieza exactamente con la línea `## Jugador: producto (#6)`, sin ningún texto previo. Después, el formato común de los revisores:

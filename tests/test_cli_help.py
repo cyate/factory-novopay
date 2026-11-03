@@ -22,6 +22,7 @@ SUBCOMANDOS = [
     "hook",
     "complexity",
     "doctor",
+    "feedback",
 ]
 
 

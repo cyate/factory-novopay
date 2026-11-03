@@ -8,6 +8,7 @@ Una sesión **no** está terminada si alguna casilla queda sin marcar y sin docu
 - [ ] **Features**: `feature_list.json` refleja la realidad. Hay una sola feature en `in_progress` como máximo, nada está en `passing` sin `factory features verify`, y los bloqueos están documentados.
 - [ ] **Artefactos**: no quedan archivos temporales, salidas de depuración ni pasos a medio hacer sin documentar.
 - [ ] **Revisión**: el subagente `checker` no dejó hallazgos `critical` ni `medium` abiertos en lo que se declara terminado.
+- [ ] **Lo que quedó mintiendo**: ningún documento, spec o decisión escrita quedó falsa por el trabajo de la sesión. Archivar un cambio de OpenSpec, mover una ruta o renombrar un comando obliga a comprobar quién los citaba (`grep -rn "<ruta vieja>" docs/ README.md AGENTS.md`).
 - [ ] **Siguiente sesión**: puede continuar sin reparar nada a mano.
 
 Si hay commits, deben tener mensajes descriptivos y el repo debe quedar en un estado seguro para retomar. Los agentes no hacen push.

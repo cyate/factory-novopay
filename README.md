@@ -7,7 +7,7 @@ Una "fábrica" para que los agentes de codificación (Claude Code) trabajen **de
   - `factory goal run`: ejecuta un objetivo hasta cumplirlo o detenerse por un motivo explícito;
   - `factory tick`: vigilancia periódica que solo gasta tokens si algo falla;
   - `factory init` y `factory doctor`: aplican y auditan el harness en otros repos;
-  - `factory panel`: panel local de tokens, revisiones y tareas.
+  - `factory panel`: panel local de tokens, revisiones, tareas y pull requests.
 
 El humano pasa de escribir cada instrucción a definir objetivos y revisar resultados. Los loops nunca integran en `main` ni hacen push.
 
@@ -317,9 +317,11 @@ Un equipo de sub-agentes de Claude Code, como uno de fútbol: un **técnico** (e
 | 4 | `revisor-pr` | revisa ramas y PR propios o ajenos (solo lectura) |
 | 5 | `metricas` | complejidad ciclomática del cambio (solo lectura) |
 | 6 | `producto` | preguntas y respuestas frente a la petición de producto (solo lectura) |
+| 7 | `entrega-qa` | prepara el paquete para el QA humano y el briefing del plan de desarrollo |
 | 9 | `ingeniero-software` | implementa el código y los tests |
+| 10 | `arquitecto-api` | contrato de la API, seguridad de la frontera, concurrencia con servicios externos y bases de datos, y AWS (solo lectura) |
 
-Los dorsales 7, 8, 10 y 11 están vacantes: fichar es añadir un archivo en `.claude/agents/`.
+Los dorsales 8 y 11 están vacantes: fichar es añadir un archivo en `.claude/agents/`.
 
 ```bash
 # 1. Jugar un partido desde Claude Code (cuesta dinero)
@@ -341,22 +343,24 @@ factory complexity --base main --max 10            # solo lo cambiado; termina e
 
 El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independiente y obligatorio antes de dar por terminada una feature.
 
-### M. Ver tokens, revisiones y tareas en el panel (opcional)
+### M. Ver tokens, revisiones, tareas y pull requests en el panel (opcional)
 
-`factory panel` sirve en `http://127.0.0.1:8765` una página de solo lectura con tres pestañas:
+`factory panel` sirve en `http://127.0.0.1:8765` una página de solo lectura con cuatro pestañas:
 
 - **Tokens:** consumo de los loops y de tus sesiones de Claude Code (por día, modelo, tipo de agente y sesión).
 - **Revisiones:** revisiones del `checker` y de los jugadores revisores en tiempo real, con veredicto y severidades.
 - **Tareas:** features, avance de los cambios OpenSpec, ejecuciones y bandeja.
+- **Pull requests:** los que abriste y los que te toca revisar, con su estado, sus tiempos (abierto, sin actividad, hasta la primera revisión y de ciclo) y las alertas: checks en rojo, cambios pedidos, conflictos, sin revisor, parado, sin `@coderabbitai review`, sin el equipo `cifra` y pasado de tamaño.
 
 Se actualiza sola cuando cambian los archivos, sin recargar.
 
 ```bash
 factory panel --open                 # sirve y abre el navegador (Ctrl+C para salir)
 factory panel --json | python -m json.tool   # la misma instantánea, en JSON
+factory panel --no-pulls             # sin consultar GitHub
 ```
 
-Las revisiones en tiempo real llegan por los hooks de `.claude/settings.json`, que ejecutan el mismo código que `factory hook`. No necesita red ni gasta tokens. Detalle, privacidad y seguridad en [docs/harness/panel.md](docs/harness/panel.md).
+Las revisiones en tiempo real llegan por los hooks de `.claude/settings.json`, que ejecutan el mismo código que `factory hook`. No gasta tokens. La única salida a la red son las consultas de pull requests, de solo lectura y con tu sesión de `gh` (requiere `gh auth login`); se apagan con `--no-pulls`. Detalle, privacidad y seguridad en [docs/harness/panel.md](docs/harness/panel.md).
 
 ## Referencia rápida de comandos
 
@@ -373,13 +377,14 @@ Las revisiones en tiempo real llegan por los hooks de `.claude/settings.json`, q
 | `factory tick <goal.md> [--reset-breaker]` | vigilancia; agentes solo si falla | 0 o `claude` |
 | `factory schedule <goal.md> --every 30m` | imprime cómo programar los ticks | 0 |
 | `factory status` | ejecuciones, ticks, avisos y costes silenciosos | 0 |
-| `factory panel [--port 8765] [--open] [--json] [--projects-dir DIR]` | panel local de tokens, revisiones y tareas | 0 |
+| `factory panel [--port 8765] [--open] [--json] [--no-pulls] [--projects-dir DIR]` | panel local de tokens, revisiones, tareas y pull requests | 0 |
 | `factory hook` | registra un evento de hook de Claude Code leído de stdin (siempre sale con 0) | 0 |
 | `factory inbox list [--all] \| ack <run-id>` | bandeja de revisión humana | 0 |
 | `factory land <run-id> [--dry-run] [--delete-branch]` | integra en `main` una ejecución completed | 0 |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
 | `factory team list \| validate \| lineup` | plantilla del equipo ideal y convocatoria sugerida | 0 |
 | `factory complexity [rutas] [--base REF] [--max N] [--json]` | complejidad ciclomática por función y delta frente a `REF` | 0 |
+| `factory feedback <pr> [--repo …] [--revisor …] [--resueltos] [--json]` | recomendaciones de los revisores de un pull request | 0 |
 
 Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harness/loops.md](docs/harness/loops.md) y [docs/harness/observabilidad.md](docs/harness/observabilidad.md).
 
@@ -413,10 +418,11 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | Ruta | Qué es |
 |---|---|
 | `AGENTS.md` / `CLAUDE.md` | instrucciones de entrada (router corto) para cualquier agente / para Claude Code |
-| `docs/harness/` | documentos temáticos: verificación, features, sesiones, roles, loops, revisión, vigilancia, cerebros |
+| `docs/harness/` | documentos temáticos: verificación, features, sesiones, roles, loops, revisión, recomendaciones, vigilancia, cerebros |
 | `feature_list.json` | fuente de verdad del trabajo: comportamiento, comandos de verificación, estado y evidencia |
 | `progress.md`, `session-handoff.md` | continuidad entre sesiones |
 | `init.sh`, `scripts/check.sh` | rutas estándar de arranque y verificación |
+| `scripts/pre-pr.sh`, `.coderabbit.yaml` | puerta previa a un pull request y reglas con las que CodeRabbit revisa este repositorio |
 | `factory.toml` | configuración de factory: límites del loop, ticks, roles y cerebros |
 | `goals/` | objetivos para los loops (`_template.md`, ejemplos y `drafts/` del intake) |
 | `prompts/` | prompts de los roles maker y checker |
@@ -426,7 +432,8 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `brain-mapa/`, `brain-diario/` | mapa de la biblioteca (sin texto) y cerebro diario, versionados |
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
 | `.factory/` | estado local de ejecuciones, ticks y bandeja (no se versiona) |
-| `.claude/agents/`, `.claude/skills/equipo/` | el equipo ideal: técnico, jugadores y reglamento de `/equipo` (paso L); los loops no pueden modificarlos |
+| `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso L) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
+| `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. **Se versionan**, así que no llevan secretos ni datos reales |
 | `openspec/` | specs principales en `openspec/specs/` (18 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |
 
 ## Reglas clave

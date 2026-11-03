@@ -44,6 +44,22 @@ Formato del veredicto:
 
 Un hallazgo sin ubicación o sin evidencia no vale: pide que lo concrete.
 
+## Las reglas de oficio
+
+Viven en el prompt del rol al que le tocan; aquí solo se listan, para no tener el texto en dos sitios.
+
+| Regla | Dónde |
+|---|---|
+| Un hallazgo corregido se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo | [`prompts/checker.md`](../../prompts/checker.md) y [`.claude/agents/checker.md`](../../.claude/agents/checker.md) |
+| La revisión cubre **lo que el diff no muestra**: documentación, specs o decisiones que el cambio dejó mintiendo | los mismos dos |
+| Antes de afirmar que algo no existe, se comprueba contra **`origin/main`** | [`prompts/maker.md`](../../prompts/maker.md) |
+| Un **supuesto es una decisión, nunca un hecho**: lo que se lee en un archivo se lee y se cita | [`prompts/intake.md`](../../prompts/intake.md) |
+| **Precedencia** entre los cerebros y la documentación del repositorio | [cerebros.md](cerebros.md) |
+| **Antes de proponer se mira cómo lo resolvieron los expertos**, y se cita (`Libro · cap. N · pp. A–B`) | [`prompts/maker.md`](../../prompts/maker.md), [`prompts/intake.md`](../../prompts/intake.md) y los diez jugadores de [`.claude/agents/`](../../.claude/agents/); el `checker` queda fuera a propósito |
+| **Lo que abriría un hilo en el pull request** se decide en la revisión, una vuelta antes | [`prompts/checker.md`](../../prompts/checker.md) y [`.claude/agents/checker.md`](../../.claude/agents/checker.md) |
+
+Vienen de la fábrica `/yate`, donde cada una costó una ronda de revisión antes de escribirse.
+
 ## Señales de un checker complaciente
 
 - Devuelve `pass` sin haber leído los archivos tocados por el diff.
@@ -86,19 +102,19 @@ Se configuran en `[roles.<rol>]` de `factory.toml`, y se pueden ajustar por obje
 En las sesiones interactivas, el [equipo ideal](equipo.md) suma un técnico y jugadores especialistas. Eso no cambia la regla de este documento: quien construye nunca aprueba.
 
 - **El `checker` es el árbitro.** Es independiente, no forma parte de la plantilla y sigue siendo **obligatorio** antes de dar por terminada una feature. Un acta del equipo en verde no lo sustituye.
-- **Los jugadores revisores** (`seguridad`, `qa`, `revisor-pr`, `metricas` y `producto`) siguen las mismas reglas que el checker:
+- **Los jugadores revisores** (`seguridad`, `qa`, `revisor-pr`, `metricas`, `producto` y `arquitecto-api`) siguen las mismas reglas que el checker:
   - solo lectura;
   - reciben criterios, diff y resultado de la verificación (en el pre-partido, `producto` y `qa` reciben la petición), nunca el razonamiento de un constructor;
   - devuelven el mismo formato de veredicto, precedido de `## Jugador: <name> (#<dorsal>)`.
 
   La diferencia es que son especialistas: cada uno mira el diff desde su faceta.
-- **Los constructores** (`ingeniero-software` y `documentador`) editan, pero **nunca** aprueban su propio trabajo.
+- **Los constructores** (`ingeniero-software`, `documentador` y `entrega-qa`) editan, pero **nunca** aprueban su propio trabajo. Cada uno tiene su terreno: código y tests, documentación del repositorio, y la carpeta `entregas/<TICKET>/`.
 
 | | Herramientas | Quién los invoca | ¿Decide? |
 |---|---|---|---|
 | Árbitro (`checker`) | solo lectura (Read, Grep, Glob) | la sesión principal, antes de dar por terminada una feature | sí: con un `critical` o un `medium` abierto, la feature no está terminada |
 | Revisores del equipo | solo lectura (Read, Grep, Glob) | el técnico, si los convoca | no: su veredicto entra en el acta; un `critical` o un `medium` devuelve el trabajo a construcción |
-| Constructores del equipo | leer y editar, sin `Agent` (`documentador`: solo `*.md`) | el técnico | nunca: los juzgan los revisores y el árbitro |
+| Constructores del equipo | leer y editar, sin `Agent` (`documentador`: solo `*.md`; `entrega-qa`: solo `entregas/<TICKET>/`) | el técnico | nunca: los juzgan los revisores y el árbitro |
 
 La verificación determinista (`./scripts/check.sh` y, si hace falta, `factory complexity`) la ejecuta el técnico, nunca un revisor.
 

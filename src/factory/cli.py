@@ -90,16 +90,18 @@ def _port(value: str) -> int:
 
 
 def cmd_panel(args: argparse.Namespace) -> int:
-    from factory.panel import PanelError, main_root, server, snapshot
+    from factory.panel import PanelError, main_root, pulls, server, snapshot
     from factory.panel.tokens import projects_dir
 
     root = main_root(args.root)
     projects = projects_dir(args.projects_dir)
     if args.json:
-        print(snapshot.to_json(snapshot.build(root, projects)))
+        # Una sola consulta: `--json` no tiene sondeador que la refresque.
+        section = pulls.collect(root) if args.pulls else pulls.empty(server.PULLS_OFF)
+        print(snapshot.to_json(snapshot.build(root, projects, None, section)))
         return EXIT_OK
     try:
-        return server.serve(root, projects, args.port, args.open)
+        return server.serve(root, projects, args.port, args.open, args.pulls)
     except PanelError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
@@ -135,6 +137,28 @@ def cmd_complexity(args: argparse.Namespace) -> int:
             print(f"aviso: {aviso}", file=sys.stderr)
         print(complexity.render(informe))
     return EXIT_FAIL if informe.superan else EXIT_OK
+
+
+def cmd_feedback(args: argparse.Namespace) -> int:
+    from factory import feedback
+
+    root = args.root or Path.cwd()
+    try:
+        informe = feedback.recoger(
+            args.pr,
+            root,
+            repo=args.repo,
+            revisores=args.revisor,
+            resueltos=args.resueltos,
+        )
+    except feedback.FeedbackError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+    if args.json:
+        print(json.dumps(informe.to_dict(), indent=2, ensure_ascii=False))
+    else:
+        print(feedback.render(informe), end="")
+    return EXIT_OK
 
 
 def _goal_path(args: argparse.Namespace) -> Path:
@@ -779,11 +803,18 @@ def build_parser() -> argparse.ArgumentParser:
     land_p.set_defaults(handler=cmd_land)
 
     panel_p = sub.add_parser(
-        "panel", help="panel local de tokens, revisiones y tareas (solo lectura, 127.0.0.1)"
+        "panel",
+        help="panel local de tokens, revisiones, tareas y pull requests (solo lectura, 127.0.0.1)",
     )
     panel_p.add_argument("--port", type=_port, default=8765, help="puerto local (8765 por defecto)")
     panel_p.add_argument("--json", action="store_true", help="imprime la instantánea y termina")
     panel_p.add_argument("--open", action="store_true", help="abre el panel en el navegador")
+    panel_p.add_argument(
+        "--no-pulls",
+        dest="pulls",
+        action="store_false",
+        help="no consulta los pull requests con `gh` (el panel no sale a la red)",
+    )
     panel_p.add_argument(
         "--projects-dir",
         type=Path,
@@ -795,6 +826,26 @@ def build_parser() -> argparse.ArgumentParser:
         "hook", help="registra un evento de hook de Claude Code para el panel (lee stdin)"
     )
     hook_p.set_defaults(handler=cmd_hook)
+
+    fb = sub.add_parser(
+        "feedback", help="recomendaciones de los revisores de un pull request (solo lectura)"
+    )
+    fb.add_argument("pr", help="número del pull request o su URL")
+    fb.add_argument(
+        "--repo", default=None, metavar="OWNER/NAME", help="repositorio (si no, el de cwd)"
+    )
+    fb.add_argument(
+        "--revisor",
+        action="append",
+        default=[],
+        metavar="LOGIN",
+        help="solo quien participe en el hilo; basta un trozo del login (sam). Repetible",
+    )
+    fb.add_argument(
+        "--resueltos", action="store_true", help="incluye también los hilos ya resueltos"
+    )
+    fb.add_argument("--json", action="store_true", help="imprime el informe en JSON")
+    fb.set_defaults(handler=cmd_feedback)
 
     stat = sub.add_parser("status", help="ejecuciones e indicadores de costes silenciosos")
     stat.set_defaults(handler=cmd_status)

@@ -8,11 +8,15 @@
 
 ## gotcha
 
+- [Check-then-insert pierde la carrera y el 23505 no dice lo que parece](2026/10/2026-10-30-check-then-insert-pierde-la-carrera-y-el.md) — 2026-10-30: Un check-then-act contra la base de datos no es atómico y el mapeo perezoso del 23505 miente.
+- [El efecto externo va después de la autorización, no antes](2026/10/2026-10-30-el-efecto-externo-va-despues-de-la-autorizacion.md) — 2026-10-30: Un efecto externo irreversible —crear la cuenta en el proveedor de identidad, mandar el correo— no puede ejecutarse antes de las comprobaciones que pueden rechazar la petición.
+- [La nota y el contrato se revisan en el mismo PR que cambia el código](2026/10/2026-10-30-la-nota-y-el-contrato-se-revisan-en.md) — 2026-10-30: Reglas de negocio documentadas en notas y en el contrato OpenAPI se quedan mintiendo en cuanto el código cambia, y el revisor del PR lo abre como hilo.
 - [En macOS /tmp apunta a /private/tmp](2026/10/2026-10-29-en-macos-tmp-apunta-a-private-tmp.md) — 2026-10-29: En macOS /tmp es un enlace simbólico a /private/tmp.
 - [macOS no tiene timeout](2026/10/2026-10-29-macos-no-tiene-timeout.md) — 2026-10-29: macOS no trae el comando timeout de GNU: un script que lo use termina con código 127.
 - [zsh interpreta :t tras una variable](2026/10/2026-10-29-zsh-interpreta-t-tras-una-variable.md) — 2026-10-29: En zsh, $VAR:t es un modificador (tail) y rompe comandos como git show $RUN:ruta.
 
 ## pattern
 
+- [El caso por defecto de classify() es un defecto propio, no una caída](2026/10/2026-10-30-el-caso-por-defecto-de-classify-es-un.md) — 2026-10-30: Una función classify() que mapea 'todo lo que no reconozco' a error de transporte convierte defectos propios en caídas de infraestructura.
 - [Fusionar consultas intercalando](2026/10/2026-10-29-fusionar-consultas-intercalando.md) — 2026-10-29: Al fusionar resultados de varias consultas, intercálalos (la mejor de cada consulta, luego la segunda…) en lugar de ordenar todo por puntuación: una consulta con títulos más coincidentes ('api gateway') se llevaba todas las plazas y dejaba fuera a 'rate limiting'.
 - [Puntuar por cobertura de términos](2026/10/2026-10-29-puntuar-por-cobertura-de-terminos.md) — 2026-10-29: En una búsqueda por palabras clave ponderada, multiplica la puntuación por la cobertura (fracción de términos de la consulta presentes en el documento).

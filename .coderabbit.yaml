@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Reglas con las que CodeRabbit revisa este repositorio.
+# Sin este archivo el bot revisa con sus valores por defecto y abre hilos que las reglas
+# de la casa ya resuelven: de ahí las vueltas. Ver docs/harness/recomendaciones.md.
+language: es-ES
+early_access: false
+
+reviews:
+  # "chill" comenta lo que importa y calla los nitpicks de estilo: ruff ya los decide.
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  auto_review:
+    enabled: true
+    # Un PR en borrador también se revisa: así no hace falta el comentario manual
+    # "@coderabbitai review" para arrancar la primera vuelta.
+    drafts: true
+  path_filters:
+    # Libros de terceros y su índice: ni se revisan ni se citan en un hilo.
+    - "!brain-principal/**"
+    - "!brain-mapa/**"
+    - "!brain-diario/**"
+  path_instructions:
+    - path: "**/*.py"
+      instructions: >-
+        Reglas de AGENTS.md. No marques como hallazgo lo que ya decide ruff
+        (formato, orden de imports, comillas): la verificación es ./scripts/check.sh.
+        Sí son hallazgo: un test borrado, omitido con skip o con la aserción relajada;
+        un cambio en scripts/check.sh o en la configuración de ruff/pytest sin pedirlo;
+        una edición a mano de status o evidence en feature_list.json;
+        un valor no confiable (rama, goal.md, petición de intake, salida de un modelo)
+        interpolado en un comando de shell.
+    - path: "prompts/**/*.md"
+      instructions: >-
+        Son contratos de rol, no documentación. Cada uno se lee entero en cada
+        invocación: un prompt que crece deja de leerse (máximo 70 líneas, tests/test_reglas_de_oficio.py).
+        Señala la regla añadida que duplica otra o que no es comprobable.
+    - path: ".claude/agents/**/*.md"
+      instructions: >-
+        Plantilla del equipo de sub-agentes. Comprueba que el bloque de herramientas
+        coincide con lo que el rol puede hacer: un revisor de solo lectura nunca lleva
+        Edit, Write ni Bash.
+
+chat:
+  auto_reply: true

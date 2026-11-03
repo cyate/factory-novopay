@@ -3,9 +3,7 @@
 ## Purpose
 
 Define el contrato del harness del repositorio: los artefactos y reglas que permiten a un agente de codificación arrancar, mantenerse en alcance, verificar su trabajo y dejar el repositorio listo para la siguiente sesión sin depender del historial de chat.
-
 ## Requirements
-
 ### Requirement: Archivo de instrucciones como router
 El repositorio SHALL tener un archivo de instrucciones de entrada de 200 líneas o menos. Debe contener un resumen del proyecto, los comandos de arranque y verificación, las restricciones duras, la definición de terminado y enlaces a documentos temáticos. El detalle MUST vivir en esos documentos temáticos, que se cargan bajo demanda, y no en el archivo de entrada.
 
@@ -95,3 +93,13 @@ El harness SHALL proveer un rol de revisión independiente, invocable desde una 
 #### Scenario: Revisión de un cambio
 - **WHEN** el implementador solicita revisión de su cambio al rol evaluador
 - **THEN** el evaluador devuelve un veredicto (aprobado, rechazado o aceptable con observaciones) con ubicación y evidencia de cada problema, sin modificar archivos
+
+### Requirement: El cierre de sesión comprueba lo que el cambio dejó mintiendo
+
+La lista de cierre de sesión (`docs/harness/clean-state-checklist.md`) SHALL incluir una comprobación de los documentos, specs y decisiones escritas que el trabajo de la sesión volvió falsos, aunque no aparezcan en el diff. Archivar un cambio, mover una ruta o renombrar un comando MUST disparar esa comprobación.
+
+#### Scenario: Se archiva un cambio citado en la documentación
+
+- **WHEN** una sesión archiva un cambio de OpenSpec que algún documento del repositorio cita por su ruta en `openspec/changes/`
+- **THEN** la lista de cierre pide actualizar esa cita antes de dar la sesión por cerrada
+

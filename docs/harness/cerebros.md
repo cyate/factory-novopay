@@ -40,6 +40,35 @@ Cada `factory brain import` regenera `brain-mapa/` desde el catálogo importado:
 - **Determinista.** Reimportar el mismo vault no cambia ni un byte. Si cambió, `import` lo indica y `factory status` avisa hasta que hagas `factory brain commit`.
 - **Uso.** Si `brain-principal/` no está importado, la búsqueda, la inyección y el intake usan el mapa. Las notas salen solo como cita y ruta ("texto no disponible en este equipo"). Si el principal está importado, el mapa se ignora y no hay resultados duplicados. Sin `abstract`, la puntuación pierde ese peso, pero los resultados principales coinciden.
 
+## Consulta obligatoria antes de proponer
+
+La biblioteca no está para leerla al final, cuando el código ya está escrito: está para decidir el
+enfoque. Es una regla de `AGENTS.md`, y la llevan en su contrato el maker, el intake y los diez
+jugadores del equipo (el `checker` no: juzga solo con los criterios, el diff y la verificación).
+
+- **Qué se contrasta**: un enfoque, un arreglo o un hallazgo que no sea evidente desde el código.
+  Un cambio mecánico —renombrar, mover un archivo, corregir una errata— no necesita cita.
+- **Cómo se busca**: `factory brain search "<consulta en inglés>"` si el rol tiene `Bash` sin
+  restringir; con Grep sobre `brain-principal/` si no lo tiene. Sin el cerebro principal importado
+  queda `brain-mapa/`, que da la cita y la ruta pero no el texto.
+- **El maker y el intake del loop no buscan**: reciben el conocimiento ya seleccionado e inyectado
+  por el orquestador (ver «Recuperación e inyección») y abren con Read o Grep las notas que vienen
+  solo con su ruta. Su `Bash` está restringido a cuatro patrones y no incluye `factory`.
+- **Cómo se cita**: `Libro · cap. N · pp. A–B`, junto a la recomendación. **Citar, no copiar**: el
+  texto de los libros no entra en un informe, en un commit ni en un hilo de revisión.
+- **Si no hay nada aplicable**: se dice. Que se buscó queda dicho, y la siguiente sesión no repite
+  la búsqueda.
+
+**Importar el cerebro no es opcional en la máquina donde se construye.** Sin
+`factory brain import <ruta-del-vault>`, los agentes reciben citas sin texto y la consulta se queda
+en un gesto. `factory brain status` dice en qué estado está.
+
+## Precedencia: qué manda cuando dos fuentes no coinciden
+
+- **Contrato, alcance y verificación de este repositorio**: mandan los documentos que se revisan junto al código — `AGENTS.md`, `docs/harness/` y las specs de `openspec/specs/`. Una nota del cerebro que los contradiga está desactualizada, por buena que suene.
+- **Experiencia de uso**: mandan los cerebros — trampas observadas, costes medidos, errores ya cometidos. Una skill o un documento general describe el estándar como se pensó; el cerebro, lo que pasó al ejecutarlo.
+- **La contradicción se registra, no se resuelve en silencio.** Déjala en `progress.md` o como nota del cerebro diario (`factory brain learn`), con las dos fuentes citadas. Elegir una y callar hace que la siguiente sesión repita la discusión.
+
 ## Cerebro diario
 
 ```bash
@@ -106,4 +135,4 @@ Maker, checker e intake reciben `--add-dir <ruta absoluta>` por cada cerebro exi
 Comprobado con `claude -p` real (Claude Code, `acceptEdits`): un `Write` nuevo y un `Edit` sobre una nota existente del cerebro quedan en `permission_denials` sin tocar nada, y la lectura sí funciona. El `CLAUDE.md` o `AGENTS.md` de un cerebro **no** se carga en el contexto por estar en `--add-dir`: el agente solo lo ve si lo abre. Las rutas se resuelven (enlaces incluidos) para que `--add-dir` y las denegaciones usen exactamente la misma.
 
 ---
-Requisitos en `openspec/specs/{main-brain,daily-brain,brain-retrieval}/` y en el cambio `openspec/changes/add-library-map/` (mapa); diseño en `openspec/changes/archive/2026-10-28-add-knowledge-brains/`.
+Requisitos en `openspec/specs/{main-brain,daily-brain,brain-retrieval,library-map}/`; diseño en `openspec/changes/archive/2026-10-28-add-knowledge-brains/` y, para el mapa, en `openspec/changes/archive/2026-10-29-add-library-map/`.

@@ -54,6 +54,10 @@ Indica la complejidad aproximada que quedaría tras la refactorización.
 ### Tests
 - Una refactorización no debe romper tests ni cambiar el comportamiento. Señala qué tests cubren hoy la función (búscalos con `Grep`). Si no hay ninguno que cubra las ramas que se moverían, dilo en la sugerencia: primero un test, después la refactorización.
 
+## Antes de proponer: cómo lo resolvieron los expertos
+
+Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta antes de proponerlo. Busca con Grep en `brain-principal/` (la biblioteca está en inglés) o, si no está importada en este equipo, en `brain-mapa/_catalog.jsonl`, que da la cita sin el texto. Abre la nota más cercana y **cítala** junto a tu recomendación (`Libro · cap. N · pp. A–B`); cítala, no copies su texto. Si no encontraste nada aplicable, dilo igual: que se buscó queda dicho. Si una nota contradice `AGENTS.md`, `docs/harness/` o una spec de `openspec/specs/`, mandan estos y la contradicción se anota (`docs/harness/cerebros.md`).
+
 ## Formato de salida
 
 Empieza tu respuesta exactamente con la línea `## Jugador: metricas (#5)`, sin ningún texto antes:

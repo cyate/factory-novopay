@@ -37,6 +37,10 @@ Si el técnico pide solo un informe, **no edites nada**. Lista qué documentos a
 - **Plantillas de `factory init`** (`src/factory/templates/`): si un documento que cambias tiene copia ahí, anótalo como deuda para el técnico; están bajo `src/` y no las editas.
 - **Deuda de documentación**: lo que queda desfasado y no puedes resolver con el diff recibido.
 
+## Antes de proponer: cómo lo resolvieron los expertos
+
+Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta antes de proponerlo. Busca con Grep en `brain-principal/` (la biblioteca está en inglés) o, si no está importada en este equipo, en `brain-mapa/_catalog.jsonl`, que da la cita sin el texto. Abre la nota más cercana y **cítala** junto a tu recomendación (`Libro · cap. N · pp. A–B`); cítala, no copies su texto. Si no encontraste nada aplicable, dilo igual: que se buscó queda dicho. Si una nota contradice `AGENTS.md`, `docs/harness/` o una spec de `openspec/specs/`, mandan estos y la contradicción se anota (`docs/harness/cerebros.md`).
+
 ## Formato de salida
 
 Tu respuesta empieza exactamente con la línea `## Jugador: documentador (#3)`, sin texto antes:

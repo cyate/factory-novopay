@@ -5,7 +5,7 @@
 - Raíz del repositorio: `factory-yate/`, la que contiene `AGENTS.md`.
 - Arranque estándar: `./init.sh`.
 - Verificación estándar: `./scripts/check.sh`.
-- OpenSpec: specs principales en `openspec/specs/` (18 capacidades). Cambios archivados: `2026-10-27-add-harness-loop-engine`, `2026-10-28-extend-factory-pipeline`, `2026-10-28-add-knowledge-brains`, `2026-10-29-add-library-map`, `2026-10-30-add-equipo-ideal` (sesión 007) y `2026-10-30-add-panel` (sesiones 008 y 009). No hay ningún cambio activo.
+- OpenSpec: specs principales en `openspec/specs/` (18 capacidades; `add-reglas-de-oficio` no añade ninguna, solo requisitos). Cambios archivados: `2026-10-27-add-harness-loop-engine`, `2026-10-28-extend-factory-pipeline`, `2026-10-28-add-knowledge-brains`, `2026-10-29-add-library-map`, `2026-10-30-add-equipo-ideal` (sesión 007) `2026-10-30-add-panel` (sesiones 008 y 009) `2026-10-30-add-reglas-de-oficio` (sesión 010) y `2026-10-30-fichar-arquitecto-api` (sesión 011). No hay ningún cambio activo.
 - Feature activa / siguiente: ver `.venv/bin/factory features list`.
 - Commits: ver `git log`. HEAD de la última sesión verificada: `b70d745`.
 - Bloqueos actuales: el push de `main` es una decisión humana pendiente. La prueba live (9.2) nunca se aprobó y quedó superada por el dogfooding de la sesión 003 (9.3), que confirmó el contrato de `--json-schema`.
@@ -154,7 +154,7 @@
   - `./scripts/check.sh` → código 0 (330 tests, ruff y doctor sin fallos).
   - `openspec validate add-knowledge-brains --strict` → válido.
   - `factory features verify` → `passing` en `main-brain`, `daily-brain`, `brain-captures` y `brain-retrieval`.
-- Tarea 6.2 (sin coste de API), vault real `/Users/camiloyateyara/PycharmProjects/redPDF/book/obsidian-vault`:
+- Tarea 6.2 (sin coste de API), vault real (`~/…/redPDF/book/obsidian-vault` en el equipo de entonces):
   - `factory brain import` → 11.245 notas, 82 libros, ~13,0 M tokens, en ~3 s. Copiados 11.330 `.md` (notas + guías) y 4 índices; ningún PDF.
   - `git status` → nada de `brain-principal/` (`git check-ignore` lo confirma); `factory doctor` → `brain-principal-untracked` en PASS.
   - `factory brain search "rate limiting"` → primeros resultados *Defending APIs* · cap. 9 · pp. 259–260 y *Privacy and Security for LLMs* · cap. 5.
@@ -334,7 +334,7 @@
 - Arranque: `./init.sh` → código 0 (verificación de referencia en verde).
 - Límites de los "datos reales" en este clon (no se sustituyeron por fixtures):
   - al arrancar no existía `.factory/`; el hook lo creó durante esta misma prueba, así que hay revisiones reales pero `tokens.loops` sigue vacío (no hay `runs/`) y se perdió el `events.jsonl` con la revisión del paso 5.2;
-  - `~/.claude/projects/-Users-cyate-PycharmProjects-factory-novo` solo tiene la transcripción de esta sesión (1), de modo que los tokens de sesiones son los de hoy. Las cifras de la sesión 008 (5 sesiones y 2 loops) se midieron en otro equipo (`/Users/camiloyateyara/…`, ver sesión 005): el slug del proyecto es distinto y por eso aquí no aparecen;
+  - el directorio de transcripciones de este proyecto en `~/.claude/projects/` solo tiene la de esta sesión (1), de modo que los tokens de sesiones son los de hoy. Las cifras de la sesión 008 (5 sesiones y 2 loops) se midieron en otro equipo, con otro `$HOME` (ver sesión 005): el slug del proyecto es distinto y por eso aquí no aparecen;
   - `add-equipo-ideal` está archivado, así que no aparece en la pestaña Tareas. Lo mismo que ya anotó la sesión 008; la tarea 5.3 lo pedía, pero su archivado era una tarea cerrada de ese mismo cambio.
   - Para la prueba se generó una revisión real nueva con el `checker` y el hook instalado, en lugar de la del paso 5.2.
 - Prueba de humo (5.3): `factory panel --port 8777 --open`, con el navegador del usuario sobre `http://127.0.0.1:8777/`.
@@ -355,4 +355,276 @@
   - **Commit:** esta sesión deja el árbol con el archivado y los documentos sin commitear.
   - **Límite del panel en este clon:** sin `.factory/runs/`, la pestaña Tokens no muestra loops. Se verá en cuanto corra un `factory goal run` aquí.
   - **Comprobaciones visuales que no se repitieron:** temas claro y oscuro y ancho de móvil (criterio de la tarea 4.5, ya cerrada en la sesión 008).
+- Cerebro principal (**revertido en la sesión 010, ver abajo**): `factory.toml` pasó a apuntar directo a un vault de Obsidian fuera del repositorio, por ruta absoluta, en lugar de una copia importada. `factory brain search` ya lee su texto (`principal_from_map` → `False`). A cambio, `factory brain status` dice "no importado" y `doctor` deja un aviso **RECOMENDADO**, porque el vault no tiene el registro `.factory-import.json` y factory no escribe en el origen: `check.sh` sigue en 0 con 1 recomendada. Queda explicado en `docs/harness/cerebros.md`.
 - Mejor próximo paso: commitear y decidir el push. Siguientes cambios propuestos: el equipo dentro de `factory goal run` (fase 2), fichar las vacantes del roster y refactorizar la deuda de complejidad (`parse_intake` 35, `parse_goal_text` 32, `cmd_brain` 30, `render_loop_state` 30).
+
+### Sesión 010 — 2026-10-30 (`add-reglas-de-oficio`)
+
+- Objetivo: traer al harness cinco reglas de oficio de la fábrica `/yate` (skill propia para servicios Go) que aquí no existían, sin tocar código ni reglas de verificación.
+- Qué se trajo y dónde vive cada regla:
+  - **prueba de mutación**: un hallazgo `critical`/`medium` dado por corregido solo se cierra con un test que falla al revertir el arreglo, citado en `evidence` → `prompts/checker.md` y `.claude/agents/checker.md`;
+  - **lo que el diff no muestra**: documentación, specs, decisiones o rutas que el cambio volvió falsas; es hallazgo aunque el archivo no esté en el diff → los mismos dos;
+  - **`origin/main`**: comprobar contra el remoto antes de afirmar que algo no existe, citando el comando en `self_check` → `prompts/maker.md`;
+  - **un supuesto es una decisión, nunca un hecho** → `prompts/intake.md`;
+  - **precedencia** entre los cerebros y la documentación del repositorio, con la contradicción registrada → `docs/harness/cerebros.md`.
+  - Además, la casilla de **lo que quedó mintiendo** en `docs/harness/clean-state-checklist.md`, y el resumen con enlaces en `docs/harness/roles.md` y `docs/harness/revision.md`, sin repetir el texto de los prompts.
+- Verificación: `tests/test_reglas_de_oficio.py` (nuevo, 11 casos) lee los archivos y afirma sobre su contenido, el patrón de `tests/test_team_revisores.py`. Incluye un tope de 70 líneas por prompt: checker 58, intake 47, maker 45.
+- Alcance que el plan no previó: los prompts viajan duplicados en `src/factory/templates/prompts/`, y `tests/test_templates.py` exige igualdad byte a byte (`engine.load_prompt` los usa de respaldo). Hubo que sincronizar los tres; quedó como tarea 3.4 y corregida la frase "sin cambios en `src/factory/`" de la propuesta.
+- Revisión independiente (`checker`), que además era la primera prueba real de las reglas nuevas (tarea 5.2): `pass_with_minor`, sin `critical` ni `medium`, con 5 `minor`, todos corregidos:
+  - la propuesta y las tareas afirmaban "sin cambios en `src/factory/`" y el cambio sí lo tocaba;
+  - `progress.md` y `session-handoff.md` seguían diciendo 26 features y "ningún cambio activo";
+  - el pie de `docs/harness/cerebros.md` citaba `openspec/changes/add-library-map/`, archivado desde la sesión 006;
+  - el formato de salida del subagente `checker` no tenía dónde decir que la superficie invisible al diff se miró: ahora lo pide bajo `## Veredicto`;
+  - tres anclajes de los tests pasaban con texto que invertía la regla: se añadió un segundo anclaje por regla (`sigue abierto`, `self_check`, `nunca un hecho`, `mandan los documentos`, `progress.md`).
+  - **El `checker` declaró haberse aplicado las dos reglas nuevas**, y la segunda produjo 3 de los 5 hallazgos, ninguno visible en el diff. El texto gobierna.
+- Verificación ejecutada: `./scripts/check.sh` → 0 (748 tests); `openspec validate add-reglas-de-oficio --strict` → válido; `factory features verify reglas-de-oficio` → `passing`.
+- Riesgos / pendientes:
+  - **Sin commitear**: el cambio y el handoff. El puntero del cerebro principal de la sesión 009 quedó revertido (ver abajo).
+  - **11 archivos generados de `.claude/`** (`commands/opsx/*` y `skills/openspec-*`): el CLI de openspec 1.3.1 los reescribió a su plantilla, más vieja que la commiteada. No es trabajo de esta sesión; conviene `git checkout -- .claude/commands .claude/skills` antes de commitear.
+  - **Preguntas abiertas de `design.md`**: si la mutación alcanza a los `minor`, y si `factory doctor` debería auditar estas reglas.
+- **Tanda paralela de revisores, y el `critical` que destapó.** Para responder si los jugadores pueden revisar en paralelo, se lanzaron `qa`, `metricas` y `revisor-pr` en un solo mensaje sobre el diff sin commitear:
+  - solaparon de verdad (`qa` 16:19:03→16:19:53, `metricas` 16:19:11→16:19:35, `revisor-pr` 16:19:21→16:25:25), con tres `tool_use_id` distintos y tres filas simultáneas en el panel;
+  - `git status --porcelain` quedó idéntico antes y durante (condición del reglamento §5.4): los revisores son `Read, Grep, Glob` y no tocan el árbol;
+  - veredictos: `metricas` `pass`, `qa` `pass_with_minor` (6 `minor` sobre los anclajes de los tests), `revisor-pr` `fail`.
+  - **El `critical` de `revisor-pr`, verificado en el código, era del puntero del cerebro de la sesión 009, no del cambio.** Con `principal_dir` apuntando al vault, `factory brain import <otro-vault>` usa el vault como *destino*: `importer.py:140-144` lo renombra y hace `rmtree`, y la guarda de `importer.py:93` solo frena si origen y destino coinciden o se contienen. Se perderían `.obsidian/`, los PDF y todo lo que no sea `.md`. Además, el refresco que documentaba `cerebros.md` no funcionaba en ese modo: con la misma ruta, `import` aborta, y `build_map` solo corre después del import.
+  - **Revertido**: `principal_dir = "brain-principal"` y fuera el bloque que documentaba el modo puntero. `factory doctor` pasa de 1 recomendada a 0, lo que confirma la otra corrección de `revisor-pr`: ese aviso no era preexistente, lo introducía el puntero (`doctor.py:367` solo emite `brain-principal-valid` si el directorio existe).
+  - El modo puntero puede volver cuando `brain import` rechace un destino que él no creó, o cuando `principal_dir` e `import_dest` sean campos distintos.
+- Cierre de la sesión 010:
+  - se quitaron las rutas personales de `progress.md` y `session-handoff.md` (el `$HOME` de otro equipo y la ruta del vault); el dato técnico se conservó;
+  - se revirtieron los 11 archivos generados de `.claude/` y se borró `parche.patch` de la raíz;
+  - el trabajo sin commitear se exportó a `~/Documents/parche-factory.patch` (40 archivos), verificado sobre un clon nuevo del remoto en `fbdf206`: `git apply` limpio, `./init.sh` en 0 y la suite entera en verde;
+  - **el `git checkout -- .claude/skills` de esta sesión borró una edición en curso de `.claude/skills/equipo/SKILL.md` de la sesión 011**, que corría en paralelo sobre el mismo árbol. Está anotado en su entrada.
+- Mejor próximo paso: commitear y decidir el push. Después, las dos ideas que quedaron de `/yate`: `factory lessons` (lecciones grepeables sobre las líneas añadidas) y el cruce de complejidad con hallazgos por área en el panel.
+
+### Sesión 011 — 2026-10-30 (fichaje de `arquitecto-api`, #10)
+
+- Objetivo: fichar un jugador del equipo ideal con la especialidad que pidió el usuario — construcción de APIs, seguridad de la frontera, alta concurrencia contra servicios externos y bases de datos, y AWS — tomando el conocimiento del cerebro principal.
+- Estado encontrado: 27 features en `passing`, ninguna `in_progress`, árbol con lo sin commitear de la sesión 010. Plantilla con 7 jugadores y vacantes 7, 8, 10 y 11.
+- Cerebro principal consultado (vault de Obsidian, 82 libros): 20 búsquedas en inglés sobre API security, rate limiting, idempotencia, transacciones y sagas, concurrencia optimista, pools y hilos, caché, IAM/KMS/Secrets Manager, puerta de enlace, multi-inquilino y trazas. Las referencias quedaron como tabla de citas (`libro · cap. · pp.`) dentro del agente: **se cita, no se copia** el texto de los libros.
+- Fichaje: `.claude/agents/arquitecto-api.md`, dorsal **10** (mediapunta, antes vacante con el perfil sugerido `arquitecto`), `tipo: revisor`, `model: opus`, solo lectura.
+  - Checklist en cuatro áreas: contrato de la API, seguridad de la frontera, concurrencia e integraciones, y AWS y plataforma.
+  - No duplica al portero: `seguridad` (#1) busca vulnerabilidades explotables en el diff; `arquitecto-api` juzga si el diseño de la frontera es defendible.
+  - Convocatoria por rutas (sin `peticion` para no encarecer cada partido): `src/factory/panel/**`, `src/factory/agents/**`, `engine.py`, `tick.py`, `gitops.py`, `**/*.go`, `**/*.java`, `**/*.tf`, `**/*.sql`, `**/openapi*.yaml` y `**/openapi*.yml`. El reglamento (`.claude/skills/equipo/SKILL.md`) ahora dice al técnico que lo amplíe a mano si la petición habla de APIs, servicios externos, concurrencia o AWS aunque las rutas no casen.
+- Documentación, las cuatro superficies que nombran la plantilla: `docs/harness/equipo.md` (fila, formación 4-3-3, vacantes ahora 7, 8 y 11, costes y el procedimiento "Cómo fichar"), `.claude/skills/equipo/SKILL.md` (regla de ampliación, vacantes y coste), `README.md` (fila del 10 y vacantes) y `docs/harness/roles.md` (enumeración de revisores). Las tres últimas salieron de la revisión; ver más abajo.
+- Tests: `tests/test_team_arquitecto_api.py` (15 casos: frontmatter, solo lectura, las cuatro áreas, reglas de oficio, biblioteca, gravedad, formato, coherencia con `equipo.md`, las otras tres superficies y el casado de los globs) y `tests/test_team_tecnico.py` actualizado (JUGADORES, VACANTES y el procedimiento de fichaje).
+- Verificación ejecutada: `./scripts/check.sh` → 0 (759 tests, 0 críticas y 0 recomendadas fallidas); `factory team validate` → 9 miembros; `factory team lineup --paths src/factory/panel/server.py` → convoca a `arquitecto-api` por rutas.
+- Prueba real barata (paso 3 del fichaje): `claude -p --agent arquitecto-api --model haiku --max-budget-usd 0.05` con diff vacío → respondió con el formato exacto (`## Jugador: arquitecto-api (#10)`, veredicto `pass`, "Superficie invisible al diff revisada"), coste 0,0039 USD, `permission_denials: []` y `git status --porcelain` idéntico antes y después.
+- Revisión independiente (`checker`), primera vuelta: `fail` con 3 `medium` y 5 `minor`. Todos corregidos:
+  - `README.md` mantenía su propia tabla del equipo y seguía contando el 10 entre las vacantes (`medium`);
+  - la spec **viva** `openspec/specs/team-match/spec.md` exigía "Los dorsales 7, 8, 10 y 11 MUST quedar vacantes" y su escenario hablaba de "los siete jugadores" (`medium`). La entrada original de esta sesión daba por bueno no abrir cambio OpenSpec: era falso;
+  - la sección "Coste" de `.claude/skills/equipo/SKILL.md` no conocía al #10, justo donde se prohíbe cambiar el modelo de un jugador (`medium`);
+  - `docs/harness/roles.md` enumeraba los revisores sin él; los globs `openapi*.y*ml` solo casaban en la raíz (`glob_to_regex` ancla y `*` no cruza `/`), ahora `**/openapi*.yaml` y `**/openapi*.yml`; el agente no pedía "exactamente una línea de veredicto"; el test no comparaba la columna de convocatoria de `equipo.md` con el frontmatter; y esta misma entrada citaba un glob que no existe.
+  - Prueba de mutación de las correcciones: `tests/test_team_arquitecto_api.py` pasa de 11 a 15 casos y ancla `README.md`, el coste y las vacantes de `SKILL.md`, `roles.md`, la columna de convocatoria y el casado de un `services/pagos/openapi.yaml` con `factory.globs.matches`. Revertir cualquiera de esas líneas rompe un test.
+- Cambio OpenSpec `fichar-arquitecto-api`, creado y archivado como `2026-10-30-fichar-arquitecto-api`: modifica los dos requisitos de la plantilla inicial (la foto de `add-equipo-ideal` deja de ser un tope; la lista viva de vacantes vive en `docs/harness/equipo.md` y en `factory team list`) y añade el requisito **Fichajes posteriores**, que fija qué debe cumplir cualquier alta: dorsal libre, frontmatter D8, formato común con una sola línea de veredicto, test propio y las cuatro superficies que no pueden quedar mintiendo.
+- Revisión independiente, segunda vuelta: `fail` con 1 `medium` y 1 `minor`, ambos corregidos. El `medium` era que el requisito nuevo **Fichajes posteriores** exige coherencia en cuatro superficies y el procedimiento "Cómo fichar" de `docs/harness/equipo.md` no nombraba ninguna, con el cambio OpenSpec todavía marcado como "Opcional": ahora son los pasos 5 y 6, y `tests/test_team_tecnico.py` los ancla. El `minor`, que las dos primeras viñetas de esta entrada se habían quedado en su versión previa a las correcciones (documentación y 11 casos); reescritas.
+- Revisión independiente, tercera vuelta: `pass`, sin hallazgos. Los diez de las dos vueltas anteriores quedan cerrados: ocho con test de mutación, el de la spec con el delta archivado sincronizado con la spec viva, y el de `progress.md` con la entrada reescrita.
+- Feature nueva `team-arquitecto-api` (prioridad 28, área `equipo`): `factory features start` → `verify` → `passing`, con evidencia de `pytest tests/test_team_arquitecto_api.py tests/test_team_tecnico.py`.
+- Verificación final: `./scripts/check.sh` → 0; `openspec validate fichar-arquitecto-api --strict` → válido; `openspec list` → sin cambios activos; 28 features en `passing`.
+- Riesgos / pendientes:
+  - **Sin commitear**: este fichaje y todo lo de la sesión 010.
+  - **11 archivos generados de `.claude/`** (`commands/opsx/*` y `skills/openspec-*`): ya revertidos por la sesión 010 y fuera del árbol. Si el CLI de openspec 1.3.1 vuelve a reescribirlos, repetir el `git checkout --`, pero **solo sobre `.claude/commands` y `.claude/skills/openspec-*`**, nunca sobre `.claude/skills` entero: ahí vive `equipo/SKILL.md`.
+  - **Una edición de `SKILL.md` se perdió** entre dos comandos de esta sesión (la línea de vacantes y la regla de ampliación volvieron al texto anterior). Se reaplicó y quedó comprobada por test. **Causa identificada desde la sesión 010, que corría en paralelo sobre el mismo árbol:** ejecutó `git checkout -- .claude/commands .claude/skills` para revertir los archivos que reescribe el CLI de openspec, y ese `checkout` se llevó por delante la edición en curso de `.claude/skills/equipo/SKILL.md`. No fue el CLI. Lección: un `git checkout --` sobre un directorio compartido borra el trabajo sin commitear de cualquier otra sesión que esté escribiendo ahí.
+  - El repo sigue en 18 capacidades: `fichar-arquitecto-api` no añade spec nueva, solo modifica `team-match`.
+- Mejor próximo paso: commitear, y después las vacantes que quedan (7 `rendimiento-costes`, 8 `bibliotecario`, 11 `experiencia-cli`).
+
+### Sesión 011 (cont.) — 2026-10-30 (fichaje de `entrega-qa`, #7)
+
+- Petición: un jugador que, tras aprobarse el PR de una API, prepare lo que recibe el **QA humano** y el briefing del plan de desarrollo que el usuario pasa a **Cowork design**.
+- Tres decisiones del usuario, con mi recomendación en cada una:
+  - las entregas viven en `entregas/<TICKET>/` **dentro de factory-novo** (un solo sitio, versionado, independiente del repo donde esté la API);
+  - los requests son **un `escenarios.py` con la biblioteca estándar** (`urllib`), para que el QA no instale nada: `python escenarios.py --base-url … [--only N] [--list]`, salida legible con esperado frente a obtenido y código de salida 0/1;
+  - el briefing y el plan son **archivos distintos**: `<TICKET>.md` es el prompt que lee Cowork design y `plan-desarrollo.md` lo escribe Cowork al lado. Un archivo único se pisa a sí mismo en la segunda iteración.
+- Fichaje: `.claude/agents/entrega-qa.md`, dorsal **7** (extremo derecho, antes vacante con el perfil sugerido `rendimiento-costes`), `tipo: constructor`, `model: sonnet`, herramientas `Read, Edit, Write, Glob, Grep` (sin `Agent` ni `Bash`), convocatoria `entregas/**`.
+  - Terreno acotado: **solo escribe dentro de `entregas/<TICKET>/`**. Lo que ve mal fuera lo reporta, no lo arregla.
+  - El briefing lleva 12 secciones fijas, incluidas las que pidió el usuario: qué hace cada API, reglas de negocio, mensajes de error, tablas afectadas, qué se puede y qué no, concurrencia, seguridad y las rutas del proyecto que Cowork tiene que abrir.
+  - Reglas duras: nada de secretos (credenciales por variable de entorno), nada de datos reales de personas o tarjetas, y ningún endpoint, campo o código de error sin anclar en `archivo:línea`; lo que no se puede anclar va a "Preguntas abiertas".
+  - No se pisa con `qa` (#2), que audita la cobertura dentro del partido, ni con `arquitecto-api` (#10), que juzga el diseño: este documenta y hace ejecutable la entrega.
+- Las cuatro superficies actualizadas (paso 5 del procedimiento): `docs/harness/equipo.md` (fila, formación, vacantes ahora 8 y 11, perfiles sugeridos y costes), `.claude/skills/equipo/SKILL.md` (ampliación, vacantes y coste), `README.md` (fila del 7 y vacantes) y `docs/harness/roles.md` (constructores y el terreno de cada uno).
+- Cambio OpenSpec `fichar-entrega-qa`, archivado como `2026-10-30-fichar-entrega-qa`: requisito nuevo **Paquete de entrega al QA humano** en `team-match`, con los tres archivos, lo que el paquete no puede contener y la verificación determinista (`escenarios.py --list` lista los escenarios sin lanzar ninguna petición).
+- Tests: `tests/test_team_entrega_qa.py` (11 casos) y `tests/test_team_tecnico.py` actualizado. Los anclajes de vacantes de `tests/test_team_arquitecto_api.py` dejan de fijar la lista entera y ahora afirman que el 10 no vuelve a aparecer como vacante: así cada fichaje no rompe el test del anterior.
+- Feature nueva `team-entrega-qa` (prioridad 29, área `equipo`): `start` → `verify` → `passing` con evidencia.
+- Verificación: `./scripts/check.sh` → 0; `pytest -q` → 775 passed (764 antes); `openspec validate fichar-entrega-qa --strict` → válido; `factory team list` → 9 jugadores, vacantes 8 y 11.
+- Aviso recibido de otra sesión (`factory-novo-a1`): el árbol se había exportado a `~/Documents/parche-factory.patch` y pedía no escribir. Se le avisó de que esta petición del usuario sí tocaba el árbol, pero su socket ya no respondía (sesión cerrada). **El parche queda desfasado: hay que regenerarlo.** También corrigió una causa que esta entrada daba por buena: la edición perdida de `SKILL.md` fue su `git checkout -- .claude/skills`, no el CLI de openspec.
+- Pendiente: `entregas/` todavía no existe; se crea con el primer ticket. Sigue todo sin commitear.
+
+### Sesión 011 (cont.) — prueba real de `entrega-qa` y segunda vuelta del `checker`
+
+- **Prueba real (paso 3 del fichaje), con un ticket de prueba `DEMO-001` sobre la API del panel de este mismo repositorio.** Dos ejecuciones:
+  - con `--permission-mode dontAsk`, como decía el procedimiento: los tres `Write` quedaron en `permission_denials` y **no escribió nada**. Ese modo solo prueba a un revisor; para un constructor no prueba nada. El contenido que llevaban los `Write` denegados sí era correcto, así que el fallo era del modo, no del agente;
+  - con `--permission-mode acceptEdits` y `--max-budget-usd 0.10` (coste real 0,0163 USD): escribió `entregas/DEMO-001/{DEMO-001.md,escenarios.py,README.md}` y **nada fuera**; `git status --porcelain` no muestra ninguna ruta ajena a `entregas/`.
+  - Verificación determinista: `python entregas/DEMO-001/escenarios.py --list` → 3 escenarios, cada uno con el criterio de la HU que prueba. `escenarios.py` importa solo `argparse`, `json`, `urllib.error` y `urllib.request`.
+  - **De extremo a extremo**: con `factory panel --port 8777` levantado, `python entregas/DEMO-001/escenarios.py --base-url http://127.0.0.1:8777` → `3 de 3 OK, 0 FALLA`, código de salida 0. Los escenarios cubren el feliz (`/api/snapshot` con sus secciones), el borde (Host ajeno → 403, DNS rebinding) y el error (POST → 405).
+  - El briefing ancló cada endpoint y cada código en `archivo:línea` de `server.py` y `snapshot.py`, y dejó 10 preguntas abiertas en vez de inventar (entre ellas, que el 405 no pasa por la comprobación de `Host`, que anotó como "Fuera de mi alcance" sin tocarlo).
+  - `entregas/DEMO-001/` se **borró** al terminar la prueba, por decisión del usuario: era un ticket ficticio. El directorio `entregas/` volverá a existir con el primer ticket real. La evidencia de la prueba es esta entrada.
+- **Segunda vuelta del `checker`: `fail`** con 2 `medium` y 3 `minor`, todos corregidos:
+  - el reglamento del partido no tenía sitio para `entrega-qa`: la fase 3 de `SKILL.md` y la tabla de fases de `equipo.md` ahora dicen que construye tras el constructor, y la fase 4 incluye `python entregas/<TICKET>/escenarios.py --list` con su salida en el acta (`medium`);
+  - el paso 3 no se había ejecutado y la lista de tareas del cambio archivado ni lo mencionaba (`medium`): ejecutado, con el resultado de arriba, y añadido como tarea 1.5 al cambio archivado;
+  - la convención de los anclajes de vacantes quedaba a medias (`minor`): ahora la frase se deriva de `VACANTES` en `tests/test_team_tecnico.py` y se comprueba igual en las tres superficies, y los tests de cada jugador solo afirman que su dorsal no vuelve a aparecer como vacante;
+  - la tabla de permisos de `docs/harness/roles.md` describía a los constructores con el terreno de solo dos (`minor`);
+  - `entregas/` iba a ser un directorio versionado de primer nivel sin aparecer en ningún mapa de rutas (`minor`): añadido al de `README.md` y a "Estructura" de `AGENTS.md`, diciendo que se versiona y que por eso el paquete no lleva secretos ni datos reales.
+- Además, el procedimiento "Cómo fichar" (paso 3) ya distingue los dos tipos: `dontAsk` para un revisor, `acceptEdits` para un constructor, comprobando que `git status --porcelain` solo muestra su terreno. Lo ancla `tests/test_team_entrega_qa.py`.
+- **Lo que destapó el ejemplo mientras estuvo en el árbol:** `entregas/` es parte del repositorio, así que `./scripts/check.sh` también lint-ea el `escenarios.py` del paquete (dos E501 y un `ruff format`). En vez de tocar la configuración de ruff —que no se cambia sin petición explícita— la restricción se le pasa al jugador: `escenarios.py` debe pasar `ruff check` y `ruff format --check`, con líneas de 100 caracteres. Anclado en `tests/test_team_entrega_qa.py`.
+- **Tercera vuelta del `checker`: `pass_with_minor`**, sin `critical` ni `medium`. Los cinco hallazgos anteriores quedaron cerrados con prueba de mutación. Los tres `minor` nuevos también se corrigieron, porque eran baratos y uno iba a estallar en el próximo fichaje:
+  - la sección "Costes" de `equipo.md` seguía diciendo que todas las pruebas reales usan `--max-budget-usd 0.05`, mientras el paso 3 ya prescribe 0,10 para un constructor;
+  - la fase 3 del reglamento decía que el paquete de entrega no llega a los revisores y la fase 5 mandaba meter los `??` de `git status` en la lista de archivos — es decir, lo incluía: ahora la fase 5 excluye `entregas/**` y remite al `--list` de la fase 4;
+  - el helper que derivaba la frase de vacantes se rompía al quedar **una sola** vacante (`" y 11"`, con espacio doble) y lanzaba `IndexError` con cero. Como el siguiente paso es fichar los dorsales 8 y 11, habría reventado en el próximo fichaje: ahora compara el **conjunto de dorsales** que nombra cada superficie contra `VACANTES`, sin depender de la redacción.
+  - Confirmó además la decisión de ruff: pasarle la restricción al jugador no toca ninguna regla de verificación; excluir `entregas/` del lint sí, y eso necesita petición explícita del usuario.
+- Verificación final de la sesión: `./scripts/check.sh` → 0; `pytest -q` → 780 passed; `ruff check .` → limpio; `factory team list` → 9 jugadores, vacantes 8 y 11; features 28 y 29 en `passing`; `openspec list` → sin cambios activos.
+
+### Sesión 012 — Pull requests en el panel (`add-panel-pulls`)
+
+- **Petición:** ver en el panel, en tiempo real, los pull requests del usuario que ejecuta la fábrica, para trazar si tienen alertas, si ya fueron revisados y cómo se mueven en tiempos de revisión.
+- **Dos decisiones del usuario** (preguntadas antes de diseñar): los PR salen **solo del repositorio donde corre el panel**, y entran **los suyos más aquellos en los que se le pidió revisión**.
+- **Decisión de arquitectura: nada de caché en disco.** La primera idea era que un sondeador escribiera `.factory/pulls.json` y que el `Watcher` lo huellara como al resto. Habría obligado a abrir una excepción en el requisito "Panel de solo lectura". En su lugar, el sondeador guarda el resultado en memoria del proceso y llama a `watcher.broadcast(["pulls"])`; el panel sigue sin escribir un solo archivo y el tiempo real sale por el mismo canal SSE.
+- **Qué se añadió:**
+  - `src/factory/panel/pulls.py`: tres consultas de `gh pr list` (abiertos como autor, abiertos con `review-requested:@me`, 10 últimos fusionados), dedupe por número con el rol `autor` ganando, estado, tiempos y alertas. El `runner` es inyectable, así que los tests no salen a la red.
+  - Tiempos: abierto, sin actividad, hasta la primera revisión y de ciclo. Alertas: `checks_fallando`, `cambios_pedidos`, `conflictos`, `sin_revisor`, `parado` (>24 h), `sin_coderabbit`, `sin_cifra` y `demasiado_grande` (>10 archivos o >600 líneas). Las tres últimas son reglas de oficio de `CLAUDE.md` y solo se le piden al **autor**.
+  - Panel: sección `pulls` en la instantánea, hilo sondeador cada 60 s que avisa **solo cuando el resultado cambia**, `factory panel --no-pulls` y pestaña nueva con filtros, KPI de PR con alerta y las dos medianas (hasta la primera revisión y de ciclo).
+- **La prueba contra datos reales encontró tres fallos que los datos inventados no habrían encontrado** (runner con `-R novopayment/cifra-spend-corporate-api-go`, 10 PR abiertos):
+  - `gh` devuelve el equipo revisor como `novopayment/cifra`, no como `cifra`: `sin_cifra` saltaba en PR que sí lo tenían;
+  - `sin_coderabbit` saltaba aunque el bot ya hubiera revisado, porque solo miraba si existía el comentario `@coderabbitai review`;
+  - la primera revisión la firmaba un escáner a los 30 segundos, así que la mediana decía 0,0 h. Los bots ya no cuentan como revisión ni como revisor humano (`BOTS` en `pulls.py`), y la mediana real pasó a 1,5 h.
+- **Tests:** `tests/test_panel_pulls.py` (37 casos) y cuatro nuevos en `tests/test_panel_server.py`. Dos son anti-deriva: un PR "en su peor momento" tiene que disparar exactamente `pulls.ALERTS`, y la página tiene que saber pintar cada estado y cada alerta del vocabulario. El fixture del servidor pasa `pull_requests=False`.
+- **Feature nueva `panel-pulls`** (prioridad 30, área `observabilidad`): `start` → `verify` → `passing` con evidencia. Cambio OpenSpec `add-panel-pulls` con dos requisitos añadidos y tres modificados de `observability-panel` (la instantánea pasa a cuatro secciones, el sondeo entra en "Actualización en vivo" y "Panel de solo lectura" dice explícitamente que no escribe ni en disco ni en GitHub).
+- **Verificación:** `./scripts/check.sh` → 0; `pytest -q` → 821 passed (780 antes); `openspec validate add-panel-pulls --strict` → válido.
+- **Límite conocido:** solo el repositorio donde corre el panel. Los PR del usuario viven en los repos de servicio (por ejemplo `cifra-spend-corporate-api-go`), así que ahí es donde hay que abrir el panel; en factory-novo la pestaña sale vacía.
+
+#### Primera vuelta del `checker` sobre `add-panel-pulls`: `fail` (2 `medium`, 8 `minor`)
+
+Los dos `medium` eran defectos que la verificación en verde no podía ver, y los dos los había introducido esta sesión:
+
+- **`--no-pulls` no estaba probado en el camino del servidor.** Solo lo cubría `--json`. Borrando el guard `if pull_requests:` de `server.py` la suite entera seguía en verde. Ahora lo anclan dos tests simétricos: sin pulls el hilo del sondeo ni siquiera arranca (`is_alive()` falso) y con pulls se llama al colector y la instantánea se actualiza.
+- **La suite había perdido hermeticidad.** `panel_json` de `tests/test_panel_tasks.py` llama a `factory panel --json` sin `--no-pulls`, así que dos tests pasaron a ejecutar `gh` de verdad tres veces cada uno, con 20 s de tope por llamada. No se ponían rojos porque el error se absorbe en `pulls.error`. Arreglado con `--no-pulls` en el helper. La frase de la entrada anterior que decía "ningún test sale a la red" era falsa y queda corregida arriba.
+
+Los ocho `minor`, todos corregidos:
+
+- un *commit status* clásico (`{"state": "PENDING"}`, sin campo `status`) se reportaba como `checks: ok`: `PENDING_CHECKS` y un caso nuevo en el parametrizado;
+- `factory panel --json` no tenía la red de seguridad del sondeador: una respuesta de `gh` con otra forma salía como traceback. `collect` captura ahora cualquier excepción y la devuelve como `error`;
+- la mediana "hasta la primera revisión" excluía a los fusionados, que son los únicos con el dato completo. Al incluirlos, la medida real del repo de cifra pasó de 1,5 h a **5,8 h**: la cifra anterior estaba sesgada por los dos o tres abiertos ya revisados;
+- `factory panel --help` y el índice de `AGENTS.md` seguían describiendo tres vistas;
+- `proposal.md` decía que el fallo de `gh` sale en `warnings`, cuando va en `pulls.error` (y la propia spec exige `warnings` vacío en ese escenario);
+- "cada 60 s" estaba escrito a mano en la página sin atarlo a `PULLS_S`: ya lo ata un test, como el que existía para `UNCLOSED_AFTER_S`;
+- `sin_cifra` puede quedarse encendido en un PR que el equipo ya revisó, porque GitHub retira la petición del equipo cuando una persona suya revisa. Documentado como límite conocido en `docs/harness/panel.md`;
+- el requisito `Página gráfica` no mencionaba la pestaña: añadido a los MODIFIED del cambio, con el filtro, las etiquetas legibles y el matiz de que el enlace a GitHub se construye en tiempo de ejecución, así que la página sigue sin URLs externas.
+
+Observación del `checker` sobre la evidencia, ya resuelta: el `manual_checks` de la feature dice `factory panel --json` con sesión de `gh`, pero hasta entonces solo se había ejercitado `collect` con un runner inyectado. Ejecutado después por el camino real: `factory --root <repo de cifra> panel --json` → 20 PR, 8 con alerta.
+
+Verificación tras los arreglos: `./scripts/check.sh` → 0; `pytest -q` → 827 passed (821 antes); `openspec validate add-panel-pulls --strict` → válido; `factory features verify panel-pulls` → `passing` con evidencia nueva.
+
+#### Segunda vuelta del `checker`: `fail` por un solo `medium`, más dos `minor` nuevos
+
+Nueve de los diez hallazgos quedaron cerrados, siete con prueba de mutación hecha por el propio `checker`. El que siguió abierto no era un defecto del código, sino de su defensa:
+
+- **Hermeticidad sin red de contención (`medium`).** `panel_json` ya pasaba `--no-pulls`, pero quitarlo volvía a dejar la suite en verde mientras ejecutaba `gh` de verdad. Ahora `tests/conftest.py` tiene un fixture `autouse` que sustituye `factory.panel.pulls._run` por un `pytest.fail` con el motivo. La regla queda escrita donde se cumple, y vale para cualquier test futuro, no solo para los dos de hoy.
+- `minor`: el MUST de los cuatro filtros de la pestaña había entrado en la spec sin test → `test_la_pagina_filtra_por_rol_y_por_alerta`.
+- `minor`: la tabla de consultas de `docs/harness/panel.md` decía que los fusionados sirven "para la mediana", en singular, cuando desde el arreglo anterior alimentan las dos.
+
+**Mutaciones comprobadas en este repo** (aplicadas, ejecutadas y revertidas):
+
+- quitar `--no-pulls` de `panel_json` → `test_cli_json_en_un_repo_sin_factory` y `test_cli_json_con_features_corruptas` fallan con el mensaje del fixture, en vez de salir a la red en verde;
+- borrar el filtro `alerta` de `PULL_FILTERS` en la página → `test_la_pagina_filtra_por_rol_y_por_alerta` falla.
+
+Verificación: `pytest -q` → 828 passed; restaurado el árbol, los dos archivos mutados vuelven a su contenido original.
+
+#### Tercera vuelta del `checker`: `pass_with_minor` — cerrado
+
+Sin hallazgos `critical` ni `medium`. Los tres arreglos de la vuelta anterior quedaron cerrados, dos con prueba de mutación. El `checker` contestó además las dos preguntas con hechos del repositorio: no existe ningún test marcado `live` (el marcador está declarado en `pyproject.toml` pero no se usa), el parcheo por ruta de módulo entra siempre porque `collect` resuelve `runner or _run` en tiempo de llamada, y en todo `src/` solo hay una invocación de `gh`, la de `pulls.py`.
+
+El `minor` nuevo sí valía la pena y se corrigió: **el guard no cubría el hilo del sondeador**. `pytest.fail` levanta `Failed`, que es `BaseException` —justo lo que lo hace atravesar el `except Exception` de `collect`—, pero dentro del hilo del sondeo esa excepción habría salido como `PytestUnhandledThreadExceptionWarning` y el test habría seguido **verde** mientras se intentaba salir a la red. El fixture apunta ahora cada intento en una lista y lo comprueba en el teardown, que corre en el hilo principal.
+
+Mutación comprobada: un test que construye `PanelServer(..., pull_requests=True)` sin inyectar `collect` termina en `ERROR` por el teardown, en vez de pasar con un warning. Archivo de prueba borrado tras ejecutarlo.
+
+Se descartó la alternativa de añadir `filterwarnings` a `pyproject.toml`: es configuración de verificación y no se toca sin petición explícita.
+
+Cambio archivado como `2026-10-30-add-panel-pulls`: 2 requisitos añadidos y 4 modificados en `observability-panel`. `openspec list` sin cambios activos. Verificación final: `./scripts/check.sh` → 0.
+
+### Sesión 013 — Recomendaciones de los revisores (`add-pr-feedback`)
+
+- Petición: un gancho de la fábrica para atender las recomendaciones de los revisores de un pull request, con el PR [#120 de `cifra-spend-corporate-api-go`](https://github.com/novopayment/cifra-spend-corporate-api-go/pull/120) y el revisor `sam-pc-novo` como caso real.
+- Decidido con el humano (dos preguntas): un **comando de `factory` más una skill de triaje**, con el **ciclo completo** —listar, arreglar el código aceptado y responder los hilos—, no solo un aviso en el panel.
+- Completado:
+  - `src/factory/feedback.py` y `factory feedback <pr> [--repo] [--revisor] [--resueltos] [--json]`: una consulta `gh api graphql` que trae los hilos en línea y los cuerpos de revisión, agrupados por revisor, con `archivo:línea`, el estado del hilo y el comando `gh … /replies` de cada uno. Solo lectura.
+  - Skill `.claude/skills/recomendaciones/`: leer → comprobar contra el código → triaje aprobado por el humano → arreglar → responder hilo a hilo. Sin push, sin merge y sin resolver hilos.
+  - `tests/test_feedback.py` (21 tests, tres por el CLI con `main([...])`), `docs/harness/recomendaciones.md`, filas en `README.md` y `AGENTS.md`, y la entrada en `tests/test_cli_help.py`.
+  - Cambio OpenSpec `add-pr-feedback` (capacidad nueva `pr-feedback`, 3 requisitos y 8 escenarios), `openspec validate --strict` válido. **Queda activo, sin archivar.**
+  - Feature `pr-feedback` (prioridad 31) promovida con `factory features verify`.
+- Prueba en vivo contra el PR #120: `--revisor sam` → los 7 hilos de `sam-pc-novo` con su comando de respuesta; sin filtro, 8 hilos sin resolver, 45 resueltos ocultos y 11 revisiones generales (CodeRabbit, Orca, SonarQube y un revisor humano).
+- Verificación: `./scripts/check.sh` → 0.
+- Pendiente: nadie ha respondido todavía los hilos de `sam-pc-novo` en el PR #120; eso se hace desde el repositorio de `cifra-spend-corporate-api-go` con `/recomendaciones 120 sam`.
+
+#### Primera vuelta del `checker`: `fail` por dos `medium`
+
+- **La capacidad no estaba registrada** (`medium`): ni feature ni spec. Arreglado con la feature `pr-feedback` y el cambio OpenSpec `add-pr-feedback`.
+- **El CLI no tenía ningún test** (`medium`): los 16 tests iniciales solo ejercitaban `recoger`/`render`. Añadidos tres por `main([...])` (JSON, mapeo de opciones y salida 2 con el motivo en `stderr`). Para que el parcheo entrara, `recoger` resuelve ahora `runner or _run` en tiempo de llamada, como `pulls.collect`.
+- `minor`: un directorio inexistente daba el mensaje falso "no se encontró el CLI `gh`" (ahora `_gh` mira `exc.filename`); `--revisor` solo miraba a quien abría el hilo (ahora, a cualquier participante, con test); un comentario con la palabra `ponytail` de un dictado; y la tabla de estructura del `README.md`, que nombraba una sola skill.
+- Descartado: usar `find_root` en `cmd_feedback`. `factory feedback` se ejecuta dentro del repositorio del PR, que normalmente **no** es este repo, así que `args.root or Path.cwd()` es deliberado.
+
+### Sesión 014 — Puerta previa al pull request y consulta a la biblioteca (`add-puerta-pre-pr`)
+
+**Por qué.** Los nueve pull requests de SPD-80 abiertos hoy en `cifra-spend-corporate-api-go`
+(131–139) acumularon 23 hilos de CodeRabbit, 16 sin contestar cuando la rama ya había pasado a
+SPD-191. Tres eran el mismo defecto visto desde tres sitios —`service.InviteUser` llama a
+`Inviter.Invite`, que crea la cuenta en el proveedor de identidad, **antes** de comprobar la
+delegación, así que un 403 deja cuenta huérfana y ninguna membresía— y nueve no eran código, sino
+notas y contrato que el propio PR dejó falsos. El CLI de CodeRabbit estaba instalado y
+autenticado en esta máquina y nada lo llamaba; la biblioteca técnica no estaba importada, así que
+la inyección de conocimiento entregaba citas sin texto.
+
+**Qué se hizo.**
+
+- `factory brain import /Users/cyate/obsidianGeneral/novopayment-software`: 11.245 notas, 82
+  libros, ~13.016.603 tokens. Antes, `factory brain status` decía `no importado`.
+- `scripts/pre-pr.sh`: puerta previa al PR —árbol limpio, commits sobre la base, `check.sh`,
+  tamaño, `factory complexity --base --max 20` y `coderabbit review --base <base> --gate major`—,
+  con salto documentado sin el CLI y `PRE_PR_STRICT=1` para convertirlo en fallo.
+- `.coderabbit.yaml`: perfil `chill`, `auto_review.drafts: true`, cerebros excluidos e
+  instrucciones por ruta para `**/*.py`, `prompts/**/*.md` y `.claude/agents/**/*.md`.
+- Consulta obligatoria a la biblioteca en `prompts/maker.md`, `prompts/intake.md`, sus plantillas
+  y los diez jugadores de `.claude/agents/`, cada uno con la variante que cabe en sus
+  herramientas. El `checker` queda fuera a propósito y hay un test que lo guarda.
+- "Lo que abriría un hilo en el PR" en los dos checkers; `docs/harness/roles.md` deja de decir
+  "las cinco reglas de oficio".
+- Cuatro notas en el cerebro diario con los patrones de los 23 hilos (efecto externo antes de la
+  autorización, `classify()` que convierte defectos propios en caídas, check-then-insert y
+  documentación que el PR dejó mintiendo). Sin commitear todavía: `factory brain commit`.
+
+**Verificación ejecutada.** `./scripts/check.sh` → 0 (ruff, ruff format, pytest y `factory
+doctor` con 0 críticas y 0 recomendadas fallidas). `tests/test_reglas_de_oficio.py` → 46 casos.
+`./scripts/pre-pr.sh main` con el árbol sucio → 1, "PUERTA CERRADA: hay cambios sin commitear".
+
+**Revisión independiente.** Primera vuelta del `checker`: `fail`, 6 `medium` + 4 `minor`.
+Corregidos los seis `medium` —la orden del maker no cabía en sus herramientas (ahora usa el
+bloque de conocimiento inyectado y Read/Grep), el paso de complejidad no podía fallar sin
+`--max`, la puerta medía un rango vacío con el árbol sucio, `roles.md` seguía diciendo "cinco
+reglas", `.coderabbit.yaml` no tenía prueba que lo defendiera y la capacidad no estaba
+registrada— y los `minor` 8, 9 y 10. Queda abierto el `minor` 7: pasarse de 10 archivos o 600
+líneas avisa pero no cierra la puerta, porque los archivos estáticos pueden pasarse y contarlos
+aparte necesita una decisión que no es de esta sesión.
+
+Segunda vuelta: `fail`, con cuatro `medium` cerrados y tres abiertos por una razón sola —el
+código era correcto y faltaba la prueba que lo defendiera—. La lección vale más que los
+arreglos: una ejecución manual en verde no es prueba de mutación. Ahora
+`test_la_puerta_previa_al_pull_request_existe_y_se_exige` ancla `--max`,
+`PRE_PR_MAX_COMPLEJIDAD`, `git status --porcelain`, `rev-list --count` y `PRE_PR_STRICT`;
+`test_las_reglas_de_oficio_estan_listadas_donde_se_buscan` defiende la tabla de `roles.md`; y
+`test_la_puerta_documentada_es_la_puerta_que_hay` impide que el documento vuelva a describir una
+versión anterior del script. Hallazgo nuevo de esa vuelta, también cerrado:
+`docs/harness/recomendaciones.md` describía la puerta de antes de las dos guardas y no nombraba
+ninguna de las dos variables de entorno; corregidos además los resúmenes de `AGENTS.md` y
+`CLAUDE.md`, la viñeta de `docs/harness/cerebros.md` sobre cómo consulta el maker del loop (no
+busca: recibe el conocimiento inyectado) y las cuatro cifras falsas de `session-handoff.md`.
+
+Tercera vuelta: **`pass_with_minor`**, sin `critical` ni `medium`. Los dos `minor` nuevos eran
+texto y quedaron cerrados (el docstring de `tests/test_reglas_de_oficio.py` seguía contando cinco
+reglas; `session-handoff.md` mantenía la verificación, el «código añadido: ninguno» y el «defecto
+conocido: ninguno» de la sesión 012). Queda abierto solo el `minor` 7, por decisión.
+
+**Estado.** Feature `puerta-pre-pr` (prioridad 32) en `not_started`: el cambio OpenSpec
+`add-puerta-pre-pr` está escrito y la verificación en verde, falta `factory features start` y
+`verify`. El árbol sigue sucio a propósito por la mudanza de repositorio pendiente.
+
+**Siguiente paso.** Cerrar los 16 hilos abiertos de los PRs 131–139 empezando por 136 y 137, que
+son los tres `Major` y se cierran con el mismo movimiento: subir las comprobaciones de
+autorización por encima de la llamada al proveedor. Y copiar a
+`cifra-spend-corporate-api-go` el `.coderabbit.yaml` preparado con las instrucciones derivadas de
+esos 23 hilos.

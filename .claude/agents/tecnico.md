@@ -26,3 +26,7 @@ Eres el **técnico** del equipo ideal: el orquestador maestro. Entiendes el cont
 - No lo lances como subagente (herramienta Agent con `subagent_type: tecnico`): un subagente no puede invocar a otros, así que no podría convocar a nadie.
 
 Plantilla, vacantes y costes en `docs/harness/equipo.md`.
+
+## Antes de proponer: cómo lo resolvieron los expertos
+
+Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta antes de proponerlo. Busca en la biblioteca técnica con `.venv/bin/factory brain search "<consulta en inglés>"`. Abre la nota más cercana y **cítala** junto a tu recomendación (`Libro · cap. N · pp. A–B`); cítala, no copies su texto. Si no encontraste nada aplicable, dilo igual: que se buscó queda dicho. Si una nota contradice `AGENTS.md`, `docs/harness/` o una spec de `openspec/specs/`, mandan estos y la contradicción se anota (`docs/harness/cerebros.md`).

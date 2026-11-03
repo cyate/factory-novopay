@@ -5,6 +5,8 @@
 - Solo `GET` y `HEAD`; cualquier otro método recibe 405.
 - `/api/stream` avisa con `event: change` cuando cambia la huella de alguna sección; el
   navegador vuelve a pedir `/api/snapshot`.
+- La sección `pulls` no sale de archivos sino de `gh`: un sondeador la refresca cada
+  `PULLS_S` y avisa solo cuando el resultado cambia. Se apaga con `--no-pulls`.
 """
 
 from __future__ import annotations
@@ -14,6 +16,7 @@ import queue
 import re
 import threading
 import time
+from collections.abc import Callable
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
@@ -21,7 +24,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-from factory.panel import PanelError, snapshot, state_dir
+from factory.panel import PanelError, pulls, snapshot, state_dir
 from factory.panel.hooks import LOG
 from factory.panel.tasks import CHANGES_DIR, FEATURES_FILE
 from factory.panel.tokens import TranscriptReader, transcript_files
@@ -31,6 +34,8 @@ DEFAULT_PORT = 8765
 LOOPBACK_HOST = re.compile(r"(127\.0\.0\.1|localhost|\[::1\])(:\d{1,5})?")
 POLL_S = 1.0
 PING_S = 15.0
+PULLS_S = 60.0
+PULLS_OFF = "consultas de GitHub desactivadas (--no-pulls)"
 SECURITY_HEADERS = {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
@@ -128,12 +133,24 @@ class Watcher:
                 self.broadcast(changed)
 
 
+def _contents(section: dict[str, Any]) -> tuple:
+    """La sección sin su marca de tiempo: dos sondeos iguales no repintan la página."""
+    return (section.get("pulls"), section.get("error"))
+
+
 class PanelServer(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
     def __init__(
-        self, root: Path, projects: Path, port: int = DEFAULT_PORT, interval: float = POLL_S
+        self,
+        root: Path,
+        projects: Path,
+        port: int = DEFAULT_PORT,
+        interval: float = POLL_S,
+        pull_requests: bool = True,
+        pulls_interval: float = PULLS_S,
+        collect: Callable[[Path], dict[str, Any]] | None = None,
     ) -> None:
         self.root = root
         self.projects = projects
@@ -142,14 +159,33 @@ class PanelServer(ThreadingHTTPServer):
         self.stopping = threading.Event()
         self.state_dir = state_dir(root)
         self.watcher = Watcher(root, self.state_dir, projects)
+        self.pulls = pulls.empty("" if pull_requests else PULLS_OFF)
+        self.collect = collect or pulls.collect
         self._watch = threading.Thread(
             target=self.watcher.run, args=(self.stopping, interval), daemon=True
         )
+        self._pulls = threading.Thread(target=self._poll_pulls, args=(pulls_interval,), daemon=True)
         try:
             super().__init__((HOST, port), PanelHandler)
         except (OSError, OverflowError) as exc:  # OverflowError: puerto fuera de 0-65535
             raise PanelError(f"No se pudo escuchar en {HOST}:{port}: {exc}") from exc
         self._watch.start()
+        if pull_requests:
+            self._pulls.start()
+
+    def _poll_pulls(self, interval: float) -> None:
+        """Consulta los pull requests y avisa solo cuando cambian; no escribe nada en disco."""
+        while True:
+            try:
+                current = self.collect(self.root)
+            except Exception as exc:  # un fallo del sondeo no debe tumbar el panel
+                current = pulls.empty(f"no se pudieron leer los pull requests ({exc})")
+            changed = _contents(current) != _contents(self.pulls)
+            self.pulls = current
+            if changed:
+                self.watcher.broadcast(["pulls"])
+            if self.stopping.wait(interval):
+                return
 
     @property
     def url(self) -> str:
@@ -157,7 +193,7 @@ class PanelServer(ThreadingHTTPServer):
 
     def snapshot(self) -> dict[str, Any]:
         with self.build_lock:  # el lector incremental no es seguro entre hilos
-            return snapshot.build(self.root, self.projects, self.reader)
+            return snapshot.build(self.root, self.projects, self.reader, self.pulls)
 
     def server_close(self) -> None:
         self.stopping.set()
@@ -256,9 +292,15 @@ class PanelHandler(BaseHTTPRequestHandler):
             self.close_connection = True
 
 
-def serve(root: Path, projects: Path, port: int = DEFAULT_PORT, open_browser: bool = False) -> int:
+def serve(
+    root: Path,
+    projects: Path,
+    port: int = DEFAULT_PORT,
+    open_browser: bool = False,
+    pull_requests: bool = True,
+) -> int:
     """Sirve el panel hasta Ctrl+C."""
-    server = PanelServer(root, projects, port)
+    server = PanelServer(root, projects, port, pull_requests=pull_requests)
     print(f"Panel de factory en {server.url} (Ctrl+C para salir)", flush=True)
     if open_browser:
         import webbrowser

@@ -25,3 +25,6 @@ dist/
 
 # Ajustes personales de Claude Code: nunca se versionan (tienen más precedencia que settings.json)
 .claude/settings.local.json
+
+# Dependencias de Node (CLI de strands-agents): se reinstalan con npm install
+node_modules/
