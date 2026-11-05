@@ -101,4 +101,26 @@ case $? in
   *) fallo "la revisión de CodeRabbit no pudo completarse (sesión, red o cuota)." ;;
 esac
 
+# 6. El recorrido contra el servicio arrancado. Un test en proceso prueba el enrutado y la
+#    forma de la respuesta; no prueba que el binario arranque, lea su configuración y
+#    conteste. Dos defectos de la pila de usuarios —un 500 en la primera página y un campo
+#    que no se podía vaciar— pasaron por suites verdes y solo cayeron al levantar el
+#    servicio. Aquí se comprueba lo único comprobable desde fuera: que el PR que construye
+#    una ruta trae también su recorrido, que es lo que `AGENTS.md` pide en `entregas/`.
+RUTAS=$(git diff --name-only "$BASE"...HEAD | grep -cE '(handlers?/|routes?\.go|module\.go)$' || true)
+RECORRIDO=$(git diff --name-only "$BASE"...HEAD | grep -cE '^entregas/' || true)
+if [ "${RUTAS:-0}" -gt 0 ] && [ "${RECORRIDO:-0}" -eq 0 ]; then
+  echo "" >&2
+  echo "    Este PR toca ${RUTAS} archivo(s) de rutas y no trae nada en entregas/." >&2
+  echo "    Levanta el servicio, ejercítalo y guarda la petición y la respuesta de cada" >&2
+  echo "    escenario; esa evidencia es la que convierte la rebanada en terminada." >&2
+  echo "    Si de verdad no aplica, PRE_PR_SIN_RECORRIDO=1 lo salta y deja dicho por qué." >&2
+  [ "${PRE_PR_SIN_RECORRIDO:-0}" = "1" ] || fallo "hay rutas construidas sin recorrido contra el servicio arrancado."
+  echo "==> [recorrido] saltado por PRE_PR_SIN_RECORRIDO=1" >&2
+elif [ "${RUTAS:-0}" -gt 0 ]; then
+  echo "==> [recorrido] ${RUTAS} archivo(s) de rutas, con evidencia en entregas/"
+else
+  echo "==> [recorrido] el PR no construye rutas; no hay recorrido que exigir"
+fi
+
 echo "==> Puerta abierta: el PR se puede publicar."

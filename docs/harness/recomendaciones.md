@@ -33,6 +33,15 @@ mañana sería un hilo.
 |---|---|
 | `PRE_PR_MAX_COMPLEJIDAD` | umbral de complejidad ciclomática; por defecto 20. Sin umbral el informe termina siempre en 0 y el paso no comprueba nada. |
 | `PRE_PR_STRICT=1` | sin el CLI `coderabbit` instalado la puerta falla en vez de saltárselo. |
+| `PRE_PR_SIN_RECORRIDO=1` | salta la exigencia del recorrido contra el servicio arrancado. Úsalo diciendo por qué. |
+
+**El recorrido contra el servicio arrancado.** Un PR que toca rutas (`handlers/`, `routes.go`,
+`module.go`) y no trae nada en `entregas/` cierra la puerta. Un test en proceso prueba el enrutado
+y la forma de la respuesta; no prueba que el binario arranque, lea su configuración y conteste.
+Medido sobre la pila de usuarios: dos defectos —un `500` en la primera página del listado y un
+campo que no se podía vaciar— pasaron por suites verdes y solo cayeron al levantar el servicio.
+Esta comprobación no ejecuta el binario, que depende de cada repositorio: exige la evidencia que
+`AGENTS.md` ya pide en `entregas/<TICKET>/`.
 
 Una cosa que **no** cierra la puerta, y conviene saberla: sin `coderabbit` instalado (salvo con
 `PRE_PR_STRICT=1`) dice «Puerta abierta SIN la revisión de CodeRabbit» y termina en 0.
