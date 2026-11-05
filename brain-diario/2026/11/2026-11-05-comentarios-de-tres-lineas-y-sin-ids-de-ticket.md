@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-los-comentarios-de-mas-de-tres-lineas-y
+id: 2026/11/2026-11-05-comentarios-de-tres-lineas-y-sin-ids-de-ticket
 type: gotcha
 title: Los comentarios de más de tres líneas, y los ids de ticket en el código, son
   bloqueantes

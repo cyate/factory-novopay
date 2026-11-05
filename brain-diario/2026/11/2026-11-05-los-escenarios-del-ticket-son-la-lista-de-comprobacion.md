@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-los-escenarios-del-ticket-son-la-lista-de
+id: 2026/11/2026-11-05-los-escenarios-del-ticket-son-la-lista-de-comprobacion
 type: gotcha
 title: 'Los escenarios del ticket son la lista de comprobación: cada hueco vuelve
   como bloqueante'

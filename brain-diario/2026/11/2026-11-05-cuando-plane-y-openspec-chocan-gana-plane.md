@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-cuando-plane-openspec-y-las-notas-chocan-gana
+id: 2026/11/2026-11-05-cuando-plane-y-openspec-chocan-gana-plane
 type: decision
 title: Cuando Plane, openspec y las notas chocan, gana Plane, y el código no fija
   la versión vieja

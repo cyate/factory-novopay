@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-tests-que-pasan-sin-ejercer-el-defecto-si
+id: 2026/11/2026-11-05-tests-que-pasan-sin-ejercer-el-defecto
 type: gotcha
 title: 'Tests que pasan sin ejercer el defecto: si quitas la línea que protege, nada
   se pone rojo'

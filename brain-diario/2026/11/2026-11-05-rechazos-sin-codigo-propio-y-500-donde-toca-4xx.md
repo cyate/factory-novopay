@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-rechazos-sin-codigo-propio-errores-sin-sentinel-y
+id: 2026/11/2026-11-05-rechazos-sin-codigo-propio-y-500-donde-toca-4xx
 type: gotcha
 title: Rechazos sin código propio, errores sin sentinel y 500 donde toca 4xx
 date: '2026-11-05'

@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-concurrencia-y-efectos-externos-el-lock-la-atomicidad
+id: 2026/11/2026-11-05-el-lock-la-atomicidad-y-el-orden-de-los-efectos
 type: gotcha
 title: 'Concurrencia y efectos externos: el lock, la atomicidad y el orden estaban
   en el comentario'

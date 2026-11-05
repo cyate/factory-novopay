@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-constantes-copiadas-errores-duplicados-y-codigo-sin-llamador
+id: 2026/11/2026-11-05-constantes-copiadas-y-codigo-sin-llamador
 type: pattern
 title: 'Constantes copiadas, errores duplicados y código sin llamador: una búsqueda
   antes de dejarlos'

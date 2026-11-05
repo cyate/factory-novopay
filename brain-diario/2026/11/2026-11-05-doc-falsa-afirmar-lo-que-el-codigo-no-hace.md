@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-doc-falsa-el-comentario-la-tarea-o-la
+id: 2026/11/2026-11-05-doc-falsa-afirmar-lo-que-el-codigo-no-hace
 type: gotcha
 title: 'Doc falsa: el comentario, la tarea o la nota afirma lo que el código no hace'
 date: '2026-11-05'

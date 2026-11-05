@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-un-indice-que-no-atiende-ninguna-consulta-cuesta
+id: 2026/11/2026-11-05-un-indice-que-no-atiende-ninguna-consulta
 type: gotcha
 title: Un índice que no atiende ninguna consulta cuesta escritura y no da nada
 date: '2026-11-05'

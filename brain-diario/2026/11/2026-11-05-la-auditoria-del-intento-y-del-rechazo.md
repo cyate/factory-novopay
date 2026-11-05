@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-la-auditoria-del-intento-y-del-rechazo-lo
+id: 2026/11/2026-11-05-la-auditoria-del-intento-y-del-rechazo
 type: gotcha
 title: 'La auditoría del intento y del rechazo: lo que no se guarda hoy no se guarda
   nunca'

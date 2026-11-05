@@ -1,5 +1,5 @@
 ---
-id: 2026/11/2026-11-05-el-pr-es-lo-que-dice-ser-archivos
+id: 2026/11/2026-11-05-el-pr-es-lo-que-dice-ser
 type: gotcha
 title: 'El PR es lo que dice ser: archivos ajenos, tareas marcadas sin hacer y lo
   diferido sin escribir'
