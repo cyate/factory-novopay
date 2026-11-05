@@ -143,6 +143,24 @@ def cmd_feedback(args: argparse.Namespace) -> int:
     from factory import feedback
 
     root = args.root or Path.cwd()
+    if args.pila:
+        if args.pr:
+            print("aviso: --pila gana; se ignora el pull request indicado", file=sys.stderr)
+        try:
+            informes = feedback.recoger_pila(
+                root, repo=args.repo, autor=args.autor, revisores=args.revisor
+            )
+        except feedback.FeedbackError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return EXIT_USAGE
+        if args.json:
+            print(json.dumps([i.to_dict() for i in informes], indent=2, ensure_ascii=False))
+        else:
+            print(feedback.render_pila(informes), end="")
+        return EXIT_OK
+    if not args.pr:
+        print("error: indica un pull request o usa --pila", file=sys.stderr)
+        return EXIT_USAGE
     try:
         informe = feedback.recoger(
             args.pr,
@@ -830,7 +848,13 @@ def build_parser() -> argparse.ArgumentParser:
     fb = sub.add_parser(
         "feedback", help="recomendaciones de los revisores de un pull request (solo lectura)"
     )
-    fb.add_argument("pr", help="número del pull request o su URL")
+    fb.add_argument("pr", nargs="?", help="número del pull request o su URL (opcional con --pila)")
+    fb.add_argument(
+        "--pila", action="store_true", help="barre todos los PR abiertos y imprime una tabla"
+    )
+    fb.add_argument(
+        "--autor", default=None, metavar="LOGIN", help="con --pila: solo PR de este autor"
+    )
     fb.add_argument(
         "--repo", default=None, metavar="OWNER/NAME", help="repositorio (si no, el de cwd)"
     )

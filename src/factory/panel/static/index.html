@@ -256,8 +256,13 @@ const ALERTAS = {
   parado: ["parado más de 24 h", "warning"],
   sin_coderabbit: ["sin @coderabbitai review", "warning"],
   sin_cifra: ["sin el equipo cifra", "warning"],
-  demasiado_grande: ["pasado de tamaño (10 archivos / 600 líneas)", "warning"],
+  demasiado_grande: ["pasado de tamaño (más de 10 archivos o 500 líneas de código y tests)", "warning"],
 };
+function sizeText(p) {
+  const n = (v) => numberFmt.format(v);
+  if (!p.tamano_separado) return `${n(p.archivos)} archivos · ${n(p.lineas)} líneas (sin separar código y documentación)`;
+  return `código ${n(p.archivos_codigo)} archivos · ${n(p.lineas_codigo)} líneas · documentación ${n(p.archivos_doc)} archivos · ${n(p.lineas_doc)} líneas`;
+}
 const PULL_FILTERS = [["todos", "Todos"], ["autor", "Míos"], ["revisor", "Por revisar"], ["alerta", "Con alerta"]];
 const FEATURE_STATUS = [
   ["in_progress", "En curso"],
@@ -599,7 +604,7 @@ function pullItem(p) {
   return h("li", {},
     h("div", { class: "row" }, chip(p.estado, PR_STATUS), title,
       h("span", { class: "meta", text: p.rol }),
-      h("span", { class: "meta", text: `${numberFmt.format(p.archivos)} archivos · ${numberFmt.format(p.lineas)} líneas` }),
+      h("span", { class: "meta", text: sizeText(p) }),
       p.checks ? h("span", { class: "meta", text: `checks: ${p.checks}` }) : null,
       h("span", { class: "meta", text: pullTimes(p) }),
       h("span", { class: "meta", text: `1ª revisión ${fmtHoras(p.horas_primera_revision)}` })),

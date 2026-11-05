@@ -13,12 +13,25 @@ cd "$ROOT_DIR"
 
 BASE="${1:-main}"
 MAX_ARCHIVOS=10
-MAX_LINEAS=600
+MAX_LINEAS=500
 
 fallo() {
   echo "" >&2
   echo "PUERTA CERRADA: $1" >&2
   exit 1
+}
+
+# Documentación: todo lo que se lee sin ejecutarse. No cuenta para el límite porque
+# añadir un escenario, un ejemplo de Postman o una página de spec no alarga la revisión
+# del comportamiento, que es lo que el límite protege.
+es_documentacion() {
+  case "$1" in
+    *.md | *.txt | *.http) return 0 ;;
+    openspec/* | docs/* | notes/* | entregas/* | testdata/* | diagramas/*) return 0 ;;
+    *postman*) return 0 ;;
+    *.openapi.yaml | *.openapi.yml | *openapi*.yaml | *openapi*.yml) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 echo "==> [base] $BASE"
@@ -35,15 +48,34 @@ echo "==> [rango] $COMMITS commit(s) por encima de $BASE"
 echo "==> [verificación] ./scripts/check.sh"
 ./scripts/check.sh || fallo "./scripts/check.sh no termina en 0."
 
-# 2. Tamaño del PR. El corte se decide antes de escribir, así que aquí solo se avisa:
-#    los archivos estáticos (specs, documentación, datos de prueba) pueden pasarse.
-ARCHIVOS=$(git diff --name-only "$BASE"...HEAD | wc -l | tr -d ' ')
-LINEAS=$(git diff --shortstat "$BASE"...HEAD | grep -oE '[0-9]+ (insertion|deletion)' | grep -oE '[0-9]+' | paste -sd+ - | bc)
-LINEAS=${LINEAS:-0}
-echo "==> [tamaño] ${ARCHIVOS} archivos, ${LINEAS} líneas (límite ${MAX_ARCHIVOS}/${MAX_LINEAS})"
+# 2. Tamaño del PR, medido sobre lo que una persona tiene que leer para revisarlo.
+#    El límite cuenta código y tests. La documentación —specs, contrato, Postman, el
+#    paquete de QA, los datos de prueba— no cuenta: crece sin que la revisión se alargue.
+#    Y aquí se cierra la puerta, porque avisar no evitó ningún PR de sesenta archivos.
+ARCHIVOS=0
+LINEAS=0
+DOC_ARCHIVOS=0
+DOC_LINEAS=0
+while IFS=$'\t' read -r mas menos ruta; do
+  [ -n "${ruta:-}" ] || continue
+  # Un binario llega como "-" en las dos columnas; cuenta como archivo y cero líneas.
+  [ "$mas" = "-" ] && mas=0
+  [ "$menos" = "-" ] && menos=0
+  if es_documentacion "$ruta"; then
+    DOC_ARCHIVOS=$((DOC_ARCHIVOS + 1))
+    DOC_LINEAS=$((DOC_LINEAS + mas + menos))
+  else
+    ARCHIVOS=$((ARCHIVOS + 1))
+    LINEAS=$((LINEAS + mas + menos))
+  fi
+done < <(git diff --numstat "$BASE"...HEAD)
+echo "==> [tamaño] código y tests: ${ARCHIVOS} archivos, ${LINEAS} líneas (límite ${MAX_ARCHIVOS}/${MAX_LINEAS})"
+echo "    documentación (sin límite): ${DOC_ARCHIVOS} archivos, ${DOC_LINEAS} líneas"
 if [ "$ARCHIVOS" -gt "$MAX_ARCHIVOS" ] || [ "$LINEAS" -gt "$MAX_LINEAS" ]; then
-  echo "    AVISO: se pasa del límite. Di en el cuerpo del PR cuántas líneas son de archivos" >&2
-  echo "    estáticos, o pártelo en PRs apilados (CLAUDE.md)." >&2
+  echo "" >&2
+  echo "    Lo que se pasa es código y tests, que es lo que alguien tiene que leer entero." >&2
+  echo "    Pártelo en PRs apilados, cada uno desplegable por sí solo (CLAUDE.md)." >&2
+  fallo "el PR se pasa del límite de ${MAX_ARCHIVOS} archivos o ${MAX_LINEAS} líneas de código y tests."
 fi
 
 # 3. Complejidad ciclomática de lo que cambió. Sin --max el informe sale siempre en 0: el

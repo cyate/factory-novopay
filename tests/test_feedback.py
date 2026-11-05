@@ -44,14 +44,20 @@ def hilo(
     }
 
 
-def respuesta(hilos: Sequence[dict[str, Any]], revisiones: Sequence[dict[str, Any]] = ()) -> Any:
+def respuesta(
+    hilos: Sequence[dict[str, Any]],
+    revisiones: Sequence[dict[str, Any]] = (),
+    comentarios: Sequence[dict[str, Any]] = (),
+    titulo: str = "docs: cambio",
+) -> Any:
     return {
         "data": {
             "repository": {
                 "pullRequest": {
-                    "title": "docs: cambio",
+                    "title": titulo,
                     "url": URL,
                     "reviews": {"nodes": list(revisiones)},
+                    "comments": {"nodes": list(comentarios)},
                     "reviewThreads": {"nodes": list(hilos)},
                 }
             }
@@ -236,3 +242,78 @@ def test_el_cli_termina_en_2_con_el_motivo_en_stderr(capsys, monkeypatch):
     )
     assert main(["feedback", URL]) == 2
     assert "error:" in capsys.readouterr().err
+
+
+def comentario(revisor: str, body: str, fecha: str) -> dict[str, Any]:
+    return {"author": {"login": revisor}, "body": body, "url": URL, "createdAt": fecha}
+
+
+def test_los_comentarios_del_pr_se_recogen_filtran_y_salen_en_su_seccion():
+    datos = respuesta(
+        [],
+        comentarios=[
+            comentario("sam-pc-novo", "Decisión: se cambia el contrato", "2026-11-01T10:00:00Z"),
+            comentario("coderabbitai", "resumen del bot", "2026-11-02T10:00:00Z"),
+            comentario("sam-pc-novo", "Aclaración posterior", "2026-11-03T10:00:00Z"),
+        ],
+    )
+    todos = feedback.recoger(URL, ROOT, runner=FakeGh(datos))
+    assert len(todos.comentarios) == 3
+    informe = feedback.recoger(URL, ROOT, revisores=["sam"], runner=FakeGh(datos))
+    assert [c.revisor for c in informe.comentarios] == ["sam-pc-novo"] * 2
+    texto = feedback.render(informe)
+    assert "## Comentarios del PR" in texto and "Revisiones generales" not in texto
+    # Del más reciente al más antiguo.
+    assert texto.index("Aclaración posterior") < texto.index("Decisión: se cambia")
+    assert (
+        "createdAt" in json.dumps(informe.to_dict())
+        or "fecha" in informe.to_dict()["comentarios"][0]
+    )
+
+
+def test_sin_comentarios_sueltos_no_se_imprime_la_seccion():
+    informe = feedback.recoger(URL, ROOT, runner=FakeGh(respuesta([hilo()])))
+    assert "Comentarios del PR" not in feedback.render(informe)
+
+
+def _pila_gh(*salidas: Any) -> FakeGh:
+    return FakeGh(*salidas)
+
+
+def test_recoger_pila_sigue_aunque_un_pr_falle(capsys):
+    gh = _pila_gh(
+        [{"number": 1}, {"number": 2}, {"number": 3}],
+        respuesta([hilo()]),
+        subprocess.CompletedProcess(["gh"], 1, "", "gh: Not Found"),
+        respuesta([hilo(), hilo(identificador=2)]),
+    )
+    informes = feedback.recoger_pila(ROOT, repo="org/repo", autor="cyate", runner=gh)
+    assert [i.numero for i in informes] == [1, 3]
+    assert "#2" in capsys.readouterr().err
+    assert gh.comandos[0] == [
+        *("pr", "list", "--state", "open", "--limit", "100", "--json", "number"),
+        *("--author", "cyate", "--repo", "org/repo"),
+    ]
+
+
+def test_render_pila_pone_primero_el_pr_con_mas_hilos_vigentes_sin_respuesta():
+    gh = _pila_gh(
+        [{"number": 1}, {"number": 2}],
+        respuesta([hilo(respuestas=["cyate"])], titulo="pocos"),
+        respuesta([hilo(), hilo(identificador=2), hilo(identificador=3)], titulo="muchos"),
+    )
+    informes = feedback.recoger_pila(ROOT, repo="org/repo", runner=gh)
+    texto = feedback.render_pila(informes)
+    assert texto.index("#2") < texto.index("#1")
+    assert "| #2 | muchos | 3 | 1 | 3 | 3 |" in texto
+    assert "| #1 | pocos | 1 | 1 | 1 | 0 |" in texto
+    assert "Total: 2 PR · 4 hilos abiertos · 4 vigentes · 3 sin respuesta" in texto
+
+
+def test_el_cli_con_pila_barre_y_con_pr_gana_pila(capsys, monkeypatch):
+    monkeypatch.setattr(feedback, "_run", _pila_gh([{"number": 1}], respuesta([hilo()])))
+    assert main(["feedback", "--pila", "--repo", "org/repo", "--json"]) == 0
+    assert len(json.loads(capsys.readouterr().out)) == 1
+    monkeypatch.setattr(feedback, "_run", _pila_gh([], respuesta([])))
+    assert main(["feedback", "5", "--pila", "--repo", "org/repo"]) == 0
+    assert "--pila gana" in capsys.readouterr().err

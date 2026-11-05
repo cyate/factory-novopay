@@ -175,6 +175,71 @@ def test_cada_alerta(overrides: dict[str, Any], alerta: str):
     assert alerta in una([pr(1, **overrides)], [], [])["alertas"]
 
 
+def archivos(n: int, ruta: str, lineas: int = 10) -> list[dict[str, Any]]:
+    return [{"path": f"{ruta}{i}", "additions": lineas, "deletions": 0} for i in range(n)]
+
+
+def con_archivos(lista: list[dict[str, Any]], **extra: Any) -> dict[str, Any]:
+    suma = sum(f["additions"] + f["deletions"] for f in lista)
+    return pr(1, files=lista, changedFiles=len(lista), additions=suma, deletions=0, **extra)
+
+
+def test_el_limite_de_lineas_es_500():
+    assert pulls.MAX_LINES == 500
+    medio = una([pr(1, additions=300, deletions=201)], [], [])  # 501 líneas, sin lista
+    assert "demasiado_grande" in medio["alertas"]
+    limite = una([pr(1, additions=300, deletions=200)], [], [])
+    assert "demasiado_grande" not in limite["alertas"]
+
+
+def test_mucha_documentacion_y_poco_codigo_no_marca_demasiado_grande():
+    lista = (
+        archivos(3, "src/factory/mod", 20)
+        + archivos(30, "docs/pagina", 40)
+        + archivos(20, "openspec/changes/x/spec", 40)
+        + [{"path": "entregas/T/escenarios.md", "additions": 100, "deletions": 0}]
+    )
+    entry = una([con_archivos(lista)], [], [])
+    assert "demasiado_grande" not in entry["alertas"]
+    assert entry["tamano_separado"] is True
+    assert (entry["archivos_codigo"], entry["lineas_codigo"]) == (3, 60)
+    assert entry["archivos_doc"] == 51
+    assert entry["lineas_doc"] == 30 * 40 + 20 * 40 + 100
+    assert entry["archivos"] == 54  # el total de siempre sigue disponible
+
+
+def test_once_archivos_de_codigo_marcan_demasiado_grande():
+    entry = una([con_archivos(archivos(11, "src/factory/mod"))], [], [])
+    assert "demasiado_grande" in entry["alertas"]
+    assert entry["archivos_codigo"] == 11
+
+
+def test_mas_de_500_lineas_de_codigo_marcan_demasiado_grande():
+    entry = una([con_archivos(archivos(2, "tests/test_x", 260))], [], [])
+    assert "demasiado_grande" in entry["alertas"]
+
+
+@pytest.mark.parametrize("sin_lista", [{}, {"files": []}])
+def test_sin_lista_de_archivos_se_mide_el_total(sin_lista: dict[str, Any]):
+    entry = una([pr(1, changedFiles=14, **sin_lista)], [], [])
+    assert "demasiado_grande" in entry["alertas"]
+    assert entry["tamano_separado"] is False
+    assert (entry["archivos_codigo"], entry["archivos_doc"]) == (14, 0)
+
+
+def test_lista_truncada_cae_al_total():
+    lista = archivos(3, "docs/p")
+    entry = una([pr(1, files=lista, changedFiles=65)], [], [])
+    assert entry["tamano_separado"] is False
+    assert "demasiado_grande" in entry["alertas"]
+
+
+def test_la_consulta_pide_los_archivos():
+    gh = FakeGh([], [], [])
+    pulls.collect(ROOT, gh, AHORA)
+    assert "files" in gh.comandos[0][gh.comandos[0].index("--json") + 1].split(",")
+
+
 def test_un_pr_limpio_no_tiene_alertas():
     equipo = [{"__typename": "Team", "name": "cifra", "slug": "novopayment/cifra"}]
     peticiones = [{"__typename": "User", "login": "grosales-np"}, *equipo]

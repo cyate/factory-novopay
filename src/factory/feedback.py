@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -21,8 +22,8 @@ TIMEOUT_S = 30
 # de bot llega a decenas de miles de caracteres y solo sirve de contexto.
 LIMITE_HILO = 4000
 LIMITE_REVISION = 1500
-# Paginación: las últimas 100 conversaciones y 50 revisiones, sin paginar. Un PR que se pase
-# de ahí no existe todavía; si aparece, la paginación va aquí.
+# Paginación: las últimas 100 conversaciones, 100 comentarios y 50 revisiones, sin paginar.
+# Un PR que se pase de ahí no existe todavía; si aparece, la paginación va aquí.
 QUERY = """
 query($owner:String!,$name:String!,$number:Int!){
   repository(owner:$owner,name:$name){
@@ -30,6 +31,7 @@ query($owner:String!,$name:String!,$number:Int!){
       title
       url
       reviews(last:50){nodes{author{login} state url body}}
+      comments(last:100){nodes{author{login} body url createdAt}}
       reviewThreads(last:100){nodes{
         isResolved
         isOutdated
@@ -77,6 +79,16 @@ class Revision:
 
 
 @dataclass
+class Comentario:
+    """Un comentario suelto del PR: no cuelga de ninguna línea ni de una revisión."""
+
+    revisor: str
+    url: str
+    fecha: str
+    body: str
+
+
+@dataclass
 class Informe:
     repo: str
     numero: int
@@ -84,6 +96,7 @@ class Informe:
     url: str
     hilos: list[Hilo] = field(default_factory=list)
     revisiones: list[Revision] = field(default_factory=list)
+    comentarios: list[Comentario] = field(default_factory=list)
     ocultos: int = 0
 
     def to_dict(self) -> dict[str, Any]:
@@ -234,7 +247,49 @@ def recoger(
                 body=_recorta(str(nodo.get("body", "")), LIMITE_REVISION),
             )
         )
+    for nodo in (pull.get("comments") or {}).get("nodes") or []:
+        if not isinstance(nodo, dict) or not str(nodo.get("body", "")).strip():
+            continue
+        revisor = str((nodo.get("author") or {}).get("login", ""))
+        if not _coincide([revisor], revisores):
+            continue
+        informe.comentarios.append(
+            Comentario(
+                revisor=revisor,
+                url=str(nodo.get("url", "")),
+                fecha=str(nodo.get("createdAt", "")),
+                body=_recorta(str(nodo.get("body", "")), LIMITE_REVISION),
+            )
+        )
     return informe
+
+
+def recoger_pila(
+    root: Path,
+    repo: str | None = None,
+    autor: str | None = None,
+    revisores: Sequence[str] = (),
+    runner: Runner | None = None,
+) -> list[Informe]:
+    """Un informe por cada PR abierto. Si uno falla se avisa por stderr y la barrida sigue."""
+    runner = runner or _run
+    args = ["pr", "list", "--state", "open", "--limit", "100", "--json", "number"]
+    if autor:
+        args += ["--author", autor]
+    if repo:
+        args += ["--repo", repo]
+    datos = _gh(args, root, runner)
+    numeros = [str(p["number"]) for p in datos or [] if isinstance(p, dict) and "number" in p]
+    if numeros and not repo:
+        # Se deduce una sola vez, en lugar de una consulta por cada PR.
+        repo = referencia(numeros[0], None, root, runner)[0]
+    informes: list[Informe] = []
+    for numero in numeros:
+        try:
+            informes.append(recoger(numero, root, repo=repo, revisores=revisores, runner=runner))
+        except FeedbackError as exc:
+            print(f"aviso: PR #{numero} no se pudo leer: {exc}", file=sys.stderr)
+    return informes
 
 
 def _estado(hilo: Hilo) -> str:
@@ -282,4 +337,51 @@ def render(informe: Informe) -> str:
                 revision.url,
                 "",
             ]
+    if informe.comentarios:
+        lineas += [
+            "## Comentarios del PR (no cuelgan de ninguna línea de código; "
+            "aquí se dejan las decisiones)",
+            "",
+        ]
+        for comentario in sorted(informe.comentarios, key=lambda c: c.fecha, reverse=True):
+            lineas += [
+                f"### {comentario.revisor} — {comentario.fecha}",
+                "",
+                comentario.body,
+                "",
+                comentario.url,
+                "",
+            ]
     return "\n".join(lineas).rstrip() + "\n"
+
+
+def _vigentes(informe: Informe) -> list[Hilo]:
+    return [h for h in informe.hilos if not h.obsoleto]
+
+
+def _sin_respuesta(informe: Informe) -> int:
+    """Hilos vigentes sin ninguna respuesta posterior al comentario inicial."""
+    return sum(1 for h in _vigentes(informe) if not h.respuestas)
+
+
+def render_pila(informes: Sequence[Informe]) -> str:
+    """Tabla de triaje: primero el PR con más hilos vigentes sin respuesta."""
+    orden = sorted(informes, key=lambda i: (-_sin_respuesta(i), -len(_vigentes(i)), i.numero))
+    lineas = [
+        "| PR | Título | Abiertos | Revisores | Vigentes | Sin respuesta |",
+        "|---|---|---|---|---|---|",
+    ]
+    for i in orden:
+        titulo = i.titulo if len(i.titulo) <= 50 else f"{i.titulo[:49].rstrip()}…"
+        revisores = len({h.revisor for h in i.hilos})
+        fila = (i.numero, titulo.replace("|", "\\|"), len(i.hilos), revisores)
+        lineas.append(
+            "| #{} | {} | {} | {} | {} | {} |".format(*fila, len(_vigentes(i)), _sin_respuesta(i))
+        )
+    lineas += [
+        "",
+        f"Total: {len(orden)} PR · {sum(len(i.hilos) for i in orden)} hilos abiertos · "
+        f"{sum(len(_vigentes(i)) for i in orden)} vigentes · "
+        f"{sum(_sin_respuesta(i) for i in orden)} sin respuesta",
+    ]
+    return "\n".join(lineas) + "\n"

@@ -34,10 +34,12 @@ mañana sería un hilo.
 | `PRE_PR_MAX_COMPLEJIDAD` | umbral de complejidad ciclomática; por defecto 20. Sin umbral el informe termina siempre en 0 y el paso no comprueba nada. |
 | `PRE_PR_STRICT=1` | sin el CLI `coderabbit` instalado la puerta falla en vez de saltárselo. |
 
-Dos cosas que **no** cierran la puerta, y conviene saberlo: sin `coderabbit` instalado (salvo con
-`PRE_PR_STRICT=1`) dice «Puerta abierta SIN la revisión de CodeRabbit» y termina en 0; y pasarse de
-10 archivos o 600 líneas solo avisa, porque los archivos estáticos pueden pasarse y contarlos
-aparte todavía no está decidido.
+Una cosa que **no** cierra la puerta, y conviene saberla: sin `coderabbit` instalado (salvo con
+`PRE_PR_STRICT=1`) dice «Puerta abierta SIN la revisión de CodeRabbit» y termina en 0.
+
+Pasarse de **10 archivos o 500 líneas sí la cierra**, pero solo por **código y tests**: la
+documentación (`*.md`, `openspec/`, `docs/`, `notes/`, `entregas/`, `testdata/`, `diagramas/`,
+Postman y `*.openapi.yaml`) no tiene límite. El informe muestra las dos cifras por separado.
 
 **Dos vueltas como máximo** (`CLAUDE.md`). Si tras la segunda siguen abriéndose hilos, el problema
 no está en el hilo: o el PR es demasiado grande para leerse de una vez, o falta una instrucción en

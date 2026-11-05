@@ -30,6 +30,7 @@ FIELDS = (
     "additions",
     "deletions",
     "changedFiles",
+    "files",
     "statusCheckRollup",
     "comments",
     "headRefName",
@@ -40,10 +41,12 @@ REVIEWER = "revisor"
 OPEN_LIMIT = 30
 MERGED_LIMIT = 10
 TIMEOUT_S = 20
-# Umbrales de alerta: los dos últimos son el límite de tamaño de PR de `CLAUDE.md`.
+# Umbrales de alerta: los dos últimos son el límite de tamaño de PR de `CLAUDE.md`,
+# que cuenta solo código y tests (la documentación no tiene límite).
 STALE_H = 24.0
 MAX_FILES = 10
-MAX_LINES = 600
+MAX_LINES = 500
+DOC_DIRS = ("openspec/", "docs/", "notes/", "entregas/", "testdata/", "diagramas/")
 CODERABBIT = "@coderabbitai review"
 CODERABBIT_BOT = "coderabbitai"
 TEAM = "cifra"
@@ -211,6 +214,40 @@ def _team_asked(reviewers: list[str]) -> bool:
     return any(name == TEAM or name.endswith(f"/{TEAM}") for name in reviewers)
 
 
+def _es_documentacion(path: str) -> bool:
+    """Misma clasificación que `es_documentacion()` de `scripts/pre-pr.sh`."""
+    if path.endswith((".md", ".txt", ".http", ".openapi.yaml", ".openapi.yml")):
+        return True
+    if path.startswith(DOC_DIRS) or "postman" in path:
+        return True
+    return "openapi" in path and path.endswith((".yaml", ".yml"))
+
+
+def _size(raw: dict[str, Any]) -> dict[str, Any]:
+    """Archivos y líneas de código y de documentación; sin lista fiable, el total sin separar.
+
+    `gh` pide a GitHub como mucho 100 archivos: si la lista viene vacía o más corta que
+    `changedFiles`, no se inventa el reparto y la cifra de código es el total.
+    """
+    total_files = int(raw.get("changedFiles") or 0)
+    total_lines = int(raw.get("additions") or 0) + int(raw.get("deletions") or 0)
+    files = [f for f in raw.get("files") or [] if isinstance(f, dict)]
+    if not files or len(files) < total_files:
+        return {
+            "archivos_codigo": total_files,
+            "lineas_codigo": total_lines,
+            "archivos_doc": 0,
+            "lineas_doc": 0,
+            "tamano_separado": False,
+        }
+    size = {"archivos_codigo": 0, "lineas_codigo": 0, "archivos_doc": 0, "lineas_doc": 0}
+    for item in files:
+        kind = "doc" if _es_documentacion(str(item.get("path", ""))) else "codigo"
+        size[f"archivos_{kind}"] += 1
+        size[f"lineas_{kind}"] += int(item.get("additions") or 0) + int(item.get("deletions") or 0)
+    return {**size, "tamano_separado": True}
+
+
 def _state(entry: dict[str, Any]) -> str:
     if entry["fusionado"]:
         return MERGED
@@ -238,7 +275,10 @@ def _alerts(entry: dict[str, Any]) -> list[str]:
         reglas += [
             ("sin_coderabbit", not entry["coderabbit"]),
             ("sin_cifra", not _team_asked(entry["revisores"])),
-            ("demasiado_grande", entry["archivos"] > MAX_FILES or entry["lineas"] > MAX_LINES),
+            (
+                "demasiado_grande",
+                entry["archivos_codigo"] > MAX_FILES or entry["lineas_codigo"] > MAX_LINES,
+            ),
         ]
     return [codigo for codigo, aplica in reglas if aplica]
 
@@ -263,6 +303,7 @@ def _entry(raw: dict[str, Any], role: str, now: datetime) -> dict[str, Any]:
         "coderabbit": _coderabbit(raw),
         "archivos": int(raw.get("changedFiles") or 0),
         "lineas": int(raw.get("additions") or 0) + int(raw.get("deletions") or 0),
+        **_size(raw),
         "creado": str(created),
         "actualizado": str(updated),
         "fusionado": str(merged),

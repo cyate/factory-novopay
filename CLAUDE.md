@@ -9,8 +9,9 @@
 - **Trabajo largo o desatendido.** Usa el motor de loops de `factory` en lugar de encadenar prompts a mano (ver `docs/harness/loops.md`).
 - **Equipo ideal.** En sesiones interactivas, para trabajo con varias facetas (seguridad, QA, documentación, producto, complejidad), usa `/equipo` (el técnico y los jugadores que convoque) o `claude --agent tecnico` (ver `docs/harness/equipo.md`).
   - El acta del equipo **no sustituye** al `checker`: sigue siendo el árbitro obligatorio antes de dar por terminada una feature.
-- **Tamaño de un pull request.** Un PR se corta para que una persona pueda leerlo: **10 archivos y 600 líneas como máximo**, y el corte se decide **antes** de escribir, no cuando ya está escrito.
-  - El límite cuenta **código y tests**. Los archivos estáticos —contrato OpenAPI, documentación, specs, datos de prueba— pueden pasarse, y conviene decir en el cuerpo del PR cuántas líneas son suyas.
+- **Tamaño de un pull request.** Un PR se corta para que una persona pueda leerlo: **10 archivos y 500 líneas como máximo**, y el corte se decide **antes** de escribir, no cuando ya está escrito.
+  - El límite cuenta **solo código y tests**. La **documentación no tiene límite**: specs de OpenSpec, contrato OpenAPI, `docs/`, `notes/`, el paquete de `entregas/`, las colecciones de Postman, los datos de `testdata/` y cualquier `.md`. Añadir un escenario o una página de spec no alarga la revisión del comportamiento, que es lo que el límite protege.
+  - `./scripts/pre-pr.sh` mide las dos cifras por separado y **cierra la puerta** solo por la de código. Que las dos salgan en el informe evita la discusión de si el PR «es grande».
   - Si la feature no cabe, se parte en PRs apilados, cada uno desplegable por sí solo. Un PR que se pasa sin haberlo intentado es un defecto de planificación, no un detalle.
 - **Toda ruta nueva nace detrás de un feature-flag.** Una clave `custom.<módulo>.enabled` inyectada con `config:"..."`, que decide si la ruta se registra, para poder apagarla sin desplegar si algo sale mal.
   - **Una bandera no es una puerta.** El flag decide si la ruta **existe**; el permiso decide **quién pasa**. Van los dos, nunca uno en lugar del otro.

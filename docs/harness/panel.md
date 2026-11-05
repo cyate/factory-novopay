@@ -178,7 +178,7 @@ Un pull request que salga en dos consultas figura una sola vez, con el rol `auto
 | `parado` | más de 24 h sin actividad |
 | `sin_coderabbit` | ni el comentario `@coderabbitai review` ni una revisión del bot |
 | `sin_cifra` | el equipo `cifra` no figura entre los revisores |
-| `demasiado_grande` | más de 10 archivos o 600 líneas |
+| `demasiado_grande` | más de 10 archivos o 500 líneas **de código y tests**; la documentación no cuenta (misma clasificación que `scripts/pre-pr.sh`). Si `gh` no trae la lista de archivos completa, se mide el total y la tarjeta lo dice («sin separar») |
 
 Las tres últimas son reglas de oficio de `CLAUDE.md` y solo se le piden al **autor**: en un PR ajeno no son accionables.
 
