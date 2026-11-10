@@ -10,6 +10,7 @@ from factory.agents.fake import FakeRunner, FakeStep, maker_done
 from factory.brain import BrainError
 from factory.brain.daily import commit_daily
 from factory.brain.libmap import BOOK_FIELDS, MAX_HEADING_WORDS, NOTE_FIELDS, build_map
+from factory.brain.search import principal_from_map
 from factory.cli import main
 from factory.config import ConfigError, load_config
 from factory.doctor import audit
@@ -17,8 +18,6 @@ from factory.engine import LoopEngine
 from factory.goal import load_goal
 from factory.inbox import Inbox
 from factory.state import RunStore
-
-QUERIES = 'knowledge:\n  queries: ["rate limiting"]\n'
 
 
 def _git(root, *args):
@@ -374,3 +373,14 @@ def test_commit_rechaza_un_mapa_manipulado(tmp_path, vault):
     with pytest.raises(BrainError, match="no se commitea nada"):
         commit_daily(load_config(root), "mapa")
     assert _git(root, "rev-parse", "HEAD").stdout == head  # nada entró en git
+
+
+def test_principal_y_mapa_presentes(tmp_path, vault, capsys):
+    root = _clone_with_map(tmp_path, vault)
+    main(["--root", str(root), "brain", "import", str(vault)])
+    capsys.readouterr()
+    assert main(["--root", str(root), "brain", "search", "rate limiting", "--json"]) == 0
+    hits = json.loads(capsys.readouterr().out)
+    paths = [h["path"] for h in hits if h["brain"] == "principal"]
+    assert paths and len(paths) == len(set(paths))  # una sola vez cada nota
+    assert not principal_from_map(load_config(root))  # el catálogo usado es el del principal

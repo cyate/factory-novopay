@@ -172,3 +172,18 @@ def test_commit_diario_no_lo_frena_un_hook(tmp_path):
     assert main(["--root", str(root), "brain", "learn", "Nota bajo un hook rojo"]) == 0
     assert main(["--root", str(root), "brain", "commit", "-m", "notas"]) == 0
     assert git(root, "log", "-1", "--format=%s") == "notas"
+
+
+def test_mapa_regenerado_por_una_importacion(tmp_path, vault, capsys):
+    from factory.util import git
+
+    root = _repo_with_daily(tmp_path)
+    assert main(["--root", str(root), "brain", "import", str(vault)]) == 0
+    git(root, "add", ".gitignore")  # la importación añade /brain-principal/ a .gitignore
+    git(root, "commit", "-qm", "ignorar el principal")
+    capsys.readouterr()
+    assert main(["--root", str(root), "brain", "commit", "-m", "mapa"]) == 0
+    files = git(root, "show", "--name-only", "--format=", "HEAD").splitlines()
+    assert "brain-mapa/_catalog.jsonl" in files
+    assert all(f.startswith("brain-mapa/") for f in files)  # nada del cerebro principal
+    assert not git(root, "ls-files", "--", "brain-principal")

@@ -84,15 +84,15 @@
       "user_visible_behavior": "`factory goal run` itera maker/checker en un worktree fuera del repo, aplica ratchet y se detiene con un motivo explícito sin tocar main.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_goal_run.py"
+        "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_goal_run.py tests/test_promotion.py"
       ],
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_goal_run.py",
+          "command": "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_goal_run.py tests/test_promotion.py",
           "exit_code": 0,
-          "date": "2026-11-10T21:27:26+00:00",
-          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
+          "date": "2026-11-10T21:36:39+00:00",
+          "commit": "189498187863797fdd2ac5d5197f5a3ba3c6c2db"
         }
       ],
       "notes": "OpenSpec add-harness-loop-engine, grupo 6"
@@ -189,15 +189,15 @@
       "user_visible_behavior": "`factory brain learn` añade notas por fecha compatibles con cualquier LLM; ningún loop puede escribir en brain-diario/ y `factory brain commit` hace commit solo de esa carpeta.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_brain_daily.py"
+        "python -m pytest -q tests/test_brain_daily.py tests/test_brain_access.py"
       ],
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_brain_daily.py",
+          "command": "python -m pytest -q tests/test_brain_daily.py tests/test_brain_access.py",
           "exit_code": 0,
-          "date": "2026-11-10T21:27:28+00:00",
-          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
+          "date": "2026-11-10T21:36:42+00:00",
+          "commit": "189498187863797fdd2ac5d5197f5a3ba3c6c2db"
         }
       ],
       "notes": "OpenSpec add-knowledge-brains, grupo 3"
@@ -210,15 +210,15 @@
       "user_visible_behavior": "`factory brain search` cita libro y capítulo; el maker y el intake reciben conocimiento citado dentro de un presupuesto de tokens y el checker no recibe nada.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_brain_search.py tests/test_claude_runner.py"
+        "python -m pytest -q tests/test_brain_search.py tests/test_brain_access.py tests/test_claude_runner.py"
       ],
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_brain_search.py tests/test_claude_runner.py",
+          "command": "python -m pytest -q tests/test_brain_search.py tests/test_brain_access.py tests/test_claude_runner.py",
           "exit_code": 0,
-          "date": "2026-11-10T21:27:29+00:00",
-          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
+          "date": "2026-11-10T21:36:41+00:00",
+          "commit": "189498187863797fdd2ac5d5197f5a3ba3c6c2db"
         }
       ],
       "notes": "OpenSpec add-knowledge-brains, grupo 5"
@@ -364,8 +364,8 @@
         {
           "command": "python -m pytest -q tests/test_brain_map.py tests/test_brain_search.py tests/test_brain_daily.py tests/test_doctor.py",
           "exit_code": 0,
-          "date": "2026-10-29T06:09:31+00:00",
-          "commit": "f18df16b8a03a490aaf29321cde930be726129d2"
+          "date": "2026-11-10T21:36:44+00:00",
+          "commit": "189498187863797fdd2ac5d5197f5a3ba3c6c2db"
         }
       ],
       "notes": "OpenSpec add-library-map"
