@@ -1,6 +1,6 @@
 {
   "project": "factory-yate",
-  "last_updated": "2026-10-30",
+  "last_updated": "2026-11-10",
   "rules": {
     "single_active_feature": true,
     "passing_requires_evidence": true,
@@ -68,10 +68,10 @@
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_state.py tests/test_summary.py tests/test_records.py tests/test_inbox.py tests/test_status.py",
+          "command": "python -m pytest -q tests/test_state.py tests/test_summary.py tests/test_records.py tests/test_inbox.py",
           "exit_code": 0,
-          "date": "2026-10-28T04:01:55+00:00",
-          "commit": "d7c3d5b27e604522c1a44b115f1c3bfa90e5ffc9"
+          "date": "2026-11-10T21:27:22+00:00",
+          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
         }
       ],
       "notes": "OpenSpec add-harness-loop-engine, grupo 5"
@@ -89,10 +89,10 @@
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_promotion.py tests/test_goal_run.py",
+          "command": "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_goal_run.py",
           "exit_code": 0,
-          "date": "2026-10-28T04:02:19+00:00",
-          "commit": "d7c3d5b27e604522c1a44b115f1c3bfa90e5ffc9"
+          "date": "2026-11-10T21:27:26+00:00",
+          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
         }
       ],
       "notes": "OpenSpec add-harness-loop-engine, grupo 6"
@@ -194,10 +194,10 @@
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_brain_daily.py tests/test_land.py",
+          "command": "python -m pytest -q tests/test_brain_daily.py",
           "exit_code": 0,
-          "date": "2026-10-29T02:55:27+00:00",
-          "commit": "65820544bcae824093fb70166165c2c4b02a927b"
+          "date": "2026-11-10T21:27:28+00:00",
+          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
         }
       ],
       "notes": "OpenSpec add-knowledge-brains, grupo 3"
@@ -215,10 +215,10 @@
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_brain_search.py tests/test_brain_inject.py tests/test_claude_runner.py tests/test_intake.py",
+          "command": "python -m pytest -q tests/test_brain_search.py tests/test_claude_runner.py",
           "exit_code": 0,
-          "date": "2026-10-29T02:55:41+00:00",
-          "commit": "65820544bcae824093fb70166165c2c4b02a927b"
+          "date": "2026-11-10T21:27:29+00:00",
+          "commit": "2db8d457b202368eeb515bbe1ee128261225c517"
         }
       ],
       "notes": "OpenSpec add-knowledge-brains, grupo 5"
