@@ -30,7 +30,7 @@ def test_frontmatter_completo(path: Path):
 
 def test_el_constructor_no_delega():
     herramientas = _frontmatter(AGENTES / "ingeniero-software.md")["tools"]
-    assert "Agent" not in {h.strip() for h in herramientas.split(",")}
+    assert not {"Agent", "Task"} & {h.strip() for h in herramientas.split(",")}
 
 
 @pytest.mark.parametrize("nombre", ["checker", "seguridad"])

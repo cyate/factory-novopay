@@ -68,7 +68,7 @@ def test_proteccion_efectiva_incluye_scripts_y_se_describe(tmp_path):
     assert "Liberadas por el objetivo: tests/test_calc.py" in text_out
 
 
-# ------------------------------------------------- definiciones del equipo (add-equipo-ideal)
+# ------------------------------------------- definiciones de los agentes (add-equipo-ideal)
 
 
 @pytest.mark.parametrize("pattern", [".claude/skills/**", ".claude/agents/**", ".claude/**"])

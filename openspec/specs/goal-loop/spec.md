@@ -123,10 +123,10 @@ Las rutas protegidas SHALL componerse de tres fuentes: las críticas del harness
 - **WHEN** se ejecuta `factory goal run --dry-run` sobre un objetivo con rutas protegidas y liberadas
 - **THEN** el plan lista las rutas protegidas efectivas y las liberadas por el objetivo
 
-### Requirement: Definiciones del equipo protegidas
+### Requirement: Definiciones de los agentes protegidas
 Además de los archivos críticos del harness ya existentes, `.claude/agents/**` y `.claude/skills/**` SHALL estar siempre protegidos. Ni `factory.toml` ni `goal.md` MUST poder liberarlos. Crear archivos nuevos en esas rutas MUST seguir permitido, como en el resto de rutas protegidas.
 
-#### Scenario: El maker edita un agente del equipo
+#### Scenario: El maker edita un agente
 - **WHEN** una ronda modifica `.claude/agents/qa.md`
 - **THEN** la ronda se revierte por modificar un archivo crítico del harness
 
@@ -137,7 +137,7 @@ Además de los archivos críticos del harness ya existentes, `.claude/agents/**`
 ### Requirement: Liberación de un archivo crítico concreto
 La validación de `scope.allow_modify` SHALL rechazar un patrón si casa con alguna ruta de muestra de los críticos estáticos (`feature_list.json`, `factory.toml`, `prompts/**`, `.claude/agents/**`, `.claude/skills/**`, `.claude/commands/**`, `.claude/hooks/**` y `.claude/settings.json`), como `.claude/**` o `**/SKILL.md`, o si, leído como ruta y sin el prefijo `./`, cae dentro de uno de ellos, como `prompts/checker.md` o `./.claude/agents/qa.md`.
 
-#### Scenario: Un objetivo intenta liberar un agente concreto del equipo
+#### Scenario: Un objetivo intenta liberar un agente concreto
 - **WHEN** un `goal.md` declara `scope.allow_modify` con `.claude/agents/qa.md`
 - **THEN** la validación del objetivo falla indicando que los archivos críticos del harness no se pueden liberar
 

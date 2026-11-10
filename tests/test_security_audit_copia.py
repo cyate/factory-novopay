@@ -46,7 +46,7 @@ def test_copia_con_archivos_clave_y_licencia():
     assert "Cloudflare" in licencia
 
 
-def test_upstream_cita_origen_commit_y_politica():
+def test_upstream_cita_origen_y_commit():
     texto = UPSTREAM.read_text(encoding="utf-8")
     assert REPOSITORIO in texto
     assert f"`{COMMIT}`" in texto

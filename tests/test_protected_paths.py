@@ -183,7 +183,7 @@ def test_simulacion_muestra_la_proteccion_efectiva(tmp_path, capsys):
     assert "Liberadas por el objetivo: tests/test_a.py" in out
 
 
-# ------------------------------------------------- definiciones del equipo (add-equipo-ideal)
+# ------------------------------------------- definiciones de los agentes (add-equipo-ideal)
 
 
 def _team_repo(tmp_path):
