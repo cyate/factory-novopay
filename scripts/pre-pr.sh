@@ -56,11 +56,20 @@ ARCHIVOS=0
 LINEAS=0
 DOC_ARCHIVOS=0
 DOC_LINEAS=0
+BORRADOS=0
+# Un archivo borrado entero cuenta como archivo pero suma 0 líneas: no hay nada que leer en él,
+# solo comprobar que sobra. Las ediciones cuentan siempre por sus líneas.
+ELIMINADOS="$(git diff --no-renames --diff-filter=D --name-only "$BASE"...HEAD)"
 while IFS=$'\t' read -r mas menos ruta; do
   [ -n "${ruta:-}" ] || continue
   # Un binario llega como "-" en las dos columnas; cuenta como archivo y cero líneas.
   [ "$mas" = "-" ] && mas=0
   [ "$menos" = "-" ] && menos=0
+  if ! es_documentacion "$ruta" && [[ $'\n'"$ELIMINADOS"$'\n' == *$'\n'"$ruta"$'\n'* ]]; then
+    BORRADOS=$((BORRADOS + 1))
+    mas=0
+    menos=0
+  fi
   if es_documentacion "$ruta"; then
     DOC_ARCHIVOS=$((DOC_ARCHIVOS + 1))
     DOC_LINEAS=$((DOC_LINEAS + mas + menos))
@@ -68,8 +77,8 @@ while IFS=$'\t' read -r mas menos ruta; do
     ARCHIVOS=$((ARCHIVOS + 1))
     LINEAS=$((LINEAS + mas + menos))
   fi
-done < <(git diff --numstat "$BASE"...HEAD)
-echo "==> [tamaño] código y tests: ${ARCHIVOS} archivos, ${LINEAS} líneas (límite ${MAX_ARCHIVOS}/${MAX_LINEAS})"
+done < <(git diff --no-renames --numstat "$BASE"...HEAD)
+echo "==> [tamaño] código y tests: ${ARCHIVOS} archivos, ${LINEAS} líneas (límite ${MAX_ARCHIVOS}/${MAX_LINEAS}); borrados enteros: ${BORRADOS} (cuentan como archivo, 0 líneas)"
 echo "    documentación (sin límite): ${DOC_ARCHIVOS} archivos, ${DOC_LINEAS} líneas"
 if [ "$ARCHIVOS" -gt "$MAX_ARCHIVOS" ] || [ "$LINEAS" -gt "$MAX_LINEAS" ]; then
   echo "" >&2

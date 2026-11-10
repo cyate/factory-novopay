@@ -63,3 +63,46 @@ def test_entregas_sin_trackear_no_cierra_la_puerta(tmp_path):
     (root / "entregas").mkdir()
     (root / "entregas" / "x.md").write_text("qa\n")
     assert _correr(root, tmp_path, 0).returncode == 0
+
+
+def _commit(root: Path, msg: str) -> None:
+    subprocess.run(["git", "add", "-A"], cwd=root, check=True)
+    subprocess.run(["git", "commit", "-qm", msg], cwd=root, check=True)
+
+
+def test_borrar_un_archivo_grande_entero_no_suma_lineas(tmp_path):
+    root = init_git_repo(tmp_path / "r")
+    (root / "grande.py").write_text("x = 1\n" * 600)
+    _commit(root, "grande")
+    root = _repo_sobre(root, tmp_path)
+    (root / "grande.py").unlink()
+    _commit(root, "borra")
+    r = _correr(root, tmp_path, 0)
+    assert r.returncode == 0, r.stderr
+    assert "1 archivos, 0 líneas" in r.stdout
+    assert "borrados enteros: 1" in r.stdout
+
+
+def test_editar_600_lineas_cierra_la_puerta(tmp_path):
+    root = init_git_repo(tmp_path / "r")
+    (root / "grande.py").write_text("x = 1\n" * 600)
+    _commit(root, "grande")
+    root = _repo_sobre(root, tmp_path)
+    (root / "grande.py").write_text("y = 2\n" * 600)
+    _commit(root, "edita")
+    r = _correr(root, tmp_path, 0)
+    assert r.returncode == 1
+    assert "se pasa del límite" in r.stderr
+
+
+def _repo_sobre(root: Path, tmp_path: Path) -> Path:
+    """Como `_repo`, pero la rama `base` queda en el commit actual y los stubs ya están dentro."""
+    for ruta in ("scripts/check.sh", ".venv/bin/factory"):
+        stub = root / ruta
+        stub.parent.mkdir(parents=True, exist_ok=True)
+        stub.write_text("#!/bin/sh\nexit 0\n")
+        stub.chmod(0o755)
+    shutil.copy(REPO / "scripts" / "pre-pr.sh", root / "scripts" / "pre-pr.sh")
+    _commit(root, "stubs")
+    subprocess.run(["git", "branch", "base"], cwd=root, check=True)
+    return root
