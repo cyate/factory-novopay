@@ -13,7 +13,6 @@ from factory.agents.base import AgentRunner
 from factory.agents.claude_code import ClaudeCodeRunner
 from factory.brain import BrainError
 from factory.brain import search as brain_search
-from factory.brain.captures import CaptureStore
 from factory.brain.daily import KINDS, DailyBrain, commit_daily, map_ignored
 from factory.brain.importer import import_vault, read_metadata
 from factory.brain.libmap import build_map
@@ -330,33 +329,6 @@ def cmd_brain(args: argparse.Namespace) -> int:
             print("AVISO: git no tiene identidad configurada; se usó la de reserva de factory.")
         print(f"Commit {commit[:10]} solo con el cerebro diario y el mapa (sin push).")
         return EXIT_OK
-    captures = CaptureStore(config.state_path)
-    if args.brain_cmd == "pending":
-        pending = captures.pending()
-        if not pending:
-            print("No hay capturas pendientes.")
-        for capture in pending:
-            print(f"{capture.id}  [{capture.kind}] {capture.title}  ({capture.source})")
-        return EXIT_OK
-    if args.brain_cmd == "accept":
-        capture = captures.load(captures.path(args.id))
-        path = daily.add(
-            capture.text,
-            kind=capture.kind,
-            title=capture.title,
-            tags=capture.tags,
-            source=capture.source,
-        )
-        captures.remove(capture.id)
-        print(
-            f"Captura aceptada: {path.relative_to(config.root)} "
-            "(versiónala con factory brain commit)"
-        )
-        return EXIT_OK
-    if args.brain_cmd == "reject":
-        target = captures.reject(args.id)
-        print(f"Captura descartada (queda constancia en {target.relative_to(config.root)})")
-        return EXIT_OK
     if args.brain_cmd == "reindex":
         errors = daily.reindex()
         print(f"Cerebro diario reindexado: {len(daily.note_paths()) - len(errors)} nota(s).")
@@ -434,11 +406,6 @@ def build_parser() -> argparse.ArgumentParser:
     learn.add_argument("--title", default=None)
     learn.add_argument("--tags", default=None, help="etiquetas separadas por comas")
     brain_sub.add_parser("reindex", help="reconstruye el catálogo e índices del cerebro diario")
-    brain_sub.add_parser("pending", help="capturas de los loops pendientes de revisión")
-    accept = brain_sub.add_parser("accept", help="convierte una captura en nota del cerebro diario")
-    accept.add_argument("id")
-    reject = brain_sub.add_parser("reject", help="descarta una captura")
-    reject.add_argument("id")
     commit_p = brain_sub.add_parser(
         "commit", help="commit solo de los cambios del cerebro diario (sin push)"
     )

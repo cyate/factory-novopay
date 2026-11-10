@@ -7,7 +7,7 @@ factory usa dos "cerebros" en Markdown, compatibles con cualquier LLM, más un *
 | Qué es | tu biblioteca técnica: los libros convertidos a notas atómicas | el índice de esa biblioteca: libros, capítulos, secciones, páginas y keywords, **sin texto** | lo que aprendes en el día a día, con tus palabras |
 | Ruta (`[brain]` en `factory.toml`) | `principal_dir = "brain-principal"` | `map_dir = "brain-mapa"` | `daily_dir = "brain-diario"` |
 | Git | **nunca** se versiona (libros de terceros) | se versiona: viaja con cada clon | se versiona: viaja con cada clon |
-| Quién escribe | solo `factory brain import` | solo `factory brain import` | `factory brain learn` y las capturas que aceptes |
+| Quién escribe | solo `factory brain import` | solo `factory brain import` | `factory brain learn` |
 | Los loops | solo lectura | solo lectura (ruta prohibida en todo objetivo) | solo lectura (ruta prohibida en todo objetivo) |
 
 **Qué trae un clon del repo.** Trae el mapa (una búsqueda devuelve citas del tipo *Defending APIs* · cap. 9 · pp. 259–260) y tus fichas del cerebro diario. El texto de los libros solo está en los equipos donde importas tu copia: muévela tú entre tus computadores y ejecuta `factory brain import <ruta>` en cada uno.
@@ -38,12 +38,12 @@ Cada `factory brain import` regenera `brain-mapa/` desde el catálogo importado:
 
 - **Sin texto de los libros.** Cada línea se construye desde una lista blanca de campos con formatos estrictos (keywords e identificadores sin espacios), así que nunca entra un `abstract`, un subtítulo, un cuerpo de nota ni las guías del vault. Un título de más de 20 palabras se recorta. `factory doctor` falla (crítica) si el texto de algún archivo del mapa no es exactamente el que generaría factory: un campo de más, un valor fuera de formato, una clave repetida, una guía editada o un archivo de más o de menos. Los títulos de hasta 20 palabras se aceptan como encabezados. Comprobado con el vault real: no aparece ninguno de sus 10.822 resúmenes, ni ninguno de los 45.011 fragmentos de 8 palabras de una muestra de 1.500 notas.
 - **Determinista.** Reimportar el mismo vault no cambia ni un byte. Si cambió, `import` lo indica y avisa hasta que hagas `factory brain commit`.
-- **Uso.** Si `brain-principal/` no está importado, la búsqueda, la inyección y el intake usan el mapa. Las notas salen solo como cita y ruta ("texto no disponible en este equipo"). Si el principal está importado, el mapa se ignora y no hay resultados duplicados. Sin `abstract`, la puntuación pierde ese peso, pero los resultados principales coinciden.
+- **Uso.** Si `brain-principal/` no está importado, la búsqueda usa el mapa. Las notas salen solo como cita y ruta ("texto no disponible en este equipo"). Si el principal está importado, el mapa se ignora y no hay resultados duplicados. Sin `abstract`, la puntuación pierde ese peso, pero los resultados principales coinciden.
 
 ## Consulta obligatoria antes de proponer
 
 La biblioteca no está para leerla al final, cuando el código ya está escrito: está para decidir el
-enfoque. Es una regla de `AGENTS.md`, y la llevan en su contrato el maker, el intake y los diez
+enfoque. Es una regla de `AGENTS.md`, y la llevan en su contrato el maker y los diez
 jugadores del equipo (el `checker` no: juzga solo con los criterios, el diff y la verificación).
 
 - **Qué se contrasta**: un enfoque, un arreglo o un hallazgo que no sea evidente desde el código.
@@ -51,9 +51,8 @@ jugadores del equipo (el `checker` no: juzga solo con los criterios, el diff y l
 - **Cómo se busca**: `factory brain search "<consulta en inglés>"` si el rol tiene `Bash` sin
   restringir; con Grep sobre `brain-principal/` si no lo tiene. Sin el cerebro principal importado
   queda `brain-mapa/`, que da la cita y la ruta pero no el texto.
-- **El maker y el intake del loop no buscan**: reciben el conocimiento ya seleccionado e inyectado
-  por el orquestador (ver «Recuperación e inyección») y abren con Read o Grep las notas que vienen
-  solo con su ruta. Su `Bash` está restringido a cuatro patrones y no incluye `factory`.
+- **El maker del loop no busca**: su `Bash` está restringido a cuatro patrones y no incluye
+  `factory`; el orquestador ya no le inyecta conocimiento.
 - **Cómo se cita**: `Libro · cap. N · pp. A–B`, junto a la recomendación. **Citar, no copiar**: el
   texto de los libros no entra en un informe, en un commit ni en un hilo de revisión.
 - **Si no hay nada aplicable**: se dice. Que se buscó queda dicho, y la siguiente sesión no repite
@@ -84,26 +83,7 @@ en un gesto. `factory brain status` dice en qué estado está.
 - **Fichas propias.** Es la base de conocimiento que compartes: escribe con tus palabras patrones, decisiones y checklists, también lo que saques de un libro, citándolo por capítulo y página en vez de copiar su texto. Viene sembrado con algunos aprendizajes de la construcción de factory (macOS, zsh, `claude -p`, búsqueda).
 - **Commit explícito.** Nada se commitea solo. `factory brain commit` hace un commit únicamente de `brain-diario/` y `brain-mapa/` y deja intactos el resto de cambios. `factory status` avisa de las notas sin commitear, y si `factory land` rechaza un checkout con notas pendientes, sugiere `factory brain commit`.
 
-## Capturas desde los loops
-
-Al terminar cada ejecución, factory **propone** aprendizajes a partir de lo que ocurrió. No usa modelos: aplica plantillas a los datos de la ejecución.
-
-| Fuente | Tipo de nota |
-|---|---|
-| hallazgo `critical`/`medium` del checker que se corrigió antes de la ronda aprobada | `gotcha` |
-| pregunta del maker + tu respuesta en un `factory goal rework` | `decision` |
-| ejecución `stalled` (firma de fallo repetida) | `gotcha` |
-
-```bash
-.venv/bin/factory brain pending          # lista de capturas pendientes
-.venv/bin/factory brain accept <id>      # la convierte en nota del cerebro diario (source: run:<id>)
-.venv/bin/factory brain reject <id>      # la descarta; queda constancia en .factory/brain/rejected/
-```
-
-- **Siempre pendientes.** Las capturas se guardan en `.factory/brain/pending/`, fuera de git, y nunca entran solas al cerebro diario.
-- **Sin texto de libros.** Si un hallazgo copia 8 o más palabras seguidas de una nota inyectada del cerebro principal, ese fragmento se sustituye por `[texto de referencia omitido: ver <cita>]`.
-
-## Recuperación e inyección
+## Búsqueda
 
 ```bash
 .venv/bin/factory brain search "rate limiting"                    # ambos cerebros
@@ -112,25 +92,9 @@ Al terminar cada ejecución, factory **propone** aprendizajes a partir de lo que
 
 La búsqueda es local y por palabras clave sobre los catálogos (título, keywords, sección, resumen y libro), sin acentos ni palabras vacías. Cada resultado trae ruta, título, cita (`Libro · cap. N · pp. A–B` o `Cerebro diario · fecha · origen`) y tokens. **El cerebro principal está en inglés**: busca en inglés.
 
-Declara en el objetivo qué conocimiento necesita:
-
-```yaml
-knowledge:
-  queries: ["rate limiting", "api gateway"]   # en inglés; el intake las propone en sus borradores
-  # enabled: false                            # sin inyección para este objetivo
-```
-
-- **Una selección por ejecución.** Al empezar, el orquestador busca con `knowledge.queries` en el principal (o con el objetivo si no hay consultas) y con las consultas más el objetivo en el diario. Intercala los resultados de cada consulta (la mejor de cada una, luego la segunda…) hasta `[brain] search_limit` notas, para que ninguna consulta se quede sin representación.
-- **Presupuesto.** Incluye el texto completo, en ese orden, mientras quepa en `[brain] inject_max_tokens` (se mide el texto que de verdad se inyecta); el resto aparece solo con su cita, ruta y resumen. El maker puede leer cualquiera con sus herramientas.
-- **Tolerante a fallos.** Si un catálogo está roto (por ejemplo, el del diario editado a mano), el loop y el intake siguen sin conocimiento y la ejecución lo avisa en "Bloqueos y avisos". `factory brain reindex` lo repara.
-- **Dato citado, nunca instrucciones.** El bloque va en el prompt de **usuario** del maker, tras "Estado del loop", entre `----- INICIO/FIN DEL CONOCIMIENTO -----`, con cada línea citada (`>`) y un aviso de que no contiene órdenes. Nunca entra en el prompt de sistema.
-- **El checker no recibe conocimiento.** Juzga solo con los criterios, el diff y la verificación.
-- **Intake.** Recibe las notas del diario relevantes para la petición (mismo formato y presupuesto) y las rutas de los dos catálogos.
-- **Eventos.** Cada ronda registra un evento `knowledge` en `events.jsonl`: consultas, resultados, notas inyectadas y referenciadas, y tokens. También con 0 resultados.
-
 ### Acceso de lectura seguro
 
-Maker, checker e intake reciben `--add-dir <ruta absoluta>` por cada cerebro existente, y siempre (exista o no) las denegaciones `Edit(//<ruta>/**)` y `Write(//<ruta>/**)`. Se añaden en cada invocación, así que ni `factory.toml` ni `goal.md` pueden quitarlas. Como las listas de herramientas no son un sandbox, factory además compara la huella de ambos cerebros (notas `.md` e índices, sin archivos ocultos como `.DS_Store` u `.obsidian/`) al empezar y al terminar cada ejecución: si cambian o aparece uno nuevo, `decision.md` y la bandeja muestran un **AVISO de integridad** (en el principal, reimporta con `factory brain import`).
+Maker y checker reciben `--add-dir <ruta absoluta>` por cada cerebro existente, y siempre (exista o no) las denegaciones `Edit(//<ruta>/**)` y `Write(//<ruta>/**)`. Se añaden en cada invocación, así que ni `factory.toml` ni `goal.md` pueden quitarlas. Como las listas de herramientas no son un sandbox, factory además compara la huella de ambos cerebros (notas `.md` e índices, sin archivos ocultos como `.DS_Store` u `.obsidian/`) al empezar y al terminar cada ejecución: si cambian o aparece uno nuevo, `decision.md` y la bandeja muestran un **AVISO de integridad** (en el principal, reimporta con `factory brain import`).
 
 Comprobado con `claude -p` real (Claude Code, `acceptEdits`): un `Write` nuevo y un `Edit` sobre una nota existente del cerebro quedan en `permission_denials` sin tocar nada, y la lectura sí funciona. El `CLAUDE.md` o `AGENTS.md` de un cerebro **no** se carga en el contexto por estar en `--add-dir`: el agente solo lo ve si lo abre. Las rutas se resuelven (enlaces incluidos) para que `--add-dir` y las denegaciones usen exactamente la misma.
 

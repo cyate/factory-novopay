@@ -43,7 +43,7 @@ Revisa cada `ConfigError` de `src/factory/config.py` y añade un test por mensaj
 | `scope.deny` | no | globs prohibidos. `feature_list.json` se añade siempre |
 | `stop` | no | `max_rounds`, `max_budget_usd`, `no_progress_rounds`, `consecutive_passes`, `round_timeout_min` |
 | `roles` | no | overrides por rol: `model`, `permission_mode`, `allowed_tools`, `denied_tools` |
-| `knowledge` | no | `queries`: consultas **en inglés** para el cerebro principal; `enabled: false` desactiva la inyección. Ver [Cerebros](cerebros.md#recuperación-e-inyección) |
+| `knowledge` | no | ya no se inyecta; se acepta y se ignora |
 
 ### Rutas protegidas
 

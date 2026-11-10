@@ -10,7 +10,6 @@ from factory.agents.fake import FakeRunner, FakeStep, maker_done
 from factory.brain import BrainError
 from factory.brain.daily import commit_daily
 from factory.brain.libmap import BOOK_FIELDS, MAX_HEADING_WORDS, NOTE_FIELDS, build_map
-from factory.brain.search import principal_from_map
 from factory.cli import main
 from factory.config import ConfigError, load_config
 from factory.doctor import audit
@@ -144,38 +143,6 @@ def test_clon_nuevo_sin_libros(tmp_path, vault, capsys):
     out = capsys.readouterr().out
     assert "resultados del mapa de la biblioteca" in out and "factory brain import" in out
     assert "Securing APIs · cap. 3 · pp. 41–44 — Token bucket rate limiting" in out
-
-
-def test_inyeccion_solo_con_el_mapa(tmp_path, vault):
-    root = _clone_with_map(tmp_path, vault)
-    config = load_config(root)
-    goal = load_goal(write_goal(root, extra=QUERIES), config.loop)
-    runner = FakeRunner(maker=[maker_done("creé a", **{"a.txt": "1"})])
-    state = LoopEngine(config, goal, runner, echo=lambda _: None).run()
-    prompt = runner.calls_for("maker")[0].prompt
-    assert "Securing APIs · cap. 3" in prompt
-    assert "texto no disponible en este equipo" in prompt
-    for note in VAULT_NOTES:  # ningún texto completo de ningún libro
-        assert note["body"] not in prompt
-    assert state.status == "completed"
-
-
-def test_principal_y_mapa_presentes(tmp_path, vault, capsys):
-    root = _clone_with_map(tmp_path, vault)
-    main(["--root", str(root), "brain", "import", str(vault)])
-    capsys.readouterr()
-    assert main(["--root", str(root), "brain", "search", "rate limiting", "--json"]) == 0
-    hits = json.loads(capsys.readouterr().out)
-    paths = [h["path"] for h in hits if h["brain"] == "principal"]
-    assert paths and len(paths) == len(set(paths))  # una sola vez cada nota
-    config = load_config(root)
-    assert not principal_from_map(config)  # el catálogo usado es el del principal
-    goal = load_goal(write_goal(root, extra=QUERIES), config.loop)
-    runner = FakeRunner(maker=[maker_done("creé a", **{"a.txt": "1"})])
-    LoopEngine(config, goal, runner, echo=lambda _: None).run()
-    prompt = runner.calls_for("maker")[0].prompt
-    assert "A token bucket refills at a fixed rate." in prompt  # con su texto disponible
-    assert "texto no disponible en este equipo" not in prompt
 
 
 def test_el_maker_edita_el_mapa(tmp_path, vault):

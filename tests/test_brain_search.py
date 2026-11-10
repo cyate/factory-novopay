@@ -100,32 +100,6 @@ def _goal(knowledge=""):
     return parse_goal_text(GOAL.format(knowledge=knowledge), LoopConfig())
 
 
-def test_objetivo_con_consultas_declaradas():
-    from factory.brain.inject import queries_for
-
-    goal = _goal('knowledge:\n  queries: ["rate limiting", "api gateway"]\n')
-    principal, daily = queries_for(goal)
-    assert principal == ["rate limiting", "api gateway"]
-    assert daily == ["rate limiting", "api gateway", "Limitar peticiones por usuario"]
-
-
-def test_sin_consultas_usa_el_objetivo_como_ultimo_recurso():
-    from factory.brain.inject import queries_for
-
-    assert queries_for(_goal())[0] == ["Limitar peticiones por usuario"]
-
-
-def test_inyeccion_desactivada_y_validacion():
-    import pytest
-
-    from factory.brain.inject import queries_for
-    from factory.goal import GoalError
-
-    assert queries_for(_goal("knowledge:\n  enabled: false\n")) == ([], [])
-    with pytest.raises(GoalError, match="knowledge"):
-        _goal("knowledge:\n  otro: 1\n")
-
-
 def test_cobertura_de_la_consulta(tmp_path):
     """Una nota con todos los términos gana a otra con más peso en uno solo (vault real)."""
 

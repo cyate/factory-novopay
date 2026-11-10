@@ -16,8 +16,6 @@ from pathlib import Path
 
 from factory import artifacts, features
 from factory.agents.base import AgentRequest, AgentResult, AgentRunner
-from factory.brain import inject
-from factory.brain.captures import CaptureStore, Injected, propose
 from factory.brain.daily import versioned_relatives
 from factory.brain.integrity import fingerprint
 from factory.config import Config, RoleConfig, brain_denials
@@ -139,9 +137,6 @@ class LoopEngine:
             self.config.effective_verify_command(),
         )
         self.state: RunState | None = None
-        self.injected: list[Injected] = []  # conocimiento inyectado (salvaguarda de capturas)
-        self.knowledge = inject.Selection()
-        self.knowledge_block = ""
         self.brain_prints: dict[str, str | None] = {}
 
     # ------------------------------------------------------------------ ciclo de vida
@@ -173,7 +168,7 @@ class LoopEngine:
         self.events = EventLog(self.store.run_dir(state.run_id))
         worktree: Worktree | None = None
         try:
-            self._prepare_knowledge(state)
+            self._fingerprint_brains(state)
             worktree = create_worktree(
                 root, self.config.worktrees_path, state.run_id, base, start_point=start
             )
@@ -201,24 +196,11 @@ class LoopEngine:
             "mapa": self.config.map_path,
         }
 
-    def _prepare_knowledge(self, state: RunState) -> None:
-        """Selección una vez por ejecución (diseño D4) y huella inicial de los cerebros.
-
-        Un cerebro roto (catálogo mal formado, archivo ilegible) nunca detiene el loop: la
-        ejecución sigue sin conocimiento y lo avisa en `blockers`.
-        """
+    def _fingerprint_brains(self, state: RunState) -> None:
+        """Huella inicial de los cerebros, para detectar si algo los cambia durante la ejecución."""
         self.brain_prints = {
             name: self._fingerprint(state, path) for name, path in self._brains().items()
         }
-        principal_queries, daily_queries = inject.queries_for(self.goal)
-        try:
-            self.knowledge = inject.select(self.config, principal_queries, daily_queries)
-            self.knowledge_block = inject.render(self.knowledge, self.config)
-            self.injected = inject.injected_texts(self.knowledge)
-        except Exception as exc:  # noqa: BLE001 — cualquier fallo del catálogo es solo un aviso
-            self.knowledge = inject.Selection(principal_queries, daily_queries)
-            self.knowledge_block, self.injected = "", []
-            state.blockers.append(f"AVISO: no se pudo consultar los cerebros: {exc!r}")
 
     @staticmethod
     def _fingerprint(state: RunState, path: Path) -> str | None:
@@ -348,7 +330,6 @@ class LoopEngine:
         started = time.monotonic()
         record = RoundRecord(number=number, started=now_iso())
         pre_commit = wt.head()
-        self.events.write("knowledge", round=number, **self.knowledge.event())
         maker = self._invoke(
             state, number, "maker", self._maker_prompt(state, number, feedback), wt
         )
@@ -581,7 +562,6 @@ class LoopEngine:
                 "## Alcance\n" + self._scope_text(),
                 "## Metodología\n" + (self.goal.body or "(sin indicaciones adicionales)"),
                 "## Estado del loop\n" + build_summary(state, self.config.loop.summary_max_chars),
-                *([self.knowledge_block] if self.knowledge_block else []),
                 "## Retroalimentación de la ronda anterior\n" + (feedback or "Primera ronda."),
                 "Termina con el informe JSON (status, summary, changed_files, self_check, risks, "
                 "question).",
@@ -667,7 +647,6 @@ class LoopEngine:
         self._check_brain_integrity(state)  # también cubre lo que ejecutó la promoción
         state.finished = now_iso()
         state.summary = self._summary(state)
-        self._propose_captures(state)
         atomic_write_text(
             self.store.run_dir(state.run_id) / "decision.md", artifacts.render_decision(state)
         )
@@ -679,18 +658,6 @@ class LoopEngine:
             remove_worktree(wt)
         self.store.save(state, self.limits.max_rounds)
         self.echo(f"Resultado: {state.status} — {state.stop_reason}")
-
-    def _propose_captures(self, state: RunState) -> None:
-        """Capturas pendientes para el cerebro diario (nunca se añaden solas)."""
-        store = CaptureStore(self.config.state_path)
-        found = propose(state, self.injected)
-        for capture in found:
-            store.save(capture)
-        if found:
-            self.echo(
-                f"{len(found)} captura(s) pendiente(s) para el cerebro diario: "
-                "factory brain pending"
-            )
 
     def _promote(self, state: RunState, wt: Worktree) -> None:
         path = wt.path / self.config.harness.feature_list

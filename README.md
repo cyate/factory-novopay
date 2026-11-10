@@ -166,7 +166,7 @@ Campos del frontmatter:
 | `scope.protected` / `allow_modify` | archivos existentes intocables / excepciones para este objetivo | |
 | `stop` | `max_rounds`, `max_budget_usd`, `no_progress_rounds`, `consecutive_passes`, `round_timeout_min` | empieza con poco presupuesto (1–2 USD) |
 | `roles` | modelo y permisos por rol (opcional) | por defecto, maker `sonnet` y checker `opus` |
-| `knowledge` | `queries` en inglés para los cerebros (paso J) | opcional |
+| `knowledge` | ya no se inyecta; se acepta y se ignora | opcional |
 
 Debajo del frontmatter escribe **Contexto** (enlaza documentos, no los copies), **Cómo trabajar** y **Fuera de alcance**.
 
@@ -214,7 +214,7 @@ Integrar es una decisión humana: `factory` no tiene comando para hacerlo. Para 
 
 ### J. Cerebros de conocimiento (opcional)
 
-Dos bibliotecas en Markdown que los loops consultan en solo lectura. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
+Dos bibliotecas en Markdown que se consultan con `factory brain search`; los loops no las leen ni las modifican. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
 
 **Qué trae el repo al clonarlo:**
 - el **mapa de la biblioteca** (`brain-mapa/`): libros, capítulos, secciones, páginas y keywords, sin texto. `factory brain search` funciona desde el primer momento y devuelve citas.
@@ -236,22 +236,9 @@ factory brain search "token bucket" --brain principal --limit 5
 factory brain learn "En macOS no existe timeout; usar el de la herramienta" --kind gotcha --tags macos
 factory brain reindex                                 # si editas una ficha a mano
 
-# 4. Revisar lo que proponen los loops al terminar
-factory brain pending                                 # capturas pendientes 
-factory brain accept <id>                             # o: factory brain reject <id>
-
-# 5. Commitear SOLO el cerebro diario y el mapa (sin push)
+# 4. Commitear SOLO el cerebro diario y el mapa (sin push)
 factory brain commit -m "aprendizajes de hoy"
 ```
-
-Para que un objetivo reciba conocimiento, declara consultas en inglés en su `goal.md`:
-
-```yaml
-knowledge:
-  queries: ["rate limiting", "api gateway"]
-```
-
-El maker recibe las notas más relevantes como texto citado (máximo `[brain] inject_max_tokens`, 3.000 por defecto); el checker no recibe nada. En un equipo sin el texto de los libros, el maker solo recibe las citas del mapa.
 
 ### K. Planificar cambios grandes con OpenSpec (opcional)
 
