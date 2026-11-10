@@ -66,7 +66,6 @@ class BrainConfig:
     principal_dir: str = "brain-principal"
     daily_dir: str = "brain-diario"
     map_dir: str = "brain-mapa"  # mapa de la biblioteca: metadatos versionados, sin texto
-    inject_max_tokens: int = 3000
     search_limit: int = 8
 
 

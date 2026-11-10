@@ -46,5 +46,4 @@ permission_mode = "dontAsk"
 principal_dir = "brain-principal"
 daily_dir = "brain-diario"
 map_dir = "brain-mapa"
-inject_max_tokens = 3000
 search_limit = 8

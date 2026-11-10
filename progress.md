@@ -7,7 +7,7 @@
 - Verificación estándar: `./scripts/check.sh` (antes de cerrar y antes de un PR).
 - OpenSpec: specs principales en `openspec/specs/`. Cambios archivados y activos: ver `openspec/changes/`.
 - Feature activa / siguiente: ver `.venv/bin/factory features list`.
-- Commits: ver `git log`. HEAD de la última sesión verificada: `dd4222f`.
+- Commits: ver `git log`. HEAD de la última sesión verificada: ver la sesión 024.
 - Bloqueos actuales: el push de `main` es una decisión humana pendiente.
 - Historial de sesiones 001 a 022: `docs/historial/progress-sesiones.md`.
 
@@ -36,3 +36,26 @@
 - Riesgo: se retiraron por decisión del usuario los tests de frases en `.md` (fijaban redacción, no comportamiento); `reglas-de-oficio` sigue `passing` con esa cobertura reducida. `puerta-pre-pr` está `not_started` y su `verification` solo corre `tests/test_reglas_de_oficio.py`: falta añadir `tests/test_pre_pr.py` antes de promoverla (no cabe en este PR: sería el archivo 11 de código).
 - Riesgos / pendientes: ninguno más.
 - Mejor próximo paso: PRs de borrado (panel, autonomía, strands, roster; ≤10 archivos/500 líneas cada uno) y decisiones 9–10 (circuito ligero para cambios pequeños, regla de delegar a partir de 3 archivos).
+
+### Sesión 024 — 2026-11-10 (borrado de lo que no se usa)
+
+- Objetivo: borrar los subsistemas sin uso real que midió la retro (panel, capa de autonomía, código del equipo, capturas e inyección del cerebro) en PRs de ≤10 archivos y ≤500 líneas. Regla nueva: un archivo borrado entero cuenta como archivo y 0 líneas.
+- Commits (rama `chore/borrar-ceremonia`, sobre `bc89acf`):
+  - `d0b87df` pre-pr: borrado entero = 1 archivo, 0 líneas, y se imprime aparte (`tests/test_pre_pr.py`, `CLAUDE.md`).
+  - `4edf66b` panel: servidor, snapshot, página y `factory panel`.
+  - `59c0abb` panel: tokens, pull requests, revisiones y tareas.
+  - `62f13dd` panel: hooks, `factory hook`, `panel-hook.sh` y `.claude/settings.json` (solo tenía esos hooks).
+  - `6b10c59` `factory status`.
+  - `ef21f74` `factory tick`.
+  - `3c380b6` `factory land`, `schedule`, `goal promote`, `goal rework`.
+  - `4f0ea55` `factory intake`, peticiones (`requests.py`) y borradores; `slugify` pasa a `brain/text.py`.
+  - `5cfee37` `factory inbox` (el módulo `inbox.py` se queda: el motor lo escribe).
+  - `5c7486c` config `[tick]`/`[alerts]`, rol `intake`, su prompt y su esquema.
+  - `fd25e69` `factory team` y `src/factory/team/` (el chequeo `team-roster` de doctor se va con él).
+  - `07b3672` capturas e inyección (`brain pending|accept|reject`); el motor ya no inyecta conocimiento ni propone capturas.
+  - Este commit: clave `[brain] inject_max_tokens` y esta entrada.
+- Specs borradas (subsistema entero): `team-roster`, `team-match`, `observability-panel`, `review-hooks`, `token-usage`, `request-intake`, `scheduled-loop`, `run-landing`. Docs borrados: `panel.md`, `vigilancia.md`, `intake.md`, `revision.md`; `observabilidad.md`, `loops.md`, `equipo.md`, `cerebros.md` y el README recortados.
+- Código de src+tests: 22 130 → 12 699 líneas. Suite: 880 tests en ~16,9 s → 519 tests en ~7,6 s.
+- Verificación: `./scripts/check.sh` → 0 y `./scripts/pre-pr.sh <commit anterior>` → «Puerta abierta» en cada commit (CodeRabbit no corrió: sin sesión en este entorno).
+- Se conserva a propósito: `inbox.py` y `engine.py` (congelados; el motor escribe la bandeja y mantiene el soporte de retrabajo `parent`/`answer`, que ya no tiene comando), el parseo de `knowledge` en `goal.md` (se acepta e ignora), `mode: monitor` (se rechaza con mensaje), `.claude/agents/*.md` y la skill `/equipo` (la skill aún nombra `factory team list|lineup`, que ya no existen), `feature_list.json` (sus entradas de panel/intake/team citan tests borrados; no se editan a mano) y `src/factory/templates/AGENTS.md`.
+- Mejor próximo paso: decisiones 9–10; el trabajo de strands sin commitear en `main` se descarta (respaldo en `respaldo/wip-2026-11-10`).

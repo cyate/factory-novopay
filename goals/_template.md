@@ -1,5 +1,5 @@
 ---
-# Plantilla de objetivo para `factory goal run` (o `factory tick` si mode: monitor).
+# Plantilla de objetivo para `factory goal run`.
 # Cuanto más específico y verificable, mejor el loop. Copia este archivo a goals/<id>.md.
 id: plantilla
 objective: "Describe en una frase qué cuenta como terminado"

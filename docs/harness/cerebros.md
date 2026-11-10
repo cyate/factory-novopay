@@ -81,7 +81,7 @@ en un gesto. `factory brain status` dice en qué estado está.
 - **Índices.** factory regenera `_catalog.jsonl`, `AGENTS.md` y `llms.txt` en cada alta. `reindex` los reconstruye tras editar notas a mano e informa de las que tienen el frontmatter roto.
 - **Protegido de los loops.** `brain-diario/**` es una ruta prohibida en **todo** objetivo: si una ronda crea, modifica o borra algo ahí, se revierte. Ni `factory.toml` ni `goal.md` pueden levantar la prohibición.
 - **Fichas propias.** Es la base de conocimiento que compartes: escribe con tus palabras patrones, decisiones y checklists, también lo que saques de un libro, citándolo por capítulo y página en vez de copiar su texto. Viene sembrado con algunos aprendizajes de la construcción de factory (macOS, zsh, `claude -p`, búsqueda).
-- **Commit explícito.** Nada se commitea solo. `factory brain commit` hace un commit únicamente de `brain-diario/` y `brain-mapa/` y deja intactos el resto de cambios. `factory status` avisa de las notas sin commitear, y si `factory land` rechaza un checkout con notas pendientes, sugiere `factory brain commit`.
+- **Commit explícito.** Nada se commitea solo. `factory brain commit` hace un commit únicamente de `brain-diario/` y `brain-mapa/` y deja intactos el resto de cambios.
 
 ## Búsqueda
 

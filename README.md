@@ -31,9 +31,9 @@ Elige el paso según lo que quieras hacer. A y D son la base; el resto se añade
 | llevar el harness a otro proyecto | [C](#c-aplicar-el-harness-a-otro-proyecto) | no |
 | trabajar una tarea en una sesión, con o sin Claude Code | [D](#d-trabajar-una-feature-en-una-sesión) | solo si usas Claude Code |
 | delegar una tarea completa a un loop | [E](#e-escribir-un-buen-objetivo-goalmd) → [F](#f-ejecutar-un-objetivo-con-un-loop) → [G](#g-revisar-el-resultado-y-continuar) | sí (`goal run`) |
-| consultar los libros y guardar lo aprendido | [J](#j-cerebros-de-conocimiento-opcional) | no |
-| planificar un cambio grande con specs | [K](#k-planificar-cambios-grandes-con-openspec-opcional) | solo si usas Claude Code |
-| repartir el trabajo entre sub-agentes especialistas (seguridad, QA, documentación…) | [L](#l-el-equipo-ideal-opcional) | sí (Claude Code) |
+| consultar los libros y guardar lo aprendido | [H](#h-cerebros-de-conocimiento-opcional) | no |
+| planificar un cambio grande con specs | [I](#i-planificar-cambios-grandes-con-openspec-opcional) | solo si usas Claude Code |
+| repartir el trabajo entre sub-agentes especialistas (seguridad, QA, documentación…) | [J](#j-el-equipo-ideal-opcional) | sí (Claude Code) |
 
 > Los ejemplos escriben `factory`. Si no activaste el entorno ni lo instalaste (paso B), usa `.venv/bin/factory`.
 
@@ -212,7 +212,7 @@ Según el resultado (código de salida entre paréntesis):
 
 Integrar es una decisión humana: `factory` no tiene comando para hacerlo. Para descartar una ejecución: `git branch -D factory/<run-id>`.
 
-### J. Cerebros de conocimiento (opcional)
+### H. Cerebros de conocimiento (opcional)
 
 Dos bibliotecas en Markdown que se consultan con `factory brain search`; los loops no las leen ni las modifican. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
 
@@ -240,7 +240,7 @@ factory brain reindex                                 # si editas una ficha a ma
 factory brain commit -m "aprendizajes de hoy"
 ```
 
-### K. Planificar cambios grandes con OpenSpec (opcional)
+### I. Planificar cambios grandes con OpenSpec (opcional)
 
 Para algo que ocupa varias features, primero escribe la spec y después implementa. Dentro de Claude Code:
 
@@ -251,7 +251,7 @@ Para algo que ocupa varias features, primero escribe la spec y después implemen
 
 `openspec validate <cambio> --strict` comprueba el formato en cualquier momento.
 
-### L. El equipo ideal (opcional)
+### J. El equipo ideal (opcional)
 
 Un equipo de sub-agentes de Claude Code, como uno de fútbol: un **técnico** (el orquestador) y hasta 11 jugadores especialistas en `.claude/agents/`. El técnico lee el contexto y decide si convoca a todos o solo a algunos. Detalle en [docs/harness/equipo.md](docs/harness/equipo.md).
 
@@ -338,7 +338,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `brain-mapa/`, `brain-diario/` | mapa de la biblioteca (sin texto) y cerebro diario, versionados |
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
 | `.factory/` | estado local de las ejecuciones (no se versiona) |
-| `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso L) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
+| `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso J) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
 | `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. Van **directo a QA**, no en el PR; nunca llevan secretos ni datos reales |
 | `openspec/` | specs principales en `openspec/specs/` (18 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |
 

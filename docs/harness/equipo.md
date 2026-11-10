@@ -118,7 +118,7 @@ El reglamento está en `.claude/skills/equipo/SKILL.md`. Resumen:
 
 ### Partido de revisión
 
-Para una rama ya hecha: propia, ajena o una `factory/<run-id>` antes de `factory land`.
+Para una rama ya hecha: propia, ajena o una `factory/<run-id>`.
 
 - Se juegan la convocatoria, la verificación, la revisión y el acta, **sin modificar ningún archivo**.
 - El diff usa tres puntos, contra la merge-base: `git diff main...<rama>` y `git log main..<rama>`.

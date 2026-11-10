@@ -119,7 +119,7 @@ El resultado queda en `.factory/runs/<run-id>/` (`decision.md`, `rounds/<n>/`); 
 - **Usar un loop por tiempo para una tarea finita**: repite el mismo trabajo sin acumular progreso. Usa `goal run`.
 - **Que el maker sea también el checker**: la autoevaluación no es fiable. Aquí son sesiones, permisos y modelos distintos.
 - **Saltarse la verificación** porque "se ve bien": solo cuentan los comandos de `acceptance`.
-- **Rendición cognitiva**: dejar de revisar porque "está automatizado". Vigila `factory status`.
+- **Rendición cognitiva**: dejar de revisar porque "está automatizado". Lee los resultados antes de lanzar otro loop.
 - **Ignorar la explosión de tokens**: cada ronda es una sesión nueva con un resumen acotado; si el aviso aparece, simplifica el objetivo.
 - **Loops sin estado externo**: cada ronda empezaría de cero. Todo queda en `.factory/`.
 - **Goodhart**: el loop optimiza los comandos, no la intención. Protege los tests existentes con `scope.deny` cuando proceda y revisa el diff.
