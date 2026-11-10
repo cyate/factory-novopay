@@ -74,7 +74,7 @@ Los dorsales 8 y 11 están libres y se irán llenando a medida que lleguen nueva
    - `tipo`: `revisor` (`tools` ⊆ `Read, Grep, Glob`) o `constructor` (sin `Agent`).
    - `convocatoria`: globs relativos al repo (`**`, `*`, `?`) y los tokens `siempre` y `peticion`, separados por comas.
    - Un revisor responde con el formato común: `## Jugador: <name> (#<dorsal>)`, una línea de veredicto y hallazgos con `archivo:línea` y evidencia (como el `checker`).
-2. **Valida la plantilla:** `.venv/bin/factory team validate` debe terminar en 0, y `factory team list` debe mostrar el fichaje en su puesto.
+2. **Valida la plantilla:** `factory doctor` y los tests `tests/test_team_*.py` comprueban el frontmatter.
 3. **Haz una prueba real barata con haiku** y comprueba que el agente carga y que respeta su terreno. El modo de permisos depende del tipo:
 
    ```bash
@@ -102,7 +102,7 @@ El reglamento está en `.claude/skills/equipo/SKILL.md`. Resumen:
 
 | Fase | Quién | Qué |
 |---|---|---|
-| 1. Convocatoria | técnico | reúne el contexto, ejecuta `factory team lineup`, ajusta justificando cada alta o baja y **publica la alineación antes de invocar a nadie** |
+| 1. Convocatoria | técnico | reúne el contexto, elige la convocatoria con la tabla de este documento, justificando cada alta o baja y **publica la alineación antes de invocar a nadie** |
 | 2. Pre-partido | `producto`, `qa` | preguntas, criterios WHEN/THEN y plan de pruebas; las preguntas abiertas van al humano **antes de construir** |
 | 3. Construcción | `ingeniero-software`, `entrega-qa` | implementa con los criterios, el plan y las respuestas; si juega `entrega-qa`, escribe el paquete en `entregas/<TICKET>/` |
 | 4. Verificación | técnico | `./scripts/check.sh`; si juega `metricas`, `factory complexity --base <ref> --json`; si juega `entrega-qa`, `python entregas/<TICKET>/escenarios.py --list` |
@@ -143,16 +143,13 @@ El acta, aunque termine en `pass`, **no sustituye** al árbitro. Ver [Roles](rol
 |---|---|
 | `/equipo <petición, rama o descripción>` | la sesión principal hace de técnico y juega el partido |
 | `claude --agent tecnico "<…>"` | arranca Claude Code con el técnico como agente principal |
-| `factory team list [--json]` | formación por líneas, vacantes, técnico y árbitro |
-| `factory team validate [--json]` | comprueba el frontmatter de la plantilla (también lo hace `factory doctor`) |
-| `factory team lineup [--base REF] [--paths P…] [--peticion TEXTO \| --peticion-file F] [--json]` | convocatoria sugerida, con el motivo de cada jugador |
 | `factory complexity [RUTAS…] [--base REF] [--max N] [--json]` | complejidad ciclomática por función (rangos A–F) y delta frente a `REF` |
 
 No lances al técnico como subagente (`subagent_type: tecnico`). Un subagente no puede invocar a otros, así que el técnico solo dirige desde la sesión principal o como agente principal.
 
 ## Costes
 
-- Los subcomandos `factory team` y `factory complexity` son deterministas y no cuestan nada.
+- `factory complexity` es determinista y no cuestan nada.
 - Cada convocado es una invocación de subagente, y cada vuelta o petición de concreción, otra más. Por eso existe la convocatoria: el técnico convoca lo mínimo que cubra el riesgo.
 - `seguridad`, `revisor-pr`, `producto`, `arquitecto-api` y el técnico usan opus; `qa`, `documentador`, `metricas`, `ingeniero-software` y `entrega-qa`, sonnet.
 - Las pruebas reales de cada agente usan haiku: `--max-budget-usd 0.05` para un revisor y `0.10` para un constructor, que además escribe archivos.

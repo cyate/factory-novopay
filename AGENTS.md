@@ -16,7 +16,6 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 - Puerta previa a un pull request (árbol limpio, commits sobre la base, verificación, tamaño, complejidad y CodeRabbit en local): `./scripts/pre-pr.sh [base]`
 - Auditoría del harness: `.venv/bin/factory doctor`
 - Features: `.venv/bin/factory features list | start <id> | verify <id>`
-- Equipo ideal (plantilla y convocatoria sugerida): `.venv/bin/factory team list | validate | lineup`
 - Complejidad ciclomática por función: `.venv/bin/factory complexity [rutas] [--base REF] [--max N]`
 - Recomendaciones de los revisores de un PR: `.venv/bin/factory feedback <pr> [--revisor <login>]`
 
@@ -72,7 +71,7 @@ Léelos solo cuando la tarea lo requiera:
 - [Observabilidad](docs/harness/observabilidad.md): estado y artefactos de cada ejecución.
 - [Recomendaciones](docs/harness/recomendaciones.md): `factory feedback` y la skill `recomendaciones`, para atender los hilos de los revisores de un pull request.
 - [Cerebros](docs/harness/cerebros.md): cerebro principal (libros, fuera de git) y diario; `factory brain …`.
-- [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo` y `factory team …`.
+- [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo`.
 - [Cambios OpenSpec](openspec/changes/): requisitos y tareas del cambio en curso.
 
 ## Estructura

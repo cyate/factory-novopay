@@ -288,15 +288,7 @@ Los dorsales 8 y 11 están vacantes: fichar es añadir un archivo en `.claude/ag
 /equipo "Añade la función restar con su test"      # en la sesión principal: técnico + convocados
 claude --agent tecnico                             # o una sesión con el técnico al mando
 
-# 2. Ver y validar la plantilla
-factory team list                                  # formación, vacantes, técnico y árbitro
-factory team validate                              # 0 si la plantilla es válida
-
-# 3. Convocatoria sugerida para el cambio actual (el técnico la ajusta y la justifica)
-factory team lineup --base main
-factory team lineup --peticion "Añade la función restar"
-
-# 4. Complejidad ciclomática (la usa el jugador metricas)
+# 2. Complejidad ciclomática (la usa el jugador metricas)
 factory complexity src/                            # funciones ordenadas por complejidad
 factory complexity --base main --max 10            # solo lo cambiado; termina en 1 si algo nuevo o empeorado supera 10
 ```
@@ -313,7 +305,6 @@ El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independ
 | `factory goal validate <goal.md>` | valida un objetivo y muestra los límites | 0 |
 | `factory goal run <goal.md> [--dry-run]` | loop maker/checker hasta cumplir o parar | `claude` |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
-| `factory team list \| validate \| lineup` | plantilla del equipo ideal y convocatoria sugerida | 0 |
 | `factory complexity [rutas] [--base REF] [--max N] [--json]` | complejidad ciclomática por función y delta frente a `REF` | 0 |
 | `factory feedback <pr> [--repo …] [--revisor …] [--resueltos] [--json]` | recomendaciones de los revisores de un pull request | 0 |
 
