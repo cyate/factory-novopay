@@ -226,7 +226,7 @@
     {
       "id": "complexity-metrics",
       "priority": 17,
-      "area": "team",
+      "area": "harness",
       "title": "Complejidad ciclomática",
       "user_visible_behavior": "`factory complexity [rutas] [--base REF] [--max N] [--json]` mide la complejidad ciclomática por función con rangos A–F y delta frente a una referencia; `pre-pr.sh` lo usa como puerta (`--max`).",
       "status": "passing",
@@ -314,7 +314,7 @@
       "priority": 32,
       "area": "revision",
       "title": "Puerta previa al pull request y consulta a la biblioteca",
-      "user_visible_behavior": "`./scripts/pre-pr.sh [base]` corre contra el diff, antes de abrir un pull request, lo mismo que correrá el revisor: árbol limpio y commits sobre la base, `./scripts/check.sh`, tamaño del PR, complejidad ciclomática con umbral y `coderabbit review --base <base> --gate major`. Termina en 0 solo si el PR se puede abrir; sin el CLI de CodeRabbit lo dice, y `PRE_PR_STRICT=1` convierte esa ausencia en fallo. `.coderabbit.yaml` lleva las reglas con las que el bot revisa este repositorio. El maker y los diez jugadores del equipo contrastan su propuesta contra la biblioteca técnica y la citan (`Libro · cap. N · pp. A–B`); el `checker` queda fuera a propósito.",
+      "user_visible_behavior": "`./scripts/pre-pr.sh [base]` corre contra el diff, antes de abrir un pull request, lo mismo que correrá el revisor: árbol limpio y commits sobre la base, `./scripts/check.sh`, tamaño del PR, complejidad ciclomática con umbral y `coderabbit review --base <base> --gate major`. Termina en 0 solo si el PR se puede abrir; sin el CLI de CodeRabbit lo dice, y `PRE_PR_STRICT=1` convierte esa ausencia en fallo. `.coderabbit.yaml` lleva las reglas con las que el bot revisa este repositorio. El maker, `ingeniero-software` y `seguridad` contrastan su propuesta contra la biblioteca técnica y la citan (`Libro · cap. N · pp. A–B`); el `checker` queda fuera a propósito.",
       "status": "not_started",
       "verification": [
         "python -m pytest -q tests/test_reglas_de_oficio.py tests/test_pre_pr.py"

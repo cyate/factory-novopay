@@ -28,6 +28,11 @@ def test_frontmatter_completo(path: Path):
     assert datos.get("description") and datos.get("tools") and datos.get("model")
 
 
+def test_el_constructor_no_delega():
+    herramientas = _frontmatter(AGENTES / "ingeniero-software.md")["tools"]
+    assert "Agent" not in {h.strip() for h in herramientas.split(",")}
+
+
 @pytest.mark.parametrize("nombre", ["checker", "seguridad"])
 def test_los_revisores_son_de_solo_lectura(nombre: str):
     herramientas = {h.strip() for h in _frontmatter(AGENTES / f"{nombre}.md")["tools"].split(",")}

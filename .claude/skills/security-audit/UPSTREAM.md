@@ -14,7 +14,7 @@ Este directorio es una **copia literal** de `skills/security-audit/` del reposit
 
 - **La copia es literal y no se edita.** Ningún archivo de este directorio, salvo este `UPSTREAM.md`, se modifica a mano; tampoco `SKILL.md`.
 - **Las adaptaciones van en `.claude/agents/seguridad.md`.** Ahí se fijan el modo guía sobre el diff, el listón de prueba "no ejecutado", el mapeo de severidad, la sección `needs_validation` y la checklist de este repositorio (decisión D5 de `openspec/changes/archive/2026-10-30-add-equipo-ideal/design.md`).
-- **Integridad.** `tests/test_team_seguridad.py` recalcula el sha256 de cada archivo y lo compara con la tabla de abajo. El test además fija una huella de la tabla, de modo que editar un archivo y su fila a la vez también rompe la verificación.
+- **Integridad.** `tests/test_security_audit_copia.py` recalcula el sha256 de cada archivo y lo compara con la tabla de abajo. El test además fija una huella de la tabla, de modo que editar un archivo y su fila a la vez también rompe la verificación.
 
 ## Resincronizar
 
@@ -24,7 +24,7 @@ Resincronizar es volver a copiar, con un clon local del upstream (`<clon>`) y un
 2. Borrar de este directorio todo salvo `UPSTREAM.md`, y copiar en él el contenido de `<tmp>/skills/security-audit/`.
 3. Copiar la licencia de la raíz: `git -C <clon> show <commit>:LICENSE > LICENSE`.
 4. Actualizar en este archivo el commit, la fecha y la tabla de sha256.
-5. Actualizar en `tests/test_team_seguridad.py` estas constantes:
+5. Actualizar en `tests/test_security_audit_copia.py` estas constantes:
    - `COMMIT`;
    - `FECHA_DE_COPIA`;
    - `ARCHIVOS_COPIADOS`, si cambia el número de archivos;
@@ -33,7 +33,7 @@ Resincronizar es volver a copiar, con un clon local del upstream (`<clon>`) y un
 
 ## Validadores de Node
 
-Los validadores `validate-findings.cjs` y `validate-coverage-ledger.cjs` (y sus `*.test.cjs`) necesitan Node. Solo los usa el modo de auditoría completa, que el jugador `seguridad` no ejecuta, y **no forman parte de `scripts/check.sh`**.
+Los validadores `validate-findings.cjs` y `validate-coverage-ledger.cjs` (y sus `*.test.cjs`) necesitan Node. Solo los usa el modo de auditoría completa, que el agente `seguridad` no ejecuta, y **no forman parte de `scripts/check.sh`**.
 
 ## sha256 de los archivos copiados
 

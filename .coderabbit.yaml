@@ -39,7 +39,7 @@ reviews:
         Señala la regla añadida que duplica otra o que no es comprobable.
     - path: ".claude/agents/**/*.md"
       instructions: >-
-        Plantilla del equipo de sub-agentes. Comprueba que el bloque de herramientas
+        Agentes interactivos de Claude Code. Comprueba que el bloque de herramientas
         coincide con lo que el rol puede hacer: un revisor de solo lectura nunca lleva
         Edit, Write ni Bash.
 

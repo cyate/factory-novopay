@@ -39,7 +39,7 @@ El repositorio SHALL declarar en `.coderabbit.yaml` las reglas con las que el bo
 pull requests. El archivo MUST fijar el perfil de revisión, MUST revisar también los pull
 requests en borrador, MUST excluir de la revisión las rutas de los cerebros y MUST llevar
 instrucciones por ruta para el código, los contratos de rol de `prompts/` y la plantilla del
-equipo de `.claude/agents/`.
+agentes de `.claude/agents/`.
 
 Un hilo de revisión que repite algo que las reglas de la casa ya deciden MUST tratarse como una
 instrucción que falta en ese archivo, no como una corrección del código.

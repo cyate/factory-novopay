@@ -16,7 +16,7 @@
 ## 2. La consulta a la biblioteca (`brain-retrieval`)
 
 - [x] 2.1 `prompts/maker.md` y `prompts/intake.md`, con sus plantillas de `src/factory/templates/`.
-- [x] 2.2 Los diez jugadores de `.claude/agents/`, con la variante que cabe en sus herramientas.
+- [x] 2.2 Los agentes de `.claude/agents/`, con la variante que cabe en sus herramientas.
 - [x] 2.3 `prompts/checker.md` y `.claude/agents/checker.md`: "lo que abriría un hilo en el PR".
 - [x] 2.4 `AGENTS.md` (restricción dura) y `docs/harness/cerebros.md` (consulta obligatoria).
 - [x] 2.5 `docs/harness/roles.md` y `revision.md`: las reglas de oficio dejan de ser cinco.

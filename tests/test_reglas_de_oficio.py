@@ -15,7 +15,7 @@ PUERTA = REPO / "scripts" / "pre-pr.sh"
 CODERABBIT = REPO / ".coderabbit.yaml"
 PLANTILLAS = REPO / "src" / "factory" / "templates" / "prompts"
 
-# Todos los roles del equipo consultan a los expertos antes de proponer, menos el checker:
+# Todos los agentes consultan a los expertos antes de proponer, menos el checker:
 # juzga solo con los criterios, el diff y la verificación (docs/harness/cerebros.md).
 QUIEN_CONSULTA = sorted(set(AGENTES_DIR.glob("*.md")) - {CHECKER_AGENTE})
 QUIEN_CONSULTA += [MAKER]

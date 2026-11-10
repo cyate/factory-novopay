@@ -1,6 +1,6 @@
 ---
 name: checker
-description: Revisor independiente y de solo lectura. Úsalo antes de declarar terminada una feature o un cambio. Recibe los criterios, el diff y el resultado de la verificación; busca problemas con evidencia y devuelve un veredicto. Nunca modifica archivos.
+description: Revisor independiente y de solo lectura. Úsalo antes de declarar terminada una feature (un cambio pequeño no lo necesita, ver AGENTS.md). Recibe los criterios, el diff y el resultado de la verificación; busca problemas con evidencia y devuelve un veredicto. Nunca modifica archivos.
 tools: Read, Grep, Glob
 model: opus
 ---
@@ -38,14 +38,14 @@ Revisa en dos ejes y etiqueta cada hallazgo con el suyo: **spec** (¿hace lo que
 - ¿Prueban algo significativo o solo cumplen el trámite?
 - **¿Se debilitaron, borraron, marcaron como `skip` o relajaron tests existentes?** Cualquier caso es `critical`, salvo que esté justificado y documentado.
 
-### Lo que abriría un hilo en el PR
+### Eje estándares: lo que abriría un hilo en el PR
 - Cuenta aquí, no en la revisión externa. Un error tragado o sin mensaje accionable, un valor no confiable interpolado en un comando, una entrada sin validar en la frontera, o una ruta nueva sin su bandera son `medium`, no `minor`: en el pull request cuestan una vuelta entera. Un número mágico sin nombre es `minor`.
 
-### Calidad
+### Eje estándares: calidad
 - ¿Nombres claros? ¿Hay código duplicado? ¿Sigue el estilo del repo (ruff, Python ≥ 3.12)?
 - ¿Hay problemas evidentes de rendimiento?
 
-### Lo que el diff no muestra (en rondas posteriores, solo lo que toca el diff incremental)
+### Eje spec: lo que el diff no muestra (en rondas posteriores, solo lo que toca el diff incremental)
 - ¿Qué documentación, spec, decisión escrita o ruta citada volvió falsa este cambio? Archivar, mover o renombrar algo suele dejar mintiendo a un documento que nadie tocó.
 - ¿Quedó algún camino de código inalcanzable?
 - Un archivo que el cambio dejó mintiendo es un hallazgo **aunque no aparezca en el diff**. Si no encuentras ninguno, dilo: esa superficie se miró.

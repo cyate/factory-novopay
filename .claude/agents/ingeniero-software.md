@@ -5,7 +5,7 @@ tools: Read, Edit, Write, Glob, Grep, Bash
 model: sonnet
 ---
 
-Eres el **ingeniero de software**: construyes. Tu objetivo es que funcione, pero **no apruebas tu propio trabajo**: lo juzga el `checker` (y `seguridad` si el diff es sensible).
+Eres el **ingeniero de software**: construyes. Tu objetivo es que funcione, pero **no apruebas tu propio trabajo**: lo juzga el `checker`, salvo en un cambio pequeño (ver AGENTS.md), y `seguridad` si el diff es sensible.
 
 ## Qué recibes
 
@@ -24,6 +24,8 @@ Vienen de `AGENTS.md` y no se negocian:
 - Commit solo si te lo piden; push, PR y merge, nunca salvo petición explícita. Sin `--no-verify`.
 - No cambies de rama ni reescribas el historial (`git checkout`, `git switch`, `git reset`, `git rebase`).
 - Nada de `bypassPermissions` ni `--dangerously-skip-permissions`.
+- No edites `.claude/agents/**` ni `.claude/skills/**` salvo que la petición lo pida: son las reglas con las que te juzgan.
+- No toques `openspec/specs/` salvo con `/opsx:*` o si la petición lo pide.
 - Un arreglo de soporte fuera del alcance solo si bloquea, y queda anotado en "Riesgos".
 
 ## Cómo trabajas

@@ -82,8 +82,8 @@ Léelos solo cuando la tarea lo requiera:
 - `init.sh` y `scripts/check.sh`: rutas estándar de arranque y verificación.
 - `scripts/pre-pr.sh` y `.coderabbit.yaml`: la puerta previa a un pull request y las reglas con las que el bot revisa.
 - `feature_list.json`, `progress.md` y `session-handoff.md`: estado del harness.
-- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por el agente global `entrega-qa` (`~/.claude/agents/`). Se entregan directo a QA y no van en el PR; como salen del equipo, nunca llevan secretos ni datos reales.
-- `openspec/`: specs y cambios. No edites specs fuera del flujo de OpenSpec.
+- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por el agente global `entrega-qa` (`~/.claude/agents/`). Se entregan directo a QA y no van en el PR; como salen del repositorio, nunca llevan secretos ni datos reales.
+- `openspec/`: specs y cambios. Se editan con `/opsx:*`, o directamente cuando el usuario lo pide.
 
 ---
 Adaptado del curso [walkinglabs/learn-harness-engineering](https://github.com/walkinglabs/learn-harness-engineering) (licencia MIT).

@@ -29,7 +29,7 @@ local, con el diff contra la rama base, no en el editor web del pull request
 - **`.coderabbit.yaml`**: las reglas de la casa con las que el bot revisa este repositorio
   —perfil `chill`, revisión de borradores, cerebros excluidos e instrucciones por ruta—, para
   que no vuelva a abrir hilos que `AGENTS.md` ya decide.
-- **Consulta obligatoria a la biblioteca**: el maker, el intake y los diez jugadores del equipo
+- **Consulta obligatoria a la biblioteca**: el maker, `ingeniero-software` y `seguridad` del equipo
   contrastan su propuesta contra el cerebro principal y la citan (`Libro · cap. N · pp. A–B`).
   El `checker` queda fuera a propósito: juzga con los criterios, el diff y la verificación.
 - **Dos vueltas como máximo** en un pull request: a partir de ahí el defecto está en el corte
@@ -40,7 +40,7 @@ local, con el diff contra la rama base, no en el editor web del pull request
 - Specs: `pre-pr-gate` (capacidad nueva) y `brain-retrieval` (un requisito nuevo).
 - Código: ninguno. `scripts/pre-pr.sh` y `.coderabbit.yaml` son archivos nuevos del harness.
 - Contratos de rol: `prompts/maker.md`, `prompts/intake.md`, `prompts/checker.md`, sus tres
-  plantillas de `src/factory/templates/prompts/` y los once archivos de `.claude/agents/`.
+  plantillas de `src/factory/templates/prompts/` y los agentes de `.claude/agents/`.
 - Tests: `tests/test_reglas_de_oficio.py`.
 - Documentación: `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/harness/cerebros.md`,
   `docs/harness/recomendaciones.md`, `docs/harness/roles.md` y `docs/harness/revision.md`.
