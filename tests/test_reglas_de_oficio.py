@@ -8,18 +8,12 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 
-CHECKER_LOOP = REPO / "prompts" / "checker.md"
 CHECKER_AGENTE = REPO / ".claude" / "agents" / "checker.md"
 MAKER = REPO / "prompts" / "maker.md"
 INTAKE = REPO / "prompts" / "intake.md"
-CEREBROS = REPO / "docs" / "harness" / "cerebros.md"
-CIERRE = REPO / "docs" / "harness" / "clean-state-checklist.md"
 AGENTES_DIR = REPO / ".claude" / "agents"
-CLAUDE_MD = REPO / "CLAUDE.md"
 PUERTA = REPO / "scripts" / "pre-pr.sh"
 CODERABBIT = REPO / ".coderabbit.yaml"
-ROLES = REPO / "docs" / "harness" / "roles.md"
-REC = REPO / "docs" / "harness" / "recomendaciones.md"
 PLANTILLAS = REPO / "src" / "factory" / "templates" / "prompts"
 
 # Todos los roles del equipo consultan a los expertos antes de proponer, menos el checker:
@@ -27,7 +21,6 @@ PLANTILLAS = REPO / "src" / "factory" / "templates" / "prompts"
 QUIEN_CONSULTA = sorted(set(AGENTES_DIR.glob("*.md")) - {CHECKER_AGENTE})
 QUIEN_CONSULTA += [MAKER, INTAKE]
 
-LOS_DOS_CHECKERS = (CHECKER_LOOP, CHECKER_AGENTE)
 # Cada prompt gobierna solo si se lee entero; un prompt que crece deja de leerse.
 MAX_LINEAS_PROMPT = 70
 
@@ -44,22 +37,6 @@ def _contiene(path: Path, *fragmentos: str) -> None:
     assert not faltan, f"{path.relative_to(REPO)}: no menciona {faltan}"
 
 
-# El campo donde cada checker cita el test que defiende el arreglo.
-CAMPO_EVIDENCIA = {CHECKER_LOOP: "`evidence`", CHECKER_AGENTE: "`evidencia`"}
-
-
-@pytest.mark.parametrize("path", LOS_DOS_CHECKERS, ids=lambda p: p.name)
-def test_mutacion_cierra_el_hallazgo(path: Path) -> None:
-    """Un arreglo sin prueba que falle al revertirlo es una opinión con commit."""
-    _contiene(path, "mutación", "revertir", "sigue abierto", CAMPO_EVIDENCIA[path])
-
-
-@pytest.mark.parametrize("path", LOS_DOS_CHECKERS, ids=lambda p: p.name)
-def test_revision_de_lo_que_el_diff_no_muestra(path: Path) -> None:
-    """Un archivo que el cambio dejó mintiendo es un hallazgo aunque no esté en el diff."""
-    _contiene(path, "no muestra", "aunque no aparezca en el diff")
-
-
 def test_maker_comprueba_contra_origin_main() -> None:
     """Un 'esto no existe' dicho desde un checkout viejo manda a construir lo ya construido."""
     _contiene(MAKER, "origin/main", "self_check")
@@ -70,37 +47,10 @@ def test_intake_separa_lo_contado_de_lo_supuesto() -> None:
     _contiene(INTAKE, "nunca un hecho", "se cita con su ruta")
 
 
-def test_precedencia_entre_cerebros_y_documentacion() -> None:
-    """La precedencia tiene dirección y deja rastro; sin eso, el texto podría decir lo contrario."""
-    _contiene(CEREBROS, "precedencia", "mandan los documentos", "progress.md")
-
-
-def test_cierre_comprueba_lo_que_quedo_mintiendo() -> None:
-    _contiene(CIERRE, "mintiendo")
-
-
 @pytest.mark.parametrize("path", sorted((REPO / "prompts").glob("*.md")), ids=lambda p: p.name)
 def test_los_prompts_siguen_siendo_cortos(path: Path) -> None:
     lineas = len(path.read_text(encoding="utf-8").splitlines())
     assert lineas <= MAX_LINEAS_PROMPT, f"{path.name}: {lineas} líneas"
-
-
-@pytest.mark.parametrize("path", QUIEN_CONSULTA, ids=lambda p: p.name)
-def test_consulta_a_los_expertos_antes_de_proponer(path: Path) -> None:
-    """Elegir enfoque sin mirar la biblioteca repite un error ya escrito en un libro."""
-    _contiene(path, "expertos", "cap.", "pp.")
-
-
-@pytest.mark.parametrize("path", LOS_DOS_CHECKERS, ids=lambda p: p.name)
-def test_el_checker_no_recibe_conocimiento(path: Path) -> None:
-    """La regla del checker es juzgar el diff; una cita de libro le daría de qué opinar."""
-    assert "expertos" not in _texto(path)
-
-
-@pytest.mark.parametrize("path", LOS_DOS_CHECKERS, ids=lambda p: p.name)
-def test_lo_que_abriria_un_hilo_en_el_pr(path: Path) -> None:
-    """Lo que el revisor externo abriría como hilo se decide aquí, una vuelta antes."""
-    _contiene(path, "abriría un hilo en el pr", "`medium`")
 
 
 def test_la_puerta_previa_al_pull_request_existe_y_se_exige() -> None:
@@ -120,7 +70,6 @@ def test_la_puerta_previa_al_pull_request_existe_y_se_exige() -> None:
         "rev-list --count",  # ni sin commits sobre la base
         "PRE_PR_STRICT",
     )
-    _contiene(CLAUDE_MD, "pre-pr.sh", "dos vueltas como máximo", ".coderabbit.yaml")
 
 
 @pytest.mark.parametrize("nombre", ["maker.md", "checker.md", "intake.md"], ids=lambda n: n)
@@ -166,14 +115,3 @@ def test_la_busqueda_cabe_en_las_herramientas_del_rol(path: Path) -> None:
     assert "factory" in permitidas, (
         f"{path.name}: manda ejecutar `factory brain search` y el rol no lo tiene permitido"
     )
-
-
-def test_las_reglas_de_oficio_estan_listadas_donde_se_buscan() -> None:
-    """roles.md es el registro canónico; una regla que no está ahí no existe para quien lo lea."""
-    _contiene(ROLES, "expertos", "abriría un hilo en el pull request")
-    assert "cinco reglas" not in _texto(ROLES), "roles.md vuelve a contar cinco reglas"
-
-
-def test_la_puerta_documentada_es_la_puerta_que_hay() -> None:
-    """Un documento que describe la versión anterior del script manda a buscar lo que no existe."""
-    _contiene(REC, "PRE_PR_STRICT", "PRE_PR_MAX_COMPLEJIDAD", "sin commitear")

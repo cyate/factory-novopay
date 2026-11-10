@@ -186,7 +186,7 @@ def test_las_entregas_estan_en_los_mapas_de_rutas():
     fila = next(
         linea for linea in readme.splitlines() if linea.startswith("| `entregas/<TICKET>/`")
     )
-    assert "versionan" in fila and "secretos" in fila
+    assert "directo a QA" in fila and "secretos" in fila
     agentes = (REPO / "AGENTS.md").read_text(encoding="utf-8")
     linea = next(x for x in agentes.splitlines() if x.startswith("- `entregas/<TICKET>/`"))
     assert "entrega-qa" in linea and "secretos" in linea

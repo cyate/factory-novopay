@@ -110,6 +110,8 @@ Cuando una invocación de agente falle (error del CLI, salida ilegible o tiempo 
 
 El prompt del checker (`prompts/checker.md`) y el subagente `checker` (`.claude/agents/checker.md`) SHALL exigir que todo hallazgo `critical` o `medium` que se declare corregido quede defendido por una prueba que falla si el arreglo se revierte. Mientras esa prueba no exista, el hallazgo MUST seguir contándose como abierto, aunque el código ya no tenga el defecto.
 
+La prueba de mutación SHALL aplicarse a hallazgos en código o tests; un hallazgo en documentación se cierra cuando el texto queda corregido.
+
 El checker SHALL nombrar en su veredicto, dentro del campo `evidence`, el test concreto que defiende cada hallazgo que da por cerrado. El esquema JSON del veredicto no cambia: la prueba se cita en los campos existentes.
 
 #### Scenario: Arreglo sin prueba que lo defienda
@@ -121,6 +123,11 @@ El checker SHALL nombrar en su veredicto, dentro del campo `evidence`, el test c
 
 - **WHEN** una ronda corrige un hallazgo y añade un test que falla si se revierte el arreglo
 - **THEN** el checker puede darlo por cerrado y cita en `evidence` el archivo y el nombre de ese test
+
+#### Scenario: Hallazgo en documentación
+
+- **WHEN** una ronda corrige un hallazgo `medium` que está en documentación (prosa, no código ni tests)
+- **THEN** el checker lo da por cerrado al comprobar que el texto quedó corregido, sin exigir prueba de mutación
 
 ### Requirement: La revisión cubre lo que el diff no muestra
 

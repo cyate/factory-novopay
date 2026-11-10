@@ -22,7 +22,6 @@ Un test que ejerce el router en proceso prueba el enrutado y la forma de la resp
 
 - El agente `entrega-qa` escribe esos escenarios en `entregas/<TICKET>/`. Si ese directorio está vacío mientras hay rutas construidas, el recorrido no se ha hecho, da igual lo verde que esté la compuerta.
 - **Decisión del usuario:** el paquete `entregas/<TICKET>/` se entrega **directo a QA** y **no va en un pull request**; no es un bloqueo de aprobación.
-- **Pendiente:** `scripts/pre-pr.sh` (paso "recorrido") todavía exige `entregas/` en el diff y choca con esa decisión. Hay que arreglar el script; esta página no lo toca.
 
 ## Un PR nace en borrador
 

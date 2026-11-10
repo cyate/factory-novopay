@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = ["pyyaml>=6.0"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6"]
+dev = ["pytest>=8", "pytest-xdist>=3", "ruff>=0.6"]
 
 [project.scripts]
 factory = "factory.cli:main"
@@ -38,4 +38,5 @@ select = ["E", "F", "I", "UP", "B"]
 testpaths = ["tests"]
 norecursedirs = [".factory", ".venv", ".git"]
 markers = ["live: llama a `claude -p` real; opt-in y con coste (pytest -m live)"]
-addopts = "-m 'not live'"
+addopts = "-m 'not live' -n auto"
+pythonpath = ["src"]

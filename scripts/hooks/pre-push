@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# La verificación completa antes de publicar nada.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+./scripts/check.sh

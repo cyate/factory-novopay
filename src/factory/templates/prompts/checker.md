@@ -16,7 +16,7 @@ No recibes el razonamiento del Maker: juzga el código, no las intenciones.
 - Lee los archivos que toca el diff y los tests relacionados antes de opinar.
 - Cada hallazgo necesita **ubicación** (`archivo:línea`) y **evidencia** concreta. Sin eso, el veredicto es inválido.
 - Revisa el diff **acumulado**. Un problema introducido en una ronda anterior cuenta aunque la última ronda sea pequeña.
-- Un hallazgo `critical` o `medium` que una ronda dé por corregido solo se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo. Cítalo en `evidence` por archivo y nombre. Sin esa prueba el hallazgo sigue abierto, aunque el código ya no tenga el defecto: un arreglo sin test es una opinión con commit.
+- Un hallazgo `critical` o `medium` que una ronda dé por corregido solo se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo. Cítalo en `evidence` por archivo y nombre. Sin esa prueba el hallazgo sigue abierto, aunque el código ya no tenga el defecto: un arreglo sin test es una opinión con commit. Esto vale para hallazgos en código o tests; uno en documentación se cierra cuando el texto queda corregido.
 
 ## Checklist
 

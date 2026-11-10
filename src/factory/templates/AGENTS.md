@@ -14,18 +14,16 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 
 ## Inicio de sesión
 
-1. `pwd`: confirma que estás en la raíz del repositorio.
-2. Lee `progress.md`: estado verificado y siguiente paso.
-3. `factory features list`: la feature `in_progress` o la de mayor prioridad sin terminar.
-4. `git log --oneline -5`.
-5. `{{START}}`. Si la verificación de referencia falla, arréglala antes de empezar trabajo nuevo.
+1. Lee `progress.md`: estado verificado y siguiente paso.
+2. `factory features list`: la feature `in_progress` o la de mayor prioridad sin terminar.
+3. `factory doctor`. Si falla, arréglalo antes de empezar trabajo nuevo. Usa `{{START}}` solo si falta `.venv`.
 
 ## Restricciones duras
 
 - **WIP=1**: una sola feature en `in_progress`.
 - **No edites a mano `status` ni `evidence`** de `feature_list.json`; usa `factory features verify <id>`.
 - **No debilites, borres ni omitas tests** para que algo pase.
-- **No hagas push, merge ni PRs** desde un agente. No cambies las reglas de verificación sin una petición explícita.
+- **Push y PRs solo si el usuario lo pide.** Nunca hagas merge, `factory land` ni `factory goal promote --yes` sin una petición explícita. No cambies las reglas de verificación sin una petición explícita.
 - **Respeta el alcance** de la feature activa.
 
 ## Definición de terminado

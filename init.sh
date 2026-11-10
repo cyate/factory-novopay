@@ -25,5 +25,7 @@ else
   .venv/bin/python -m pip install --quiet --disable-pip-version-check -e '.[dev]'
 fi
 
+git config core.hooksPath scripts/hooks
+
 echo "==> Verificación de referencia"
 exec ./scripts/check.sh

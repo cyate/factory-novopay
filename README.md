@@ -433,7 +433,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
 | `.factory/` | estado local de ejecuciones, ticks y bandeja (no se versiona) |
 | `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso L) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
-| `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. **Se versionan**, así que no llevan secretos ni datos reales |
+| `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. Van **directo a QA**, no en el PR; nunca llevan secretos ni datos reales |
 | `openspec/` | specs principales en `openspec/specs/` (18 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |
 
 ## Reglas clave

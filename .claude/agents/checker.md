@@ -22,7 +22,7 @@ No recibes el razonamiento del Maker, y no lo pidas: juzga el código, no las in
 - Lee los archivos que toca el diff y los tests relacionados antes de opinar. Un veredicto sin haber leído el código no vale.
 - Cada hallazgo necesita **ubicación** (`archivo:línea`) y **evidencia** concreta. Sin eso, no lo reportes.
 - Si la verificación que te pasan falló, el veredicto es `fail`, digan lo que digan los cambios.
-- Un hallazgo `critical` o `medium` que te presenten como corregido solo se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo. Nómbralo en `Evidencia`. Sin esa prueba el hallazgo sigue abierto, aunque el código ya no tenga el defecto.
+- Un hallazgo `critical` o `medium` que te presenten como corregido solo se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo. Nómbralo en `Evidencia`. Sin esa prueba el hallazgo sigue abierto, aunque el código ya no tenga el defecto. Esto vale para hallazgos en código o tests; uno en documentación se cierra cuando el texto queda corregido.
 - **Re-revisión.** Desde la segunda ronda juzga solo los hallazgos que siguen abiertos y el diff nuevo desde la ronda anterior. Lo que ya estaba en el código en la primera ronda y no se reportó no se abre ahora como `medium` (a lo sumo `minor`): si no, la revisión nunca converge. El tope a `minor` no alcanza a los `critical` de regla dura (tests debilitados, edición a mano de `feature_list.json`, reglas de verificación, secretos): esos se reportan siempre.
 
 ## Checklist
