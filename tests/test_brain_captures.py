@@ -128,8 +128,6 @@ def test_aceptar_una_captura(tmp_path, capsys):
     from factory.cli import main
 
     root, config, state, capture = _with_capture(tmp_path)
-    assert main(["--root", str(root), "status"]) == 0
-    assert "1 captura(s) pendiente(s)" in capsys.readouterr().out
     assert main(["--root", str(root), "brain", "pending"]) == 0
     assert capture.id in capsys.readouterr().out
     assert main(["--root", str(root), "brain", "accept", capture.id]) == 0

@@ -11,7 +11,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from factory import __version__, doctor, features, scaffold, schedule, status
+from factory import __version__, doctor, features, scaffold, schedule
 from factory import intake as intake_mod
 from factory import tick as ticks
 from factory.agents.base import AgentRunner
@@ -325,17 +325,6 @@ def cmd_inbox(args: argparse.Namespace) -> int:
         )
         if e.question:
             print(f"          pregunta: {e.question}")
-    return EXIT_OK
-
-
-def cmd_status(args: argparse.Namespace) -> int:
-    config = load_config(args.root)
-    report = status.collect(config)
-    tick_lines = ticks.summarize(ticks.TickStore(config.state_path))
-    if tick_lines:
-        report.extra = ["\nVigilancia (ticks):", *tick_lines]
-    report.extra += status.brain_lines(config)
-    print(status.render(report))
     return EXIT_OK
 
 
@@ -814,9 +803,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     fb.add_argument("--json", action="store_true", help="imprime el informe en JSON")
     fb.set_defaults(handler=cmd_feedback)
-
-    stat = sub.add_parser("status", help="ejecuciones e indicadores de costes silenciosos")
-    stat.set_defaults(handler=cmd_status)
 
     cx = sub.add_parser(
         "complexity", help="complejidad ciclomática por función (rangos A–F y delta frente a REF)"
