@@ -12,4 +12,4 @@
   - **Dos vueltas como máximo.** Si tras la segunda siguen abriéndose hilos, para: el problema es el corte del PR o una regla que falta en `.coderabbit.yaml`, no el hilo. Arréglalo ahí y deja la nota con `factory brain learn`.
 - **Servicios Go de cifra** (rutas nuevas, feature-flags, abrir PRs, `entregas/`): antes del primer `Edit` o del primer PR en un repo cifra, lee `docs/harness/cifra.md`.
 - **Cierre de sesión.** Sigue la lista de `AGENTS.md`; no termines con `./scripts/check.sh` en rojo sin documentarlo en `progress.md`.
-- **OpenSpec.** Los comandos `/opsx:*` gestionan las specs y los cambios de `openspec/`.
+- **OpenSpec.** Los comandos `/opsx:*` gestionan las specs y los cambios de `openspec/`. Solo comandos: si `openspec update` vuelve a crear `.claude/skills/openspec-*`, bórralas (la configuración global tiene `delivery: both`).
