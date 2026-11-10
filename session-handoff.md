@@ -22,13 +22,13 @@
 - `~/.claude/settings.json` y `~/.claude/CLAUDE.md` sin jbcontext. La búsqueda de código va floorplan → grep.
 - La configuración global de OpenSpec está en `delivery: commands`.
 - Las memorias de cifra están en el proyecto `cifra-spend-corporate-api-go`. Las notas sueltas de cifra, en `~/NOVOPAYMENT/cifra-spend/notas-desde-factory-novo/`.
-- Respaldo del trabajo descartado (strands): ramas `respaldo/wip-2026-11-10` y `respaldo/wip-2026-11-10-b`.
+- Las ramas de respaldo de strands se borraron (eran `06e09fc` y `4826f2c`; recuperables con `git branch <nombre> <sha>` mientras git no las recolecte).
 
 ## Estado y siguiente paso
 
 - El detalle está en `progress.md`, sesión 025, y en `docs/historial/progress-sesiones.md`.
 - Mejor próximo paso: usar el harness ligero en trabajo real y medir otra retro.
-- Abierto, de baja prioridad: el paso «ajustes del bot» de `scripts/pre-pr.sh` no tiene test con `gh`. Las ramas de respaldo se pueden borrar cuando ya no hagan falta.
+- Abierto, de baja prioridad: el paso «ajustes del bot» de `scripts/pre-pr.sh` no tiene test con `gh`.
 
 ## Comandos
 
