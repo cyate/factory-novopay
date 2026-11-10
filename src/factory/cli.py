@@ -82,12 +82,6 @@ def cmd_features(args: argparse.Namespace) -> int:
     raise AssertionError(args.features_cmd)
 
 
-def cmd_hook(args: argparse.Namespace) -> int:
-    from factory.panel import hooks
-
-    return hooks.run()
-
-
 def cmd_doctor(args: argparse.Namespace) -> int:
     report = doctor.audit(load_config(args.root))
     if args.json:
@@ -794,11 +788,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--delete-branch", action="store_true", help="borra la rama de la ejecución al integrar"
     )
     land_p.set_defaults(handler=cmd_land)
-
-    hook_p = sub.add_parser(
-        "hook", help="registra un evento de hook de Claude Code para el panel (lee stdin)"
-    )
-    hook_p.set_defaults(handler=cmd_hook)
 
     fb = sub.add_parser(
         "feedback", help="recomendaciones de los revisores de un pull request (solo lectura)"

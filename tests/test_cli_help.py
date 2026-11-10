@@ -18,7 +18,6 @@ SUBCOMANDOS = [
     "team",
     "land",
     "status",
-    "hook",
     "complexity",
     "doctor",
     "feedback",
