@@ -30,7 +30,7 @@ class InboxEntry:
     id: str
     goal_id: str
     kind: str = "run"  # run | escalation
-    origin: str = "goal"  # goal (factory goal run) | tick (factory tick)
+    origin: str = "goal"  # goal (factory goal run)
     status: str = PENDING
     created: str = field(default_factory=now_iso)
     reviewed_at: str | None = None
