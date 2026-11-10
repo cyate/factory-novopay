@@ -114,10 +114,6 @@ Qué pasa en cada ronda:
 
 El resultado queda en `.factory/runs/<run-id>/` (`decision.md`, `rounds/<n>/`); integrar la rama `factory/<run-id>` es decisión humana y a mano.
 
-## Peticiones: `factory intake`
-
-Triaje de peticiones en lenguaje natural (aceptar con borrador, pedir información o rechazar) y promoción explícita de borradores: ver [intake.md](intake.md).
-
 ## Anti-patrones (L13)
 
 - **Usar un loop por tiempo para una tarea finita**: repite el mismo trabajo sin acumular progreso. Usa `goal run`.

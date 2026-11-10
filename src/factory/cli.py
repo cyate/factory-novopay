@@ -9,7 +9,6 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from factory import __version__, doctor, features, scaffold
-from factory import intake as intake_mod
 from factory.agents.base import AgentRunner
 from factory.agents.claude_code import ClaudeCodeRunner
 from factory.brain import BrainError
@@ -23,7 +22,6 @@ from factory.engine import EngineError, Limits, LoopEngine, exit_code
 from factory.gitops import PreflightError
 from factory.goal import Goal, GoalError, load_goal
 from factory.inbox import Inbox, InboxError
-from factory.requests import RequestError
 from factory.util import find_root
 
 EXIT_OK = 0
@@ -232,24 +230,6 @@ def cmd_init(args: argparse.Namespace) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     print(result.render())
-    return EXIT_OK
-
-
-def cmd_intake(args: argparse.Namespace) -> int:
-    config = load_config(args.root)
-    text = Path(args.file).read_text(encoding="utf-8") if args.file else args.text
-    if not text or not text.strip():
-        raise GoalError('Falta el texto: `factory intake "<petición>"` o `--file archivo.md`.')
-    runner = make_runner(config)
-    if args.answer:
-        result = intake_mod.answer(config, runner, args.answer, text, budget_usd=args.budget)
-    else:
-        result = intake_mod.submit(config, runner, text, budget_usd=args.budget)
-    if result.decision is None:
-        return EXIT_FAIL
-    if result.draft:
-        rel = result.draft.relative_to(config.root)
-        print(f"Revisa el borrador y promuévelo: factory goal promote {rel} --yes")
     return EXIT_OK
 
 
@@ -513,17 +493,6 @@ def build_parser() -> argparse.ArgumentParser:
     ack.add_argument("id")
     inbox.set_defaults(handler=cmd_inbox)
 
-    intake_p = sub.add_parser(
-        "intake", help="triaje de una petición: ACCEPT (borrador), NEEDS-INFO o REJECT"
-    )
-    intake_p.add_argument("text", nargs="?", default=None, help="texto de la petición o respuesta")
-    intake_p.add_argument("--file", default=None, help="archivo con la petición o la respuesta")
-    intake_p.add_argument(
-        "--answer", default=None, metavar="REQUEST_ID", help="responde a una petición NEEDS-INFO"
-    )
-    intake_p.add_argument("--budget", type=float, default=1.0, help="presupuesto en USD (1.0)")
-    intake_p.set_defaults(handler=cmd_intake)
-
     brain = sub.add_parser("brain", help="cerebros de conocimiento: principal y diario")
     brain_sub = brain.add_subparsers(dest="brain_cmd", required=True)
     brain_import = brain_sub.add_parser(
@@ -658,7 +627,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         InboxError,
         PreflightError,
         EngineError,
-        RequestError,
         BrainError,
     ) as exc:
         print(f"error: {exc}", file=sys.stderr)

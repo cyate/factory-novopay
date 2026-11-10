@@ -16,7 +16,7 @@ El humano pasa de escribir cada instrucción a definir objetivos y revisar resul
 | macOS o Linux | — | `bash`, `flock` y worktrees de git (Windows solo con WSL) | — |
 | Python | ≥ 3.12 | el CLI `factory` y sus tests | `python3 --version` |
 | git | ≥ 2.30 | ramas y worktrees de cada ejecución | `git --version` |
-| Claude Code (`claude`) | ≥ 2.1, con sesión iniciada | **solo** para los loops reales (`goal run`, `intake`); cuestan dinero | `claude --version` |
+| Claude Code (`claude`) | ≥ 2.1, con sesión iniciada | **solo** para los loops reales (`goal run`); cuestan dinero | `claude --version` |
 | OpenSpec (`openspec`) | opcional | planificar cambios con `/opsx:*` | `openspec --version` |
 | uv | opcional | si está instalado, `init.sh` lo usa en lugar de `pip` | `uv --version` |
 
@@ -31,7 +31,6 @@ Elige el paso según lo que quieras hacer. A y D son la base; el resto se añade
 | llevar el harness a otro proyecto | [C](#c-aplicar-el-harness-a-otro-proyecto) | no |
 | trabajar una tarea en una sesión, con o sin Claude Code | [D](#d-trabajar-una-feature-en-una-sesión) | solo si usas Claude Code |
 | delegar una tarea completa a un loop | [E](#e-escribir-un-buen-objetivo-goalmd) → [F](#f-ejecutar-un-objetivo-con-un-loop) → [G](#g-revisar-el-resultado-y-continuar) | sí (`goal run`) |
-| describir la tarea en lenguaje natural | [H](#h-de-una-idea-a-un-objetivo-con-triaje-opcional) | sí (`intake`) |
 | consultar los libros y guardar lo aprendido | [J](#j-cerebros-de-conocimiento-opcional) | no |
 | planificar un cambio grande con specs | [K](#k-planificar-cambios-grandes-con-openspec-opcional) | solo si usas Claude Code |
 | repartir el trabajo entre sub-agentes especialistas (seguridad, QA, documentación…) | [L](#l-el-equipo-ideal-opcional) | sí (Claude Code) |
@@ -213,17 +212,6 @@ Según el resultado (código de salida entre paréntesis):
 
 Integrar es una decisión humana: `factory` no tiene comando para hacerlo. Para descartar una ejecución: `git branch -D factory/<run-id>`.
 
-### H. De una idea a un objetivo, con triaje (opcional)
-
-Si prefieres describir lo que quieres en lenguaje natural en lugar de escribir el `goal.md`:
-
-```bash
-factory intake "Añade la función restar con su test"          # ACCEPT → borrador en goals/drafts/
-factory intake --answer <request-id> "tu respuesta"           # si contestó NEEDS-INFO
-```
-
-El intake usa `claude` (cuesta dinero, 1 USD como máximo por defecto; cámbialo con `--budget`), solo lee el repo y nunca ejecuta comandos. Un borrador (`status: draft`) no se puede ejecutar.
-
 ### J. Cerebros de conocimiento (opcional)
 
 Dos bibliotecas en Markdown que los loops consultan en solo lectura. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
@@ -256,7 +244,7 @@ factory brain accept <id>                             # o: factory brain reject 
 factory brain commit -m "aprendizajes de hoy"
 ```
 
-Para que un objetivo reciba conocimiento, declara consultas en inglés en su `goal.md` (el intake las propone solo):
+Para que un objetivo reciba conocimiento, declara consultas en inglés en su `goal.md`:
 
 ```yaml
 knowledge:
@@ -324,7 +312,6 @@ El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independ
 | `factory features list \| validate \| start <id> \| verify <id>` | ver, validar, activar y promover features | 0 |
 | `factory goal validate <goal.md>` | valida un objetivo y muestra los límites | 0 |
 | `factory goal run <goal.md> [--dry-run]` | loop maker/checker hasta cumplir o parar | `claude` |
-| `factory intake "<petición>"` | triaje: ACCEPT, NEEDS-INFO o REJECT | `claude` |
 | `factory inbox list [--all] \| ack <run-id>` | bandeja de revisión humana | 0 |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
 | `factory team list \| validate \| lineup` | plantilla del equipo ideal y convocatoria sugerida | 0 |
@@ -367,7 +354,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `scripts/hooks/` | `pre-commit` (ruff) y `pre-push` (`check.sh`); los activa `./init.sh` o `git config core.hooksPath scripts/hooks` |
 | `scripts/pre-pr.sh`, `.coderabbit.yaml` | puerta previa a un pull request y reglas con las que CodeRabbit revisa este repositorio |
 | `factory.toml` | configuración de factory: límites del loop, roles y cerebros |
-| `goals/` | objetivos para los loops (`_template.md`, ejemplos y `drafts/` del intake) |
+| `goals/` | objetivos para los loops (`_template.md` y ejemplos) |
 | `prompts/` | prompts de los roles maker y checker |
 | `src/factory/` | paquete y CLI `factory` |
 | `.claude/agents/checker.md` | revisor independiente de solo lectura para sesiones interactivas |

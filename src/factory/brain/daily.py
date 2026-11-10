@@ -16,8 +16,7 @@ from pathlib import Path
 import yaml
 
 from factory.brain import BrainError
-from factory.brain.text import abstract, estimate_tokens, keywords
-from factory.requests import slugify
+from factory.brain.text import abstract, estimate_tokens, keywords, slugify
 from factory.util import atomic_write_text
 
 KINDS = ("learning", "decision", "gotcha", "pattern")

@@ -70,7 +70,6 @@ Léelos solo cuando la tarea lo requiera:
 - [Roles](docs/harness/roles.md): separación maker/checker, cuándo pedir revisión independiente y permisos por rol.
 - [Loops](docs/harness/loops.md): `goal.md`, `factory goal run`, anti-patrones y seguridad.
 - [Observabilidad](docs/harness/observabilidad.md): estado de cada ejecución, bandeja y costes silenciosos.
-- [Intake](docs/harness/intake.md): triaje de peticiones, borradores y `factory goal promote`.
 - [Recomendaciones](docs/harness/recomendaciones.md): `factory feedback` y la skill `recomendaciones`, para atender los hilos de los revisores de un pull request.
 - [Cerebros](docs/harness/cerebros.md): cerebro principal (libros, fuera de git) y diario; `factory brain …`.
 - [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo` y `factory team …`.

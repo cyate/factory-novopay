@@ -379,22 +379,6 @@ def test_notas_descartadas_se_avisan(tmp_path, capsys):
     assert "1 nota(s) del catálogo no entran en el mapa" in capsys.readouterr().out
 
 
-def test_el_intake_recibe_el_mapa(tmp_path, vault, monkeypatch):
-    from test_intake import ACCEPT
-
-    import factory.cli as cli
-
-    root = _clone_with_map(tmp_path, vault)
-    (root / "prompts" / "intake.md").write_text("Eres el intake de prueba.\n")
-    runner = FakeRunner(intake=[FakeStep(output=ACCEPT)])
-    monkeypatch.setattr(cli, "make_runner", lambda _c: runner)
-    assert main(["--root", str(root), "intake", "Configurar el rate limiting"]) == 0
-    request = runner.calls_for("intake")[0]
-    config = load_config(root)
-    assert config.map_path in request.add_dirs
-    assert str(config.map_path / "_catalog.jsonl") in request.prompt
-
-
 def test_clave_repetida_en_los_libros(tmp_path, vault):
     root = _clone_with_map(tmp_path, vault)
     books = root / "brain-mapa" / "_books.json"

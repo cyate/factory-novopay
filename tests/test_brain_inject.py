@@ -4,9 +4,7 @@ import json
 import subprocess
 
 from conftest import make_loop_repo, write_goal
-from test_intake import ACCEPT
 
-import factory.cli as cli
 import factory.engine as engine_module
 from factory.agents.claude_code import build_argv
 from factory.agents.fake import FakeRunner, FakeStep, maker_done
@@ -15,7 +13,6 @@ from factory.brain.daily import DailyBrain
 from factory.brain.importer import import_vault
 from factory.brain.inject import NOTICE, render, select
 from factory.brain.text import estimate_tokens
-from factory.cli import main
 from factory.config import load_config
 from factory.engine import LoopEngine
 from factory.goal import load_goal
@@ -209,27 +206,6 @@ def test_sin_cambios_no_hay_aviso_de_integridad(tmp_path, vault):
     assert not any("integridad" in b for b in state.blockers)
 
 
-# ---------------------------------------------------------------- intake
-def test_peticion_relacionada_con_un_aprendizaje_previo(tmp_path, vault, monkeypatch):
-    root = _repo(tmp_path, vault)
-    (root / "prompts" / "intake.md").write_text("Eres el intake de prueba.\n")
-    runner = FakeRunner(intake=[FakeStep(output=ACCEPT)])
-    monkeypatch.setattr(cli, "make_runner", lambda _c: runner)
-    assert main(["--root", str(root), "intake", "Configurar el rate limiting del gateway"]) == 0
-    [request] = runner.calls_for("intake")
-    config = load_config(root)
-    prompt = request.prompt
-    assert "Cerebro diario · 2026-10-28" in prompt
-    assert "> El rate limiting por usuario se configura en el gateway" in prompt
-    assert prompt.index("----- FIN DE LA PETICIÓN -----") < prompt.index(SECTION)
-    assert IMPERATIVE not in prompt  # el intake solo recibe notas del diario
-    for brain in (config.principal_path, config.daily_path):
-        assert str(brain / "_catalog.jsonl") in prompt
-        assert f"Write(//{brain.as_posix().lstrip('/')}/**)" in request.denied_tools
-    assert request.add_dirs == [config.principal_path, config.daily_path]
-    assert request.system_prompt.strip() == "Eres el intake de prueba."  # nada añadido
-
-
 def test_cada_consulta_queda_representada(tmp_path, vault):
     root = tmp_path / "repo"
     root.mkdir()
@@ -280,16 +256,6 @@ def test_catalogo_roto_no_detiene_el_loop(tmp_path, vault):
     assert state.status == "completed"
     assert any("no se pudo consultar los cerebros" in b for b in state.blockers)
     assert SECTION not in runner.calls_for("maker")[0].prompt
-
-
-def test_catalogo_roto_no_detiene_el_intake(tmp_path, vault, monkeypatch):
-    root = _repo(tmp_path, vault)
-    (root / "brain-diario" / "_catalog.jsonl").write_text('{"title": "sin ruta"}\n')
-    (root / "prompts" / "intake.md").write_text("Eres el intake de prueba.\n")
-    runner = FakeRunner(intake=[FakeStep(output=ACCEPT)])
-    monkeypatch.setattr(cli, "make_runner", lambda _c: runner)
-    assert main(["--root", str(root), "intake", "Configurar el rate limiting"]) == 0
-    assert "_catalog.jsonl" in runner.calls_for("intake")[0].prompt  # rutas, sin notas
 
 
 def test_archivos_ocultos_no_dan_falsos_avisos(tmp_path, vault):

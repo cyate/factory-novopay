@@ -11,7 +11,6 @@ SUBCOMANDOS = [
     "features",
     "goal",
     "inbox",
-    "intake",
     "brain",
     "team",
     "complexity",

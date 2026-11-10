@@ -53,3 +53,9 @@ def abstract(text: str) -> str:
 def estimate_tokens(text: str) -> int:
     """Misma estimación que el vault principal: caracteres / 4."""
     return max(1, len(text) // 4)
+
+
+def slugify(text: str, words: int = 5) -> str:
+    ascii_text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    tokens = re.findall(r"[a-z0-9]+", ascii_text.lower())
+    return "-".join(tokens[:words]) or "nota"
