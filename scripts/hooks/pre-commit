@@ -2,5 +2,6 @@
 # Lint y formato rápidos antes de cada commit (los mismos de check.sh).
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
+[ -x .venv/bin/python ] || { echo "falta .venv: ejecuta ./init.sh" >&2; exit 1; }
 .venv/bin/python -m ruff check .
 .venv/bin/python -m ruff format --check .

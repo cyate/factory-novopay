@@ -23,7 +23,8 @@
 
 ## 3. Verificación
 
-- [x] 3.1 `tests/test_reglas_de_oficio.py`: consulta en los doce contratos, exclusión del
-      `checker`, lente del hilo del PR, existencia y contenido de la puerta, claves de
-      `.coderabbit.yaml` y encaje entre la orden de búsqueda y las herramientas del rol.
+- [x] 3.1 `tests/test_reglas_de_oficio.py` y `tests/test_pre_pr.py`: existencia y contenido de la
+      puerta, su comportamiento con CodeRabbit (0, 2, 1, ausente, `PRE_PR_STRICT`), claves de
+      `.coderabbit.yaml` y encaje entre la orden de búsqueda y las herramientas del rol. Los tests
+      de frases en Markdown se retiraron por decisión del usuario.
 - [x] 3.2 `./scripts/check.sh` en 0.

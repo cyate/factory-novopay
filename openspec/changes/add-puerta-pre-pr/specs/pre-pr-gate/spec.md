@@ -6,21 +6,29 @@ mismas comprobaciones que correrá el revisor. MUST terminar en 0 solo cuando el
 puede abrir, y MUST decir cuál comprobación lo impide en cualquier otro caso.
 
 La puerta MUST rechazar la ejecución cuando no hay nada que medir: con el árbol de trabajo sucio
-—lo que no está en un commit no llega al pull request— o sin ningún commit por encima de la rama
+—lo que no está en un commit no llega al pull request; `entregas/` no cuenta, porque se entrega directo a QA y nunca va en el PR— o sin ningún commit por encima de la rama
 base. MUST exigir un umbral de complejidad ciclomática, porque sin umbral el informe termina
 siempre en 0. MUST ejecutar `coderabbit review --base <base> --gate major`, que termina en 2
 cuando queda algún hallazgo de severidad `major` o peor.
 
 Sin el CLI `coderabbit` instalado, la puerta MUST decir que se abre **sin** esa revisión, y con
-`PRE_PR_STRICT=1` MUST tratar esa ausencia como fallo.
+`PRE_PR_STRICT=1` MUST tratar esa ausencia como fallo. Si la revisión de CodeRabbit no puede completarse (sesión, red o cuota; salida distinta de 0 y de 2), la puerta MUST avisar y continuar, y `PRE_PR_STRICT=1` MUST tratarlo como fallo.
 
 #### Scenario: El árbol tiene cambios sin commitear
 - **WHEN** se ejecuta `./scripts/pre-pr.sh` con `git status --porcelain` no vacío
 - **THEN** termina distinto de 0 y dice que lo que no está en un commit no llega al pull request
 
+#### Scenario: Solo `entregas/` tiene cambios sin commitear
+- **WHEN** se ejecuta `./scripts/pre-pr.sh` y los únicos cambios sin commitear están en `entregas/`
+- **THEN** la puerta no se cierra por árbol sucio y sigue con las demás comprobaciones
+
 #### Scenario: No hay ningún commit sobre la base
 - **WHEN** se ejecuta `./scripts/pre-pr.sh <base>` y no hay commits entre `<base>` y `HEAD`
 - **THEN** termina distinto de 0 y dice que no hay pull request que medir
+
+#### Scenario: La revisión de CodeRabbit no puede completarse
+- **WHEN** `coderabbit review` termina en un código distinto de 0 y de 2
+- **THEN** la puerta avisa que se abre sin esa revisión y termina en 0, salvo con `PRE_PR_STRICT=1`, donde termina distinto de 0
 
 #### Scenario: CodeRabbit deja un hallazgo major
 - **WHEN** `coderabbit review --base <base> --gate major` termina en 2

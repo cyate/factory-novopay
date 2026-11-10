@@ -11,7 +11,7 @@ Una sesión **no** está terminada si alguna casilla queda sin marcar y sin docu
 - [ ] **Lo que quedó mintiendo**: ningún documento, spec o decisión escrita quedó falsa por el trabajo de la sesión. Archivar un cambio de OpenSpec, mover una ruta o renombrar un comando obliga a comprobar quién los citaba (`grep -rn "<ruta vieja>" docs/ README.md AGENTS.md`).
 - [ ] **Siguiente sesión**: puede continuar sin reparar nada a mano.
 
-Si hay commits, deben tener mensajes descriptivos y el repo debe quedar en un estado seguro para retomar. Los agentes no hacen push.
+Si hay commits, deben tener mensajes descriptivos y el repo debe quedar en un estado seguro para retomar. Push y PRs solo cuando el usuario los pide en la sesión.
 
 ---
 Adaptado de walkinglabs/learn-harness-engineering (MIT), lección 12.

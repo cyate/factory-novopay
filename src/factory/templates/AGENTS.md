@@ -16,7 +16,7 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 
 1. Lee `progress.md`: estado verificado y siguiente paso.
 2. `factory features list`: la feature `in_progress` o la de mayor prioridad sin terminar.
-3. `factory doctor`. Si falla, arréglalo antes de empezar trabajo nuevo. Usa `{{START}}` solo si falta `.venv`.
+3. `factory doctor`. Si falla, arréglalo antes de empezar trabajo nuevo. Usa `{{START}}` solo si falta el entorno o el doctor falla.
 
 ## Restricciones duras
 

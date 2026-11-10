@@ -210,3 +210,17 @@ def test_commit_del_diario_y_el_mapa_juntos(tmp_path, vault, capsys):
     assert any(f.startswith("brain-mapa/") for f in files)
     assert all(f.startswith(("brain-diario/", "brain-mapa/")) for f in files)
     assert git(root, "status", "--porcelain") == "M app.py"
+
+
+def test_commit_diario_no_lo_frena_un_hook(tmp_path):
+    from factory.util import git
+
+    root = _repo_with_daily(tmp_path)
+    hook = root / "hooks" / "pre-commit"
+    hook.parent.mkdir()
+    hook.write_text("#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
+    git(root, "config", "core.hooksPath", str(hook.parent))
+    assert main(["--root", str(root), "brain", "learn", "Nota bajo un hook rojo"]) == 0
+    assert main(["--root", str(root), "brain", "commit", "-m", "notas"]) == 0
+    assert git(root, "log", "-1", "--format=%s") == "notas"

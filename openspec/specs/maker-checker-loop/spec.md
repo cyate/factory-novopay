@@ -126,7 +126,7 @@ El checker SHALL nombrar en su veredicto, dentro del campo `evidence`, el test c
 
 #### Scenario: Hallazgo en documentación
 
-- **WHEN** una ronda corrige un hallazgo `medium` que está en documentación (prosa, no código ni tests)
+- **WHEN** una ronda corrige un hallazgo `critical` o `medium` que está en documentación (prosa, no código ni tests)
 - **THEN** el checker lo da por cerrado al comprobar que el texto quedó corregido, sin exigir prueba de mutación
 
 ### Requirement: La revisión cubre lo que el diff no muestra

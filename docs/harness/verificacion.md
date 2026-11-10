@@ -15,6 +15,8 @@ Se ejecuta sin interacción y se detiene en el primer fallo. Pasos, en orden:
 
 Usa el intérprete de `.venv` si existe y, si no, `python3` (o `$PYTHON`). Termina en 0 solo si todo pasa.
 
+Los hooks de `scripts/hooks/` corren parte de esto solo: `pre-commit` ejecuta ruff (lint y formato) y `pre-push` ejecuta `./scripts/check.sh`. Los activa `./init.sh` o `git config core.hooksPath scripts/hooks`.
+
 ## Cómo leer un fallo
 
 Un fallo termina así:

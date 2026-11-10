@@ -147,7 +147,7 @@ Nunca cambies a mano `status` ni `evidence`: `doctor` y `check.sh` detectan la p
 
 - `./scripts/check.sh` en verde; si no lo está, documenta el fallo como riesgo en `progress.md`;
 - añade a `progress.md` la entrada de la sesión: qué se hizo, qué comandos lo verifican y el mejor próximo paso. Si la sesión fue larga, actualiza también `session-handoff.md`;
-- haz el commit tú (`git add … && git commit`). Ningún agente hace push.
+- haz el commit tú (`git add … && git commit`). Push y PRs solo cuando los pides en la sesión.
 
 ### E. Escribir un buen objetivo (`goal.md`)
 
@@ -422,6 +422,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `feature_list.json` | fuente de verdad del trabajo: comportamiento, comandos de verificación, estado y evidencia |
 | `progress.md`, `session-handoff.md` | continuidad entre sesiones |
 | `init.sh`, `scripts/check.sh` | rutas estándar de arranque y verificación |
+| `scripts/hooks/` | `pre-commit` (ruff) y `pre-push` (`check.sh`); los activa `./init.sh` o `git config core.hooksPath scripts/hooks` |
 | `scripts/pre-pr.sh`, `.coderabbit.yaml` | puerta previa a un pull request y reglas con las que CodeRabbit revisa este repositorio |
 | `factory.toml` | configuración de factory: límites del loop, ticks, roles y cerebros |
 | `goals/` | objetivos para los loops (`_template.md`, ejemplos y `drafts/` del intake) |

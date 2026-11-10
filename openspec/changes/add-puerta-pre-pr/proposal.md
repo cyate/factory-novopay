@@ -45,4 +45,4 @@ local, con el diff contra la rama base, no en el editor web del pull request
 - Documentación: `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/harness/cerebros.md`,
   `docs/harness/recomendaciones.md`, `docs/harness/roles.md` y `docs/harness/revision.md`.
 - Red: la puerta ejecuta una revisión de CodeRabbit por invocación, con la sesión del usuario.
-  Sin el CLI instalado el paso se salta con aviso, y `PRE_PR_STRICT=1` lo convierte en fallo.
+  Sin el CLI instalado, o si la revisión no llega a completarse, el paso avisa y sigue, y `PRE_PR_STRICT=1` lo convierte en fallo.

@@ -10,7 +10,7 @@ Una sesión **no** está terminada si alguna casilla queda sin marcar y sin docu
 - [ ] **Revisión**: el subagente `checker` no dejó hallazgos `critical` ni `medium` abiertos en lo que se declara terminado.
 - [ ] **Siguiente sesión**: puede continuar sin reparar nada a mano.
 
-Si hay commits, deben tener mensajes descriptivos y el repo debe quedar en un estado seguro para retomar. Los agentes no hacen push.
+Si hay commits, deben tener mensajes descriptivos y el repo debe quedar en un estado seguro para retomar. Push y PRs solo cuando el usuario los pide en la sesión.
 
 ---
 Adaptado de walkinglabs/learn-harness-engineering (MIT), lección 12.

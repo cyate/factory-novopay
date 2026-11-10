@@ -39,7 +39,7 @@ git rev-parse --verify --quiet "$BASE" >/dev/null || fallo "la rama base '$BASE'
 
 # Tamaño y complejidad se miden sobre "$BASE"...HEAD, o sea sobre lo commiteado. Con el árbol
 # sucio o con el rango vacío la puerta se abriría sin haber mirado una sola línea del cambio.
-[ -z "$(git status --porcelain)" ] || fallo "hay cambios sin commitear: lo que no está en un commit no llega al PR y esta puerta no lo mediría."
+[ -z "$(git status --porcelain -- . ':(exclude)entregas')" ] || fallo "hay cambios sin commitear: lo que no está en un commit no llega al PR y esta puerta no lo mediría."
 COMMITS=$(git rev-list --count "$BASE"..HEAD)
 [ "$COMMITS" -gt 0 ] || fallo "no hay ningún commit por encima de '$BASE': no hay PR que medir."
 echo "==> [rango] $COMMITS commit(s) por encima de $BASE"

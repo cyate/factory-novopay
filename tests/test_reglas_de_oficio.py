@@ -37,16 +37,6 @@ def _contiene(path: Path, *fragmentos: str) -> None:
     assert not faltan, f"{path.relative_to(REPO)}: no menciona {faltan}"
 
 
-def test_maker_comprueba_contra_origin_main() -> None:
-    """Un 'esto no existe' dicho desde un checkout viejo manda a construir lo ya construido."""
-    _contiene(MAKER, "origin/main", "self_check")
-
-
-def test_intake_separa_lo_contado_de_lo_supuesto() -> None:
-    """La regla la lleva la cláusula, no la palabra: 'por supuesto' aparece por casualidad."""
-    _contiene(INTAKE, "nunca un hecho", "se cita con su ruta")
-
-
 @pytest.mark.parametrize("path", sorted((REPO / "prompts").glob("*.md")), ids=lambda p: p.name)
 def test_los_prompts_siguen_siendo_cortos(path: Path) -> None:
     lineas = len(path.read_text(encoding="utf-8").splitlines())

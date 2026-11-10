@@ -279,5 +279,5 @@ def commit_daily(config, message: str) -> tuple[str | None, bool]:
         git(config.root, "config", "user.email", check=False)
     )
     identity = () if has_identity else FALLBACK_IDENTITY
-    git(config.root, *identity, "commit", "-q", "-m", message, "--", *relatives)
+    git(config.root, *identity, "commit", "-q", "--no-verify", "-m", message, "--", *relatives)
     return git(config.root, "rev-parse", "HEAD"), not has_identity

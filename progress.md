@@ -27,10 +27,12 @@
 - Verificación ejecutada: `PYTHONPATH=src ./scripts/check.sh` en el worktree → código 0, «Verificación completa: OK» (`PYTHONPATH` para que los tests usen el `src` del worktree y no el editable del árbol principal).
 - Bloque 2 (guardrails):
   - `scripts/pre-pr.sh`: sin CodeRabbit, o si la revisión no se completa, avisa y sigue (`PRE_PR_STRICT=1` lo mantiene como fallo; salida 2 sigue cerrando); se borra el paso "recorrido" y `PRE_PR_SIN_RECORRIDO`.
-  - `pyproject.toml`: `pythonpath = ["src"]` (ya no hace falta `PYTHONPATH`), `pytest-xdist` y `-n auto`; suite de 80 s a 17 s.
+  - `pyproject.toml`: `pythonpath = ["src"]` (ya no hace falta `PYTHONPATH`), `pytest-xdist` y `-n auto`; suite de 108 s a ~21 s en `check.sh`; `pythonpath` solo arregla los imports de pytest: `doctor`, `complexity` y los tests con subprocesos en un worktree siguen usando el `.venv` editable compartido, así que un worktree que cambia `src/` necesita su propio `.venv`.
   - Hooks versionados `scripts/hooks/{pre-commit,pre-push}` y `init.sh` fija `core.hooksPath`.
   - `tests/test_reglas_de_oficio.py` sin los tests que fijaban frases de Markdown; la prueba de mutación aplica a código y tests, no a documentación (prompts del checker y spec `maker-checker-loop`).
   - `entregas/` va directo a QA (README, `test_team_entrega_qa.py`, `cifra.md`, `recomendaciones.md`); plantillas `AGENTS.md`/`CLAUDE.md` alineadas.
-  - Verificación: `./scripts/check.sh` sin `PYTHONPATH` → código 0, 874 tests en 21 s (antes 108 s en un solo proceso).
-- Riesgos / pendientes: ninguno nuevo.
-- Mejor próximo paso: PR 2: guardrails (pre-commit, pre-push, pytest-xdist); PR 3: borrar panel, autonomía, strands y roster.
+  - Ronda 1 del `checker`: `tests/test_pre_pr.py` ejecuta `pre-pr.sh` real (salidas 0/2/1 de CodeRabbit, CLI ausente, `PRE_PR_STRICT`); la puerta ignora `entregas/` sin trackear; `commit_daily` usa `--no-verify` (con test de hook que falla); checklists y README ya no dicen «los agentes no hacen push».
+  - Verificación: `./scripts/check.sh` sin `PYTHONPATH` → código 0, 880 tests en 18 s (antes 108 s en un solo proceso).
+- Riesgo: se retiraron por decisión del usuario los tests de frases en `.md` (fijaban redacción, no comportamiento); `reglas-de-oficio` sigue `passing` con esa cobertura reducida. `puerta-pre-pr` está `not_started` y su `verification` solo corre `tests/test_reglas_de_oficio.py`: falta añadir `tests/test_pre_pr.py` antes de promoverla (no cabe en este PR: sería el archivo 11 de código).
+- Riesgos / pendientes: ninguno más.
+- Mejor próximo paso: PRs de borrado (panel, autonomía, strands, roster; ≤10 archivos/500 líneas cada uno) y decisiones 9–10 (circuito ligero para cambios pequeños, regla de delegar a partir de 3 archivos).
