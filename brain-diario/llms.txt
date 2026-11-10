@@ -9,6 +9,7 @@
 ## decision
 
 - [Cuando Plane, openspec y las notas chocan, gana Plane, y el código no fija la versión vieja](2026/11/2026-11-05-cuando-plane-y-openspec-chocan-gana-plane.md) — 2026-11-05: Cuando el ticket de Plane, `openspec/` y las notas se contradicen, **gana Plane** (decisión del 2026-11-04) y el código no debe fijar la versión vieja.
+- [En la base solo tablas, claves e indices: las reglas van en Go](2026/11/2026-11-03-en-la-base-solo-tablas-claves-e-indices.md) — 2026-11-03: En la base de datos solo pueden existir **tablas** y **constraints** (claves foráneas e índices).
 
 ## gotcha
 
@@ -23,6 +24,8 @@
 - [Rechazos sin código propio, errores sin sentinel y 500 donde toca 4xx](2026/11/2026-11-05-rechazos-sin-codigo-propio-y-500-donde-toca-4xx.md) — 2026-11-05: Un rechazo que el cliente no puede distinguir por su código, o un error que se pierde en el camino, vuelve como hallazgo.
 - [Tests que pasan sin ejercer el defecto: si quitas la línea que protege, nada se pone rojo](2026/11/2026-11-05-tests-que-pasan-sin-ejercer-el-defecto.md) — 2026-11-05: El test existe y pasa, y aun así el defecto vivía justo donde nadie miraba: `grosal-np` lo marcó cuando **quitar la línea que protege no pone nada en rojo**, y por eso es bloqueante, no menor.
 - [Un índice que no atiende ninguna consulta cuesta escritura y no da nada](2026/11/2026-11-05-un-indice-que-no-atiende-ninguna-consulta.md) — 2026-11-05: Un índice que ninguna consulta usa **cuesta escritura y no da nada**, y `grosal-np` midió cada uno con `EXPLAIN` antes de rechazarlo.
+- [Archivar al último administrador no lo frena nadie: el trigger mira cuatro columnas](2026/11/2026-11-03-archivar-al-ultimo-administrador-no-lo-frena-nadie.md) — 2026-11-03: El trigger que garantiza que una empresa no se queda sin administrador se declara `UPDATE OF` sobre cuatro columnas, y `archived_at` no es ninguna.
+- [El esquema RBAC vive de triggers y vistas: 45 objetos que la regla prohibe](2026/11/2026-11-03-el-esquema-rbac-vive-de-triggers-y-vistas.md) — 2026-11-03: El esquema RBAC de `cifra-spend-corporate-api-go` esta construido sobre exactamente lo que la regla de la casa prohibe.
 - [Check-then-insert pierde la carrera y el 23505 no dice lo que parece](2026/10/2026-10-30-check-then-insert-pierde-la-carrera-y-el.md) — 2026-10-30: Un check-then-act contra la base de datos no es atómico y el mapeo perezoso del 23505 miente.
 - [El efecto externo va después de la autorización, no antes](2026/10/2026-10-30-el-efecto-externo-va-despues-de-la-autorizacion.md) — 2026-10-30: Un efecto externo irreversible —crear la cuenta en el proveedor de identidad, mandar el correo— no puede ejecutarse antes de las comprobaciones que pueden rechazar la petición.
 - [La nota y el contrato se revisan en el mismo PR que cambia el código](2026/10/2026-10-30-la-nota-y-el-contrato-se-revisan-en.md) — 2026-10-30: Reglas de negocio documentadas en notas y en el contrato OpenAPI se quedan mintiendo en cuanto el código cambia, y el revisor del PR lo abre como hilo.
