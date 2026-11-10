@@ -123,33 +123,6 @@ Las rutas protegidas SHALL componerse de tres fuentes: las críticas del harness
 - **WHEN** se ejecuta `factory goal run --dry-run` sobre un objetivo con rutas protegidas y liberadas
 - **THEN** el plan lista las rutas protegidas efectivas y las liberadas por el objetivo
 
-### Requirement: Retrabajo desde una ejecución anterior
-`factory goal rework <run-id>` SHALL continuar una ejecución terminada sin éxito (`blocked`, `max_rounds`, `stalled`, `budget_exhausted`, `agent_error` o `interrupted`) con una respuesta humana obligatoria.
-
-La nueva ejecución:
-- MUST partir de la punta de la rama anterior en una rama nueva;
-- MUST conservar el commit base original;
-- MUST registrar la ejecución padre;
-- MUST entregar la respuesta humana como retroalimentación inicial del maker.
-
-La rama anterior MUST quedar intacta.
-
-#### Scenario: Retrabajo de una ejecución bloqueada
-- **WHEN** una ejecución terminó `blocked` y el humano ejecuta `factory goal rework <run-id> --answer "usa el archivo nuevo"`
-- **THEN** se crea una ejecución hija desde la punta de la rama padre, con el commit base original; el primer prompt del maker incluye la respuesta, y el diff acumulado que ve el checker incluye el trabajo de la ejecución padre
-
-#### Scenario: Retrabajo de una ejecución completada
-- **WHEN** se pide retrabajo de una ejecución que terminó `completed`
-- **THEN** el comando falla sin crear ninguna ejecución y sugiere `factory land`
-
-#### Scenario: Retrabajo sin respuesta
-- **WHEN** se ejecuta `factory goal rework <run-id>` sin `--answer` ni `--answer-file`
-- **THEN** el comando falla sin crear ninguna ejecución e indica que la respuesta humana es obligatoria
-
-#### Scenario: La entrada de la bandeja de la ejecución padre
-- **WHEN** se crea una ejecución hija por retrabajo
-- **THEN** la entrada de la bandeja de la ejecución padre queda marcada como revisada, con la referencia a la ejecución hija
-
 ### Requirement: Definiciones del equipo protegidas
 Además de los archivos críticos del harness ya existentes, `.claude/agents/**` y `.claude/skills/**` SHALL estar siempre protegidos. Ni `factory.toml` ni `goal.md` MUST poder liberarlos. Crear archivos nuevos en esas rutas MUST seguir permitido, como en el resto de rutas protegidas.
 

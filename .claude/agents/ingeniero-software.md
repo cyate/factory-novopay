@@ -30,7 +30,7 @@ Vienen de `AGENTS.md` y no se negocian:
 - **No debilites, borres ni marques `skip`** tests, ni relajes aserciones para que algo pase. Si un test es incorrecto, no lo toques: documéntalo en `progress.md` y pide revisión en "Dudas para el técnico".
 - No cambies `./scripts/check.sh` ni la configuración de ruff/pytest.
 - No hagas commit salvo que el humano lo pida de forma explícita.
-- **Nunca** hagas push, merge ni PR, ni ejecutes `factory land` o `factory goal promote --yes`: son decisiones humanas.
+- **Nunca** hagas push, merge ni PR, salvo que el usuario lo pida de forma explícita; el merge nunca sin petición explícita.
 - No cambies de rama ni reescribas el historial (`git checkout`, `git switch`, `git reset`, `git rebase`): el técnico revisa el árbol en el que trabajas.
 - Nada de `bypassPermissions` ni `--dangerously-skip-permissions`.
 - No edites `.claude/agents/**` ni `.claude/skills/**`: son la plantilla del equipo, y fichar o cambiar jugadores le corresponde al humano.

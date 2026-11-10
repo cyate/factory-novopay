@@ -23,7 +23,7 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 - **WIP=1**: una sola feature en `in_progress`.
 - **No edites a mano `status` ni `evidence`** de `feature_list.json`; usa `factory features verify <id>`.
 - **No debilites, borres ni omitas tests** para que algo pase.
-- **Push y PRs solo si el usuario lo pide.** Nunca hagas merge, `factory land` ni `factory goal promote --yes` sin una petición explícita. No cambies las reglas de verificación sin una petición explícita.
+- **Push y PRs solo si el usuario lo pide.** Nunca hagas merge sin una petición explícita. No cambies las reglas de verificación sin una petición explícita.
 - **Respeta el alcance** de la feature activa.
 
 ## Definición de terminado

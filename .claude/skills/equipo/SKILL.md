@@ -13,7 +13,7 @@ Solo puedes dirigir desde la sesión principal (`/equipo`) o como agente princip
 ## Reglas del técnico
 
 - **No editas archivos.** Ni código, ni tests, ni documentación: construir es de los constructores (`ingeniero-software`, `documentador`).
-- **No haces push, merge ni PR**, ni ejecutas `factory land` ni `factory goal promote`.
+- **No haces push, merge ni PR** salvo petición explícita del usuario; el merge nunca sin ella.
 - **Respetas AGENTS.md:** WIP=1, nunca tocas `status` ni `evidence` de `feature_list.json` y no ejecutas `factory features start|verify`.
 - **Alineación primero.** No invocas a ningún jugador antes de publicarla.
 - **Los revisores solo reciben criterios, diff y verificación**, nunca el razonamiento de un constructor. Ellos no ejecutan comandos: la verificación es tuya.
@@ -35,12 +35,8 @@ Solo puedes dirigir desde la sesión principal (`/equipo`) o como agente princip
    - `git status --porcelain` y `git diff <base>` (por defecto, `<base>` es `HEAD`);
    - la feature activa: `.venv/bin/factory features list`;
    - el cambio OpenSpec en curso: `ls openspec/changes/`;
-   - la plantilla: `.venv/bin/factory team list` (si no está disponible, la tabla de `docs/harness/equipo.md`).
-2. **Pide la sugerencia determinista:**
-   ```bash
-   .venv/bin/factory team lineup [--base REF] [--peticion "…"] --json
-   ```
-   Sin rutas cambiadas ni petición no hay partido: dilo y termina. Si el comando no está disponible, aplica a mano las reglas de `convocatoria` de la plantilla y dilo en la alineación.
+   - la plantilla: los archivos de `.claude/agents/` y la tabla de `docs/harness/equipo.md`.
+2. **Deduce la sugerencia leyendo la plantilla:** aplica a mano las reglas de `convocatoria` de cada archivo de `.claude/agents/` y de `docs/harness/equipo.md` a las rutas cambiadas y a la petición. Sin rutas cambiadas ni petición no hay partido: dilo y termina.
 3. **Ajusta la sugerencia con el contexto** y justifica cada alta o baja frente a ella. Por ejemplo:
    - amplía con `seguridad` si la petición habla de autenticación, secretos, permisos, red o ejecución de comandos, aunque el diff aún no toque código;
    - amplía con `producto` si hay un cambio OpenSpec en curso que el diff debería cumplir;
@@ -175,7 +171,7 @@ El acta no sustituye al árbitro. Aunque termine en `pass`, recuerda que antes d
 
 ## Partido de revisión
 
-Revisa una rama ya hecha: propia, ajena o una `factory/<run-id>` antes de `factory land`.
+Revisa una rama ya hecha: propia, ajena o una `factory/<run-id>` antes de integrarla.
 
 - **Rango con tres puntos, contra la merge-base:** así solo ves lo que aporta la rama, no lo que avanzó `main` desde entonces.
   ```bash
@@ -184,7 +180,7 @@ Revisa una rama ya hecha: propia, ajena o una `factory/<run-id>` antes de `facto
   git log main..<rama>                 # commits
   git merge-base main <rama>           # <ref> para factory complexity --base
   ```
-- **Convocatoria:** usa `factory team lineup --paths <archivos> --json` con esa lista. `--base` compara con el árbol de trabajo, no con la rama.
+- **Convocatoria:** aplica las reglas de `convocatoria` de la plantilla a esa lista de archivos.
 - **Fases:** convocatoria, verificación, revisión y acta. Se saltan el pre-partido, la construcción y la documentación.
 - **No modificas ningún archivo** ni haces checkout de la rama. `git status --porcelain` debe ser idéntico al principio y al final.
 - **Archivos completos.** Pasa a cada revisor la lista de archivos cambiados para que lea el archivo completo, no solo los hunks.
@@ -195,7 +191,7 @@ Revisa una rama ya hecha: propia, ajena o una `factory/<run-id>` antes de `facto
   - al terminar, elimínalo con `git worktree remove <dir-temporal>`.
 
   Si no puedes verificar el código de la rama, anótalo en el acta como riesgo.
-- **Ramas `factory/<run-id>`:** los criterios salen de `.factory/runs/<run-id>/goal.md`. A los revisores pásales solo `goal.md`, `rounds/<n>/checks.md` y, si existe, `land/checks.md`, con su ruta absoluta en el checkout principal (`.factory/` no se versiona y no está en un worktree temporal). Nunca les pases `decision.md`, `loop-state.md` ni `rounds/<n>/maker.md`, que contienen el razonamiento del maker, ni `rounds/<n>/review.md`, el veredicto del checker del loop.
+- **Ramas `factory/<run-id>`:** los criterios salen de `.factory/runs/<run-id>/goal.md`. A los revisores pásales solo `goal.md` y `rounds/<n>/checks.md`, con su ruta absoluta en el checkout principal (`.factory/` no se versiona y no está en un worktree temporal). Nunca les pases `decision.md`, `loop-state.md` ni `rounds/<n>/maker.md`, que contienen el razonamiento del maker, ni `rounds/<n>/review.md`, el veredicto del checker del loop.
 
 ## Coste
 

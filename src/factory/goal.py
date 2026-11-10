@@ -91,8 +91,8 @@ class Goal:
             where = self.path or self.id
             raise GoalError(
                 f"'{self.id}' es un BORRADOR (status: draft) generado por el intake: no se "
-                "ejecuta. Revisa sus comandos y promuévelo con "
-                f"`factory goal promote {where} --yes`."
+                "ejecuta. Revisa sus comandos y quítale la línea `status: draft` del "
+                f"frontmatter de {where} para poder ejecutarlo."
             )
 
     def role(self, name: str, base: RoleConfig) -> RoleConfig:
@@ -111,7 +111,8 @@ class Goal:
             *(
                 [
                     f"BORRADOR (status: draft, petición {self.request or '—'}, riesgo "
-                    f"{self.risk or '—'}): revísalo y promuévelo con `factory goal promote`."
+                    f"{self.risk or '—'}): revísalo y quita `status: draft` del frontmatter "
+                    "para ejecutarlo."
                 ]
                 if self.is_draft
                 else []

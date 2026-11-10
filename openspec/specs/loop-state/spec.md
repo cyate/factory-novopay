@@ -62,21 +62,6 @@ Al terminar cada ejecución, cualquiera que sea su resultado, el sistema SHALL a
 - **WHEN** el humano marca una entrada como revisada
 - **THEN** deja de aparecer entre las pendientes y conserva la fecha de revisión
 
-### Requirement: Indicadores de costes silenciosos
-El comando `factory status` SHALL mostrar las ejecuciones recientes y activas junto con indicadores de los cuatro costes silenciosos:
-- deuda de verificación: proporción de criterios verificados por máquina;
-- deterioro de la comprensión: archivos y líneas cambiados pendientes de revisión;
-- rendición cognitiva: entradas de la bandeja pendientes y su antigüedad;
-- explosión de tokens: tendencia de tokens de entrada por ronda.
-
-#### Scenario: Bandeja acumulada
-- **WHEN** hay más entradas pendientes en la bandeja que el umbral configurado
-- **THEN** `factory status` muestra una advertencia de rendición cognitiva con el número de entradas y la más antigua
-
-#### Scenario: Crecimiento de tokens
-- **WHEN** los tokens de entrada por ronda de una ejecución crecen por encima del umbral configurado
-- **THEN** `factory status` muestra una advertencia de explosión de tokens para esa ejecución
-
 ### Requirement: Artefactos legibles por ronda
 Por cada ronda, el orquestador SHALL escribir en `.factory/runs/<run-id>/rounds/<n>/`:
 - `maker.md`: estado e informe del maker;

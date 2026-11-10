@@ -53,9 +53,10 @@
   - `5c7486c` config `[tick]`/`[alerts]`, rol `intake`, su prompt y su esquema.
   - `fd25e69` `factory team` y `src/factory/team/` (el chequeo `team-roster` de doctor se va con él).
   - `07b3672` capturas e inyección (`brain pending|accept|reject`); el motor ya no inyecta conocimiento ni propone capturas.
-  - Este commit: clave `[brain] inject_max_tokens` y esta entrada.
+  - `e1ad0ea` clave `[brain] inject_max_tokens` y esta entrada.
+  - Este commit: quitar las referencias a lo borrado (`goal promote`, `land`, `team`, `brain accept`) en `goal.py`, specs, reglas, skill y `feature_list.json` (10 features de subsistemas borrados fuera).
 - Specs borradas (subsistema entero): `team-roster`, `team-match`, `observability-panel`, `review-hooks`, `token-usage`, `request-intake`, `scheduled-loop`, `run-landing`. Docs borrados: `panel.md`, `vigilancia.md`, `intake.md`, `revision.md`; `observabilidad.md`, `loops.md`, `equipo.md`, `cerebros.md` y el README recortados.
 - Código de src+tests: 22 130 → 12 699 líneas. Suite: 880 tests en ~16,9 s → 519 tests en ~7,6 s.
 - Verificación: `./scripts/check.sh` → 0 y `./scripts/pre-pr.sh <commit anterior>` → «Puerta abierta» en cada commit (CodeRabbit no corrió: sin sesión en este entorno).
-- Se conserva a propósito: `inbox.py` y `engine.py` (congelados; el motor escribe la bandeja y mantiene el soporte de retrabajo `parent`/`answer`, que ya no tiene comando), el parseo de `knowledge` en `goal.md` (se acepta e ignora), `mode: monitor` (se rechaza con mensaje), `.claude/agents/*.md` y la skill `/equipo` (la skill aún nombra `factory team list|lineup`, que ya no existen), `feature_list.json` (sus entradas de panel/intake/team citan tests borrados; no se editan a mano) y `src/factory/templates/AGENTS.md`.
+- Se conserva a propósito: `inbox.py` y `engine.py` (congelados; el motor escribe la bandeja y mantiene el soporte de retrabajo `parent`/`answer`, que ya no tiene comando), el parseo de `knowledge` en `goal.md` (se acepta e ignora), `mode: monitor` (se rechaza con mensaje), `.claude/agents/*.md` y la skill `/equipo`, `feature_list.json` (quedan `loop-state`, `maker-checker-engine`, `daily-brain` y `brain-retrieval` con algún test borrado en su `verification`) y `src/factory/templates/AGENTS.md`.
 - Mejor próximo paso: decisiones 9–10; el trabajo de strands sin commitear en `main` se descarta (respaldo en `respaldo/wip-2026-11-10`).

@@ -98,27 +98,6 @@
       "notes": "OpenSpec add-harness-loop-engine, grupo 6"
     },
     {
-      "id": "scheduled-loop",
-      "priority": 5,
-      "area": "loop",
-      "title": "Loop programado (tick)",
-      "user_visible_behavior": "`factory tick` verifica primero sin coste, evita solapes y duplicados, respeta presupuestos y abre un cortacircuitos tras fallos repetidos.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_tick.py tests/test_tick_lock.py tests/test_tick_guards.py tests/test_tick_log.py tests/test_schedule.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_tick.py tests/test_tick_lock.py tests/test_tick_guards.py tests/test_tick_log.py tests/test_schedule.py",
-          "exit_code": 0,
-          "date": "2026-10-28T04:02:27+00:00",
-          "commit": "d7c3d5b27e604522c1a44b115f1c3bfa90e5ffc9"
-        }
-      ],
-      "notes": "OpenSpec add-harness-loop-engine, grupo 7"
-    },
-    {
       "id": "harness-scaffolding",
       "priority": 6,
       "area": "harness",
@@ -182,69 +161,6 @@
       "notes": "OpenSpec extend-factory-pipeline, grupo 3"
     },
     {
-      "id": "run-rework",
-      "priority": 9,
-      "area": "loop",
-      "title": "Retrabajo desde una ejecución anterior",
-      "user_visible_behavior": "`factory goal rework <run-id> --answer …` continúa una ejecución atascada desde la punta de su rama, con la respuesta humana y el commit base original.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_rework.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_rework.py",
-          "exit_code": 0,
-          "date": "2026-10-28T04:57:05+00:00",
-          "commit": "7563c8feeae20abd652ff413aade3dbdd63980bd"
-        }
-      ],
-      "notes": "OpenSpec extend-factory-pipeline, grupo 4"
-    },
-    {
-      "id": "run-landing",
-      "priority": 10,
-      "area": "loop",
-      "title": "Integración asistida",
-      "user_visible_behavior": "`factory land <run-id>` verifica el merge exacto sobre el main actual en un worktree temporal y solo entonces avanza main, sin push.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_land.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_land.py",
-          "exit_code": 0,
-          "date": "2026-10-28T05:00:50+00:00",
-          "commit": "7563c8feeae20abd652ff413aade3dbdd63980bd"
-        }
-      ],
-      "notes": "OpenSpec extend-factory-pipeline, grupo 5"
-    },
-    {
-      "id": "request-intake",
-      "priority": 11,
-      "area": "loop",
-      "title": "Intake de peticiones",
-      "user_visible_behavior": "`factory intake` decide ACCEPT/NEEDS-INFO/REJECT con un agente de solo lectura y genera borradores que no se ejecutan hasta `factory goal promote --yes`.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_requests.py tests/test_intake.py tests/test_drafts.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_requests.py tests/test_intake.py tests/test_drafts.py",
-          "exit_code": 0,
-          "date": "2026-10-28T05:08:04+00:00",
-          "commit": "7563c8feeae20abd652ff413aade3dbdd63980bd"
-        }
-      ],
-      "notes": "OpenSpec extend-factory-pipeline, grupo 6"
-    },
-    {
       "id": "main-brain",
       "priority": 12,
       "area": "brain",
@@ -287,27 +203,6 @@
       "notes": "OpenSpec add-knowledge-brains, grupo 3"
     },
     {
-      "id": "brain-captures",
-      "priority": 14,
-      "area": "brain",
-      "title": "Capturas desde los loops",
-      "user_visible_behavior": "Al terminar una ejecución se proponen capturas pendientes (sin texto de libros) que se aceptan o rechazan con `factory brain accept|reject`.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_brain_captures.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_brain_captures.py",
-          "exit_code": 0,
-          "date": "2026-10-29T02:55:32+00:00",
-          "commit": "65820544bcae824093fb70166165c2c4b02a927b"
-        }
-      ],
-      "notes": "OpenSpec add-knowledge-brains, grupo 4"
-    },
-    {
       "id": "brain-retrieval",
       "priority": 15,
       "area": "brain",
@@ -327,27 +222,6 @@
         }
       ],
       "notes": "OpenSpec add-knowledge-brains, grupo 5"
-    },
-    {
-      "id": "team-roster",
-      "priority": 16,
-      "area": "team",
-      "title": "Plantilla y convocatoria del equipo",
-      "user_visible_behavior": "`factory team list|validate|lineup` muestra la formación 4-3-3 con vacantes, valida el frontmatter de los agentes del equipo y sugiere la convocatoria con su motivo; `factory doctor` incluye `team-roster`.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_roster.py tests/test_team_lineup.py tests/test_doctor.py tests/test_scaffold_integration.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_roster.py tests/test_team_lineup.py tests/test_doctor.py tests/test_scaffold_integration.py",
-          "exit_code": 0,
-          "date": "2026-10-30T06:01:44+00:00",
-          "commit": "fed72fde528435f9856ca9165bf893078ee66125"
-        }
-      ],
-      "notes": "OpenSpec add-equipo-ideal, grupo 2"
     },
     {
       "id": "complexity-metrics",
@@ -497,69 +371,6 @@
       "notes": "OpenSpec add-library-map"
     },
     {
-      "id": "token-usage",
-      "priority": 24,
-      "area": "panel",
-      "title": "Consumo de tokens de loops y sesiones",
-      "user_visible_behavior": "`factory panel --json` incluye en `tokens` el consumo de los loops (tokens, turnos y USD por ejecución, rol y modelo) y de las sesiones de Claude Code del repo y sus worktrees, con subagentes, deduplicado por mensaje y sin texto de las conversaciones.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_panel_tokens.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_panel_tokens.py",
-          "exit_code": 0,
-          "date": "2026-10-30T06:16:24+00:00",
-          "commit": "8b7e7e646fcb13a070f0ed44bfa97ce0cef3dae6"
-        }
-      ],
-      "notes": "OpenSpec add-panel, grupo 2"
-    },
-    {
-      "id": "review-hooks",
-      "priority": 25,
-      "area": "panel",
-      "title": "Revisiones en tiempo real con hooks",
-      "user_visible_behavior": "Con `.claude/settings.json`, cada lanzamiento y fin de un subagente revisor queda en `.factory/hooks/events.jsonl` con su veredicto y severidades; `factory hook` siempre termina en 0 y el feed une esas revisiones con las del checker de los loops.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_panel_hooks.py tests/test_panel_reviews.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_panel_hooks.py tests/test_panel_reviews.py",
-          "exit_code": 0,
-          "date": "2026-10-30T06:16:29+00:00",
-          "commit": "8b7e7e646fcb13a070f0ed44bfa97ce0cef3dae6"
-        }
-      ],
-      "notes": "OpenSpec add-panel, grupo 3"
-    },
-    {
-      "id": "observability-panel",
-      "priority": 26,
-      "area": "panel",
-      "title": "Panel gráfico local (factory panel)",
-      "user_visible_behavior": "`factory panel` sirve en 127.0.0.1 una página sin recursos externos con tokens, feed de revisiones y estado de features, cambios OpenSpec y ejecuciones, que se actualiza sola por SSE; `--json` imprime la instantánea.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_panel_tasks.py tests/test_panel_server.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_panel_tasks.py tests/test_panel_server.py",
-          "exit_code": 0,
-          "date": "2026-10-30T06:16:30+00:00",
-          "commit": "8b7e7e646fcb13a070f0ed44bfa97ce0cef3dae6"
-        }
-      ],
-      "notes": "OpenSpec add-panel, grupo 4"
-    },
-    {
       "id": "reglas-de-oficio",
       "priority": 27,
       "area": "harness",
@@ -621,29 +432,6 @@
         }
       ],
       "notes": "OpenSpec fichar-entrega-qa"
-    },
-    {
-      "id": "panel-pulls",
-      "priority": 30,
-      "area": "observabilidad",
-      "title": "Pull requests en el panel",
-      "user_visible_behavior": "El panel muestra una pestaña Pull requests con los PR abiertos que creó el usuario y aquellos en los que se le pidió revisión, con su estado de revisión, los checks, el tamaño, los tiempos (abierto, sin actividad, hasta la primera revisión y de ciclo) y las alertas accionables; se actualiza en vivo cada 60 s y `factory panel --no-pulls` apaga las consultas a GitHub.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_panel_pulls.py tests/test_panel_server.py"
-      ],
-      "manual_checks": [
-        "factory panel --json con sesión de gh iniciada: la sección pulls trae los PR propios"
-      ],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_panel_pulls.py tests/test_panel_server.py",
-          "exit_code": 0,
-          "date": "2026-10-30T21:01:53+00:00",
-          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
-        }
-      ],
-      "notes": "OpenSpec add-panel-pulls"
     },
     {
       "id": "pr-feedback",

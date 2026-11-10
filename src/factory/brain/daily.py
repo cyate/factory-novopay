@@ -37,7 +37,7 @@ CATALOG_FIELDS = (
 AGENTS_GUIDE = """# Cerebro diario
 
 Aprendizajes del día a día (decisiones, gotchas, patrones), escritos a mano con
-`factory brain learn` o aceptados desde las capturas de los loops (`factory brain accept`).
+`factory brain learn`.
 Lo genera y mantiene factory: edita las notas si quieres y luego ejecuta `factory brain reindex`.
 
 ## Estructura

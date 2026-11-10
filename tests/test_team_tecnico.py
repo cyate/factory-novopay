@@ -90,7 +90,7 @@ def test_reglamento_declara_la_skill_equipo():
 
 def test_convocatoria_parcial_justificada():
     texto = _reglamento()
-    assert "factory team lineup" in texto
+    assert "reglas de `convocatoria`" in texto
     assert "Publica la alineación antes de invocar a nadie" in texto
     assert "| # | Posición | Jugador | ¿Convocado? | Motivo o ajuste |" in texto
     assert "vacantes nunca se convocan" in texto
@@ -142,7 +142,7 @@ def test_revision_de_una_rama_de_un_loop():
     # Mismos artefactos del loop que revisor-pr: criterios y verificación, nunca razonamiento.
     regla = next(linea for linea in texto.splitlines() if "**Ramas `factory/<run-id>`:**" in linea)
     pasan, nunca = regla.split("Nunca", 1)
-    for artefacto in ("goal.md", "rounds/<n>/checks.md", "land/checks.md"):
+    for artefacto in ("goal.md", "rounds/<n>/checks.md"):
         assert artefacto in pasan, artefacto
     prohibidos = ("decision.md", "loop-state.md", "rounds/<n>/maker.md", "rounds/<n>/review.md")
     for artefacto in prohibidos:

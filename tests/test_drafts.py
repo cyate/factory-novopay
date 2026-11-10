@@ -43,7 +43,7 @@ def test_ejecutar_un_borrador_con_goal_run(tmp_path, monkeypatch, capsys):
     root = make_loop_repo(tmp_path)
     monkeypatch.setattr(cli, "make_runner", _no_runner)
     assert main(["--root", str(root), "goal", "run", str(_draft(root))]) == 2
-    assert "factory goal promote" in capsys.readouterr().err
+    assert "quítale la línea `status: draft`" in capsys.readouterr().err
     assert not (root / "marcador-ejecutado").exists()
 
 
