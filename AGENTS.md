@@ -40,7 +40,9 @@ El directorio de trabajo y los commits recientes ya vienen en el contexto de la 
 
 ## Definición de terminado
 
-Una feature está terminada solo si se cumple todo lo siguiente:
+Un **cambio pequeño** (menos de 3 archivos y sin capacidad nueva) está terminado con `./scripts/check.sh` en verde y su commit: no pasa por `feature_list.json`, OpenSpec ni el `checker`.
+
+Una **feature** (capacidad nueva) está terminada solo si se cumple todo lo siguiente:
 
 - el comportamiento está implementado y cubierto por tests;
 - `./scripts/check.sh` termina en 0;
