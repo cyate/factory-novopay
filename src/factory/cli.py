@@ -21,7 +21,6 @@ from factory.config import Config, ConfigError, load_config
 from factory.engine import EngineError, Limits, LoopEngine, exit_code
 from factory.gitops import PreflightError
 from factory.goal import Goal, GoalError, load_goal
-from factory.inbox import Inbox, InboxError
 from factory.util import find_root
 
 EXIT_OK = 0
@@ -195,28 +194,8 @@ def cmd_goal(args: argparse.Namespace) -> int:
         return EXIT_OK
     engine = LoopEngine(config, goal, make_runner(config), limits=limits)
     state = engine.run()
-    print(f"Revisión: factory inbox list · rama {state.branch} · {state.summary}")
+    print(f"Revisión: rama {state.branch} · {state.summary}")
     return exit_code(state)
-
-
-def cmd_inbox(args: argparse.Namespace) -> int:
-    inbox = Inbox(load_config(args.root).state_path)
-    if args.inbox_cmd == "ack":
-        entry = inbox.ack(args.id)
-        print(f"'{entry.id}' marcada como revisada ({entry.reviewed_at})")
-        return EXIT_OK
-    entries = inbox.entries(None if args.all else "pending")
-    if not entries:
-        print("La bandeja está vacía." if args.all else "No hay entradas pendientes.")
-        return EXIT_OK
-    for e in entries:
-        print(
-            f"{e.status:<9} {e.created}  {e.id}  [{e.kind}] {e.result or '-'}  "
-            f"rama={e.branch or '-'}  coste={e.cost_usd:.4f} USD"
-        )
-        if e.question:
-            print(f"          pregunta: {e.question}")
-    return EXIT_OK
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -485,14 +464,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     goal.set_defaults(handler=cmd_goal)
 
-    inbox = sub.add_parser("inbox", help="bandeja de revisión humana")
-    inbox_sub = inbox.add_subparsers(dest="inbox_cmd", required=True)
-    inbox_list = inbox_sub.add_parser("list", help="entradas pendientes (o todas con --all)")
-    inbox_list.add_argument("--all", action="store_true")
-    ack = inbox_sub.add_parser("ack", help="marca una entrada como revisada")
-    ack.add_argument("id")
-    inbox.set_defaults(handler=cmd_inbox)
-
     brain = sub.add_parser("brain", help="cerebros de conocimiento: principal y diario")
     brain_sub = brain.add_subparsers(dest="brain_cmd", required=True)
     brain_import = brain_sub.add_parser(
@@ -624,7 +595,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         features.FeatureError,
         ConfigError,
         GoalError,
-        InboxError,
         PreflightError,
         EngineError,
         BrainError,

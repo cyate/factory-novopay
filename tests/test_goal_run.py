@@ -45,7 +45,7 @@ def test_objetivo_completado_no_toca_main_ni_hace_push(tmp_path, monkeypatch, ca
     monkeypatch.setattr(cli, "make_runner", lambda _config: runner)
     assert main(["--root", str(root), "goal", "run", str(goal)]) == 0
     out = capsys.readouterr().out
-    assert "Resultado: completed" in out and "factory inbox list" in out
+    assert "Resultado: completed" in out
     assert git(root, "rev-parse", "main") == main_before
     assert not (root / "a.txt").exists()
     assert git(root, "ls-remote", "origin") == ""

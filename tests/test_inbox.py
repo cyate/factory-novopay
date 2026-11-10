@@ -1,7 +1,8 @@
 """Escenarios de `loop-state`: bandeja de revisión humana."""
 
-from factory.cli import main
-from factory.inbox import Inbox, run_entry
+import pytest
+
+from factory.inbox import Inbox, InboxError, run_entry
 from factory.state import RoundRecord, RunState
 
 
@@ -28,7 +29,7 @@ def _blocked_state():
     return state
 
 
-def test_ejecucion_bloqueada_crea_entrada_pendiente_con_pregunta(tmp_path, capsys):
+def test_ejecucion_bloqueada_crea_entrada_pendiente_con_pregunta(tmp_path):
     inbox = Inbox(tmp_path / ".factory")
     entry = run_entry(_blocked_state(), ["src/a.py"], 12, " src/a.py | 12 ++++")
     inbox.save(entry)
@@ -38,26 +39,20 @@ def test_ejecucion_bloqueada_crea_entrada_pendiente_con_pregunta(tmp_path, capsy
     assert pending.branch == "factory/20261027-100000-demo-ab12"
     for text in ("¿Validamos en el cliente", "src/a.py | 12", "Añadí el esqueleto", "[medium]"):
         assert text in pending.body
-    assert main(["--root", str(tmp_path), "inbox", "list"]) == 0
-    out = capsys.readouterr().out
-    assert "20261027-100000-demo-ab12" in out and "pregunta: ¿Validamos" in out
 
 
-def test_marcar_como_revisada(tmp_path, capsys):
+def test_marcar_como_revisada(tmp_path):
     inbox = Inbox(tmp_path / ".factory")
     inbox.save(run_entry(_blocked_state(), [], 0))
-    assert main(["--root", str(tmp_path), "inbox", "ack", "20261027-100000-demo-ab12"]) == 0
+    inbox.ack("20261027-100000-demo-ab12")
     assert inbox.pending() == []
     [entry] = inbox.entries()
     assert entry.status == "reviewed" and entry.reviewed_at
-    capsys.readouterr()
-    assert main(["--root", str(tmp_path), "inbox", "list"]) == 0
-    assert "No hay entradas pendientes" in capsys.readouterr().out
 
 
-def test_ack_inexistente(tmp_path, capsys):
-    assert main(["--root", str(tmp_path), "inbox", "ack", "nada"]) == 2
-    assert "No hay ninguna entrada" in capsys.readouterr().err
+def test_ack_inexistente(tmp_path):
+    with pytest.raises(InboxError, match="No hay ninguna entrada"):
+        Inbox(tmp_path / ".factory").ack("nada")
 
 
 def test_pending_for_goal(tmp_path):

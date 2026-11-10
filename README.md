@@ -312,7 +312,6 @@ El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independ
 | `factory features list \| validate \| start <id> \| verify <id>` | ver, validar, activar y promover features | 0 |
 | `factory goal validate <goal.md>` | valida un objetivo y muestra los límites | 0 |
 | `factory goal run <goal.md> [--dry-run]` | loop maker/checker hasta cumplir o parar | `claude` |
-| `factory inbox list [--all] \| ack <run-id>` | bandeja de revisión humana | 0 |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
 | `factory team list \| validate \| lineup` | plantilla del equipo ideal y convocatoria sugerida | 0 |
 | `factory complexity [rutas] [--base REF] [--max N] [--json]` | complejidad ciclomática por función y delta frente a `REF` | 0 |
@@ -360,7 +359,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `.claude/agents/checker.md` | revisor independiente de solo lectura para sesiones interactivas |
 | `brain-mapa/`, `brain-diario/` | mapa de la biblioteca (sin texto) y cerebro diario, versionados |
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
-| `.factory/` | estado local de ejecuciones y bandeja (no se versiona) |
+| `.factory/` | estado local de las ejecuciones (no se versiona) |
 | `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso L) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
 | `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. Van **directo a QA**, no en el PR; nunca llevan secretos ni datos reales |
 | `openspec/` | specs principales en `openspec/specs/` (18 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |

@@ -151,7 +151,6 @@ def run_entry(
         f"- `git log --oneline {state.base_commit[:10]}..{state.branch}`",
         f"- `git diff {state.base_commit[:10]}...{state.branch}`",
         f"- Estado completo: `.factory/runs/{state.run_id}/loop-state.md`",
-        f"- Al terminar: `factory inbox ack {state.run_id}`",
     ]
     return InboxEntry(
         id=state.run_id,

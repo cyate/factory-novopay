@@ -10,7 +10,6 @@ SUBCOMANDOS = [
     "init",
     "features",
     "goal",
-    "inbox",
     "brain",
     "team",
     "complexity",
