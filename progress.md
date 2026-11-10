@@ -30,5 +30,6 @@
   - Motivo: el MCP no conectaba, el agente se invocó 0 veces y el hook inyectó su consejo más de 1.000 veces en las sesiones medidas.
 - Checker: dos rondas sobre los commits de esta sesión. Ronda 1 `fail` (1 `critical`: se había borrado la comprobación de integridad de `security-audit`, recuperada en `tests/test_security_audit_copia.py`); ronda 2 `pass_with_minor`, minor corregidos en `376575f`.
 - Verificación ejecutada: `./scripts/check.sh` → código 0, 431 tests en ~9 s.
-- Riesgos / pendientes: siguen sin commitear en `main` el paso "ajustes del bot" de `scripts/pre-pr.sh`, tres notas nuevas de `brain-diario/` y `tests/test_openspec_deltas.py` (trabajo del usuario).
+- Cierre: commiteados el trabajo pendiente del usuario (3 notas de `brain-diario/`, el paso «ajustes del bot» de `scripts/pre-pr.sh` y `tests/test_openspec_deltas.py`); borradas las ramas de respaldo de strands y las `chore/*` ya integradas; `main` es la única rama, con el árbol limpio y sin push (lo sube el usuario). Proyecto personal: no se registra tiempo.
+- Riesgos / pendientes: el paso «ajustes del bot» de `pre-pr.sh` no tiene test con `gh`.
 - Mejor próximo paso: usar el harness ligero en trabajo real y medir otra retro.
