@@ -54,9 +54,9 @@ Viven en el prompt del rol al que le tocan; aquí solo se listan, para no tener 
 | Un hallazgo corregido se cierra con una **prueba de mutación**: un test que falla al revertir el arreglo | [`prompts/checker.md`](../../prompts/checker.md) y [`.claude/agents/checker.md`](../../.claude/agents/checker.md) |
 | La revisión cubre **lo que el diff no muestra**: documentación, specs o decisiones que el cambio dejó mintiendo | los mismos dos |
 | Antes de afirmar que algo no existe, se comprueba contra **`origin/main`** | [`prompts/maker.md`](../../prompts/maker.md) |
-| Un **supuesto es una decisión, nunca un hecho**: lo que se lee en un archivo se lee y se cita | [`prompts/intake.md`](../../prompts/intake.md) |
+| Un **supuesto es una decisión, nunca un hecho**: lo que se lee en un archivo se lee y se cita | [`prompts/maker.md`](../../prompts/maker.md) |
 | **Precedencia** entre los cerebros y la documentación del repositorio | [cerebros.md](cerebros.md) |
-| **Antes de proponer se mira cómo lo resolvieron los expertos**, y se cita (`Libro · cap. N · pp. A–B`) | [`prompts/maker.md`](../../prompts/maker.md), [`prompts/intake.md`](../../prompts/intake.md) y los diez jugadores de [`.claude/agents/`](../../.claude/agents/); el `checker` queda fuera a propósito |
+| **Antes de proponer se mira cómo lo resolvieron los expertos**, y se cita (`Libro · cap. N · pp. A–B`) | [`prompts/maker.md`](../../prompts/maker.md) y los diez jugadores de [`.claude/agents/`](../../.claude/agents/); el `checker` queda fuera a propósito |
 | **Lo que abriría un hilo en el pull request** se decide en la revisión, una vuelta antes | [`prompts/checker.md`](../../prompts/checker.md) y [`.claude/agents/checker.md`](../../.claude/agents/checker.md) |
 
 Vienen de la fábrica `/yate`, donde cada una costó una ronda de revisión antes de escribirse.
@@ -77,7 +77,7 @@ Si pasa esto, vuelve a invocarlo recordándole su checklist. En los loops se usa
 
 ## Permisos por rol en los loops
 
-En `factory goal run` y `factory tick` cada rol se invoca con `claude -p` en una **sesión nueva**, con listas explícitas de herramientas (`--allowedTools` / `--disallowedTools`). Nunca se usa `bypassPermissions` ni `--dangerously-skip-permissions`.
+En `factory goal run` cada rol se invoca con `claude -p` en una **sesión nueva**, con listas explícitas de herramientas (`--allowedTools` / `--disallowedTools`). Nunca se usa `bypassPermissions` ni `--dangerously-skip-permissions`.
 
 | | Maker | Checker |
 |---|---|---|

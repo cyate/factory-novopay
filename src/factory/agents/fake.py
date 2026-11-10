@@ -54,12 +54,10 @@ class FakeRunner:
         self,
         maker: list[FakeStep] | None = None,
         checker: list[FakeStep] | None = None,
-        intake: list[FakeStep] | None = None,
     ):
         self.scripts: dict[str, list[FakeStep]] = {
             "maker": list(maker or [maker_done()]),
             "checker": list(checker or [verdict("pass")]),
-            "intake": list(intake or [FakeStep(output={})]),
         }
         self.calls: list[AgentRequest] = []
 

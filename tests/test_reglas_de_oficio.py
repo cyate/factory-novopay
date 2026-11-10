@@ -10,7 +10,6 @@ REPO = Path(__file__).resolve().parents[1]
 
 CHECKER_AGENTE = REPO / ".claude" / "agents" / "checker.md"
 MAKER = REPO / "prompts" / "maker.md"
-INTAKE = REPO / "prompts" / "intake.md"
 AGENTES_DIR = REPO / ".claude" / "agents"
 PUERTA = REPO / "scripts" / "pre-pr.sh"
 CODERABBIT = REPO / ".coderabbit.yaml"
@@ -19,7 +18,7 @@ PLANTILLAS = REPO / "src" / "factory" / "templates" / "prompts"
 # Todos los roles del equipo consultan a los expertos antes de proponer, menos el checker:
 # juzga solo con los criterios, el diff y la verificación (docs/harness/cerebros.md).
 QUIEN_CONSULTA = sorted(set(AGENTES_DIR.glob("*.md")) - {CHECKER_AGENTE})
-QUIEN_CONSULTA += [MAKER, INTAKE]
+QUIEN_CONSULTA += [MAKER]
 
 # Cada prompt gobierna solo si se lee entero; un prompt que crece deja de leerse.
 MAX_LINEAS_PROMPT = 70
@@ -62,7 +61,7 @@ def test_la_puerta_previa_al_pull_request_existe_y_se_exige() -> None:
     )
 
 
-@pytest.mark.parametrize("nombre", ["maker.md", "checker.md", "intake.md"], ids=lambda n: n)
+@pytest.mark.parametrize("nombre", ["maker.md", "checker.md"], ids=lambda n: n)
 def test_las_plantillas_repiten_el_prompt_vigente(nombre: str) -> None:
     """Un repo nuevo nace con estos prompts; si se quedan atrás, nace sin las reglas."""
     vigente = (REPO / "prompts" / nombre).read_text(encoding="utf-8")
@@ -98,7 +97,7 @@ def test_la_busqueda_cabe_en_las_herramientas_del_rol(path: Path) -> None:
             f"{path.name}: manda ejecutar un comando y no declara Bash"
         )
         return
-    # maker e intake no declaran herramientas aquí: las fija default_roles().
+    # el maker no declara herramientas aquí: las fija default_roles().
     from factory.config import default_roles
 
     permitidas = " ".join(default_roles()[path.stem].allowed_tools)

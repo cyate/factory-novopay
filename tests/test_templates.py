@@ -26,7 +26,7 @@ def test_plantillas_con_atribucion():
 
 
 def test_prompts_empaquetados_iguales_a_los_del_repo():
-    for role in ("maker", "checker", "intake"):
+    for role in ("maker", "checker"):
         repo = (ROOT / "prompts" / f"{role}.md").read_text(encoding="utf-8")
         assert read_template(f"prompts/{role}.md") == repo, f"prompts/{role}.md divergió"
 

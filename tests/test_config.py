@@ -14,7 +14,6 @@ def test_valores_por_defecto_sin_archivo(tmp_path):
     assert config.source is None
     assert config.loop.max_rounds == 8
     assert config.loop.max_budget_usd == 5.0
-    assert config.tick.daily_budget_usd == 10.0
     assert config.roles["maker"].model != config.roles["checker"].model
     assert config.roles["checker"].permission_mode == "dontAsk"
     assert "Bash" in config.roles["checker"].denied_tools

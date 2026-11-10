@@ -23,17 +23,6 @@ worktrees_dir = ""
 # Se suman a los críticos: feature_list.json, factory.toml, prompts/** y el script de verificación.
 protected_paths = ["tests/**"]
 
-[tick]
-max_rounds = 3
-budget_per_tick_usd = 2.0
-daily_budget_usd = 10.0
-circuit_after = 3
-
-[alerts]
-inbox_pending_max = 3
-token_growth_ratio = 2.0
-pending_lines_max = 500
-
 [agent]
 command = "claude"
 

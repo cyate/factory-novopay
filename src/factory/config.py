@@ -16,8 +16,8 @@ CONFIG_FILE = "factory.toml"
 VALID_PERMISSION_MODES = ("acceptEdits", "auto", "manual", "dontAsk", "plan")
 FORBIDDEN_PERMISSION_MODES = ("bypassPermissions",)
 
-ROLES = ("maker", "checker", "intake")
-READ_ONLY_ROLES = ("checker", "intake")
+ROLES = ("maker", "checker")
+READ_ONLY_ROLES = ("checker",)
 
 
 class ConfigError(ValueError):
@@ -52,25 +52,6 @@ class LoopConfig:
     worktrees_dir: str = ""
     # Globs de archivos existentes que una ronda no puede modificar, borrar ni renombrar.
     protected_paths: list[str] = field(default_factory=list)
-
-
-@dataclass
-class TickConfig:
-    max_rounds: int = 3
-    budget_per_tick_usd: float = 2.0
-    daily_budget_usd: float = 10.0
-    circuit_after: int = 3
-    # 0: se calcula como round_timeout_min * max_rounds.
-    lock_stale_min: float = 0
-
-
-@dataclass
-class AlertsConfig:
-    inbox_pending_max: int = 3
-    # Avisa si los tokens de entrada de la última ronda superan este múltiplo de la primera.
-    token_growth_ratio: float = 2.0
-    # Avisa si las líneas cambiadas pendientes de revisión superan este número.
-    pending_lines_max: int = 500
 
 
 @dataclass
@@ -115,7 +96,6 @@ CHECKER_READ_ONLY = ("Read", "Glob", "Grep")
 MANDATORY_DENIED = {
     "maker": [*PUBLISH_DENIED, "Edit(feature_list.json)", "Write(feature_list.json)"],
     "checker": ["Edit", "Write", "NotebookEdit", "Bash", *PUBLISH_DENIED],
-    "intake": ["Edit", "Write", "NotebookEdit", "Bash", *PUBLISH_DENIED],
 }
 
 
@@ -165,14 +145,6 @@ def default_roles() -> dict[str, RoleConfig]:
             allowed_tools=["Read", "Glob", "Grep"],
             denied_tools=["Edit", "Write", "NotebookEdit", "Bash", *PUBLISH_DENIED],
         ),
-        # Triaje de peticiones: una sola invocación por petición, solo lectura (request-intake).
-        "intake": RoleConfig(
-            model="opus",
-            prompt="prompts/intake.md",
-            permission_mode="dontAsk",
-            allowed_tools=["Read", "Glob", "Grep"],
-            denied_tools=["Edit", "Write", "NotebookEdit", "Bash", *PUBLISH_DENIED],
-        ),
     }
 
 
@@ -181,8 +153,6 @@ class Config:
     root: Path
     harness: HarnessConfig = field(default_factory=HarnessConfig)
     loop: LoopConfig = field(default_factory=LoopConfig)
-    tick: TickConfig = field(default_factory=TickConfig)
-    alerts: AlertsConfig = field(default_factory=AlertsConfig)
     agent: AgentConfig = field(default_factory=AgentConfig)
     brain: BrainConfig = field(default_factory=BrainConfig)
     roles: dict[str, RoleConfig] = field(default_factory=default_roles)
@@ -226,11 +196,6 @@ class Config:
             return path if path.is_absolute() else (self.root / path).resolve()
         return self.root.parent / f"{self.root.name}.factory-worktrees"
 
-    @property
-    def lock_stale_s(self) -> float:
-        minutes = self.tick.lock_stale_min or self.loop.round_timeout_min * self.tick.max_rounds
-        return minutes * 60
-
 
 def _section(data: dict, name: str) -> dict:
     value = data.get(name, {})
@@ -245,7 +210,7 @@ def _coerce(value: object, current: object, key: str, section: str) -> object:
     if isinstance(current, (int, float)):
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ConfigError(f"[{section}].{key} debe ser numérico")
-        if value <= 0 and key not in {"lock_stale_min"}:
+        if value <= 0:
             raise ConfigError(f"[{section}].{key} debe ser mayor que 0")
         return type(current)(value) if isinstance(current, float) else value
     if isinstance(current, list):
@@ -288,14 +253,12 @@ def load_config(root: Path) -> Config:
         except tomllib.TOMLDecodeError as exc:
             raise ConfigError(f"{CONFIG_FILE} no es TOML válido: {exc}") from exc
         config.source = path
-        known = {"harness", "loop", "tick", "alerts", "agent", "roles", "brain"}
+        known = {"harness", "loop", "agent", "roles", "brain"}
         unknown = set(data) - known
         if unknown:
             raise ConfigError(f"Sección desconocida en {CONFIG_FILE}: {', '.join(sorted(unknown))}")
         apply_values(config.harness, _section(data, "harness"), "harness")
         apply_values(config.loop, _section(data, "loop"), "loop")
-        apply_values(config.tick, _section(data, "tick"), "tick")
-        apply_values(config.alerts, _section(data, "alerts"), "alerts")
         apply_values(config.agent, _section(data, "agent"), "agent")
         apply_values(config.brain, _section(data, "brain"), "brain")
         roles = _section(data, "roles")

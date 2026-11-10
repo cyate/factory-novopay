@@ -30,7 +30,7 @@ reviews:
         Sí son hallazgo: un test borrado, omitido con skip o con la aserción relajada;
         un cambio en scripts/check.sh o en la configuración de ruff/pytest sin pedirlo;
         una edición a mano de status o evidence en feature_list.json;
-        un valor no confiable (rama, goal.md, petición de intake, salida de un modelo)
+        un valor no confiable (rama, goal.md, salida de un modelo)
         interpolado en un comando de shell.
     - path: "prompts/**/*.md"
       instructions: >-
