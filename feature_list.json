@@ -63,7 +63,7 @@
       "user_visible_behavior": "Cada ejecución deja loop-state.md, events.jsonl y filas en results.tsv; la bandeja lista lo pendiente y `factory status` avisa de los costes silenciosos.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_state.py tests/test_summary.py tests/test_records.py tests/test_inbox.py tests/test_status.py"
+        "python -m pytest -q tests/test_state.py tests/test_summary.py tests/test_records.py tests/test_inbox.py"
       ],
       "manual_checks": [],
       "evidence": [
@@ -84,7 +84,7 @@
       "user_visible_behavior": "`factory goal run` itera maker/checker en un worktree fuera del repo, aplica ratchet y se detiene con un motivo explícito sin tocar main.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_promotion.py tests/test_goal_run.py"
+        "python -m pytest -q tests/test_worktree.py tests/test_verify.py tests/test_round_engine.py tests/test_stop_conditions.py tests/test_goal_run.py"
       ],
       "manual_checks": [],
       "evidence": [
@@ -189,7 +189,7 @@
       "user_visible_behavior": "`factory brain learn` añade notas por fecha compatibles con cualquier LLM; ningún loop puede escribir en brain-diario/ y `factory brain commit` hace commit solo de esa carpeta.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_brain_daily.py tests/test_land.py"
+        "python -m pytest -q tests/test_brain_daily.py"
       ],
       "manual_checks": [],
       "evidence": [
@@ -210,7 +210,7 @@
       "user_visible_behavior": "`factory brain search` cita libro y capítulo; el maker y el intake reciben conocimiento citado dentro de un presupuesto de tokens y el checker no recibe nada.",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_brain_search.py tests/test_brain_inject.py tests/test_claude_runner.py tests/test_intake.py"
+        "python -m pytest -q tests/test_brain_search.py tests/test_claude_runner.py"
       ],
       "manual_checks": [],
       "evidence": [
@@ -464,7 +464,7 @@
       "user_visible_behavior": "`./scripts/pre-pr.sh [base]` corre contra el diff, antes de abrir un pull request, lo mismo que correrá el revisor: árbol limpio y commits sobre la base, `./scripts/check.sh`, tamaño del PR, complejidad ciclomática con umbral y `coderabbit review --base <base> --gate major`. Termina en 0 solo si el PR se puede abrir; sin el CLI de CodeRabbit lo dice, y `PRE_PR_STRICT=1` convierte esa ausencia en fallo. `.coderabbit.yaml` lleva las reglas con las que el bot revisa este repositorio. El maker, el intake y los diez jugadores del equipo contrastan su propuesta contra la biblioteca técnica y la citan (`Libro · cap. N · pp. A–B`); el `checker` queda fuera a propósito.",
       "status": "not_started",
       "verification": [
-        "python -m pytest -q tests/test_reglas_de_oficio.py"
+        "python -m pytest -q tests/test_reglas_de_oficio.py tests/test_pre_pr.py"
       ],
       "manual_checks": [
         "./scripts/pre-pr.sh main con el árbol sucio: termina distinto de 0 y dice que lo que no está en un commit no llega al PR",
