@@ -4,14 +4,9 @@ Trata a cada sesión como un ingeniero con amnesia (L05): lo que no esté en el 
 
 ## Inicio (clock in)
 
-1. `pwd`: confirma que estás en la raíz del repo.
-2. Lee `progress.md`: estado verificado actual, riesgos y mejor próximo paso.
-3. `.venv/bin/factory features list`: la feature `in_progress`, o la de mayor prioridad sin terminar.
-4. `git log --oneline -5`: qué cambió recientemente.
-5. `./init.sh`: entorno y verificación de referencia.
-6. Si la referencia ya está rota, **arréglala primero**. No apiles trabajo nuevo sobre un estado roto.
+Los pasos están en [AGENTS.md](../../AGENTS.md) › Inicio de sesión: estado y última entrada de `progress.md`, `factory features list` y `factory doctor` (`./init.sh` solo si falta `.venv` o el doctor falla). No se lee el historial entero ni se corre la suite completa al empezar.
 
-Si existe `session-handoff.md` con contenido reciente, léelo después de `progress.md`.
+Si la referencia ya está rota, **arréglala primero**. No apiles trabajo nuevo sobre un estado roto. Si existe `session-handoff.md` con contenido reciente, léelo después de `progress.md`.
 
 ## Durante la sesión
 
@@ -27,7 +22,7 @@ El clean state forma parte de la definición de terminado (L12). Usa la [lista d
 
 | Dimensión | Cómo se comprueba |
 |---|---|
-| Build / entorno | `./init.sh` funciona desde cero |
+| Build / entorno | `.venv/bin/factory doctor` pasa (`./init.sh` funciona desde cero) |
 | Pruebas | `./scripts/check.sh` termina en 0 |
 | Progreso | `progress.md` tiene la entrada de esta sesión |
 | Artefactos | `feature_list.json` refleja la realidad; no hay archivos temporales sueltos |
@@ -37,7 +32,7 @@ El clean state forma parte de la definición de terminado (L12). Usa la [lista d
 
 ## Registro de progreso (`progress.md`)
 
-Arriba va el **estado verificado actual**: raíz, rutas de arranque y verificación, feature activa, bloqueos. Debajo, una entrada por sesión:
+Arriba va el **estado verificado actual**: raíz, rutas de arranque y verificación, feature activa, bloqueos. Debajo, la entrada de la última sesión; las anteriores se archivan en `docs/historial/progress-sesiones.md`:
 
 ```markdown
 ### Sesión NNN — AAAA-MM-DD
@@ -53,7 +48,7 @@ Escribe hechos verificables, no impresiones. "Tests en verde" sin el comando no 
 
 ## Handoff compacto (`session-handoff.md`)
 
-Úsalo cuando la sesión fue larga o cuando otra persona o agente va a continuar. Tiene cuatro bloques: *verificado ahora*, *cambiado en esta sesión*, *roto o sin verificar* y *mejor próximo paso*, con los comandos exactos. Se sobrescribe en cada handoff; el historial vive en `progress.md` y en git.
+Úsalo cuando la sesión fue larga o cuando otra persona o agente va a continuar. Tiene cuatro bloques: *verificado ahora*, *cambiado en esta sesión*, *roto o sin verificar* y *mejor próximo paso*, con los comandos exactos. Se sobrescribe en cada handoff; el historial vive en `docs/historial/progress-sesiones.md` y en git.
 
 ## Prueba de arranque en frío
 
