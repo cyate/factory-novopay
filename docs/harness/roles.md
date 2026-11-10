@@ -24,9 +24,10 @@ El subagente `checker` está en `.claude/agents/checker.md`. Úsalo antes de dec
 2. Invoca el subagente con:
    - los criterios: el `user_visible_behavior` y los comandos de `verification` de la feature;
    - el diff: `git diff` (y `git diff --cached` si hay cambios en el índice);
-   - el resultado de la verificación.
+   - el resultado de la verificación;
+   - desde la segunda ronda, el número de ronda, los hallazgos abiertos y el diff incremental (`git diff <sha-de-la-ronda-anterior>`).
 3. **No** le pases tu razonamiento ni tu resumen de "por qué está bien".
-4. Corrige los hallazgos `critical` y `medium` y repite la revisión. Los `minor` pueden quedar anotados en `progress.md`.
+4. Corrige los hallazgos `critical` y `medium` y repite la revisión. Los `minor` pueden quedar anotados en `progress.md`. Dos rondas como máximo; después, pregunta al usuario (`CLAUDE.md`).
 
 Formato del veredicto:
 

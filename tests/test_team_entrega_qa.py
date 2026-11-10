@@ -181,7 +181,7 @@ def test_el_partido_sabe_donde_juega():
 
 
 def test_las_entregas_estan_en_los_mapas_de_rutas():
-    """`entregas/` se versiona: por eso el paquete no puede llevar secretos."""
+    """`entregas/` sale del equipo (va a QA): por eso el paquete no puede llevar secretos."""
     readme = README.read_text(encoding="utf-8")
     fila = next(
         linea for linea in readme.splitlines() if linea.startswith("| `entregas/<TICKET>/`")

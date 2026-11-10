@@ -41,7 +41,9 @@ y la forma de la respuesta; no prueba que el binario arranque, lea su configurac
 Medido sobre la pila de usuarios: dos defectos —un `500` en la primera página del listado y un
 campo que no se podía vaciar— pasaron por suites verdes y solo cayeron al levantar el servicio.
 Esta comprobación no ejecuta el binario, que depende de cada repositorio: exige la evidencia que
-`AGENTS.md` ya pide en `entregas/<TICKET>/`.
+`docs/harness/cifra.md` pide en `entregas/<TICKET>/`.
+
+Pendiente: choca con la decisión de `docs/harness/cifra.md` (`entregas/` va directo a QA, no en el PR); el paso del script está por corregir.
 
 Una cosa que **no** cierra la puerta, y conviene saberla: sin `coderabbit` instalado (salvo con
 `PRE_PR_STRICT=1`) dice «Puerta abierta SIN la revisión de CodeRabbit» y termina en 0.

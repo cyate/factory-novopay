@@ -1,6 +1,6 @@
 # AGENTS.md
 
-factory-yate es una "fábrica" para agentes de codificación. Tiene dos capas:
+factory-novo es una "fábrica" para agentes de codificación. Tiene dos capas:
 
 - un **harness**: instrucciones, estado, verificación, alcance y ciclo de vida;
 - un **motor de loops** en Python (`factory`) que orquesta Claude Code en modo headless con roles maker/checker separados.
@@ -11,7 +11,7 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 
 ## Comandos
 
-- Arranque (entorno + verificación de referencia): `./init.sh`
+- Arranque (entorno + verificación de referencia; solo si falta `.venv` o el doctor falla): `./init.sh`
 - Verificación completa (lint, formato, tests y auditoría del harness): `./scripts/check.sh`
 - Puerta previa a un pull request (árbol limpio, commits sobre la base, verificación, tamaño, complejidad y CodeRabbit en local): `./scripts/pre-pr.sh [base]`
 - Auditoría del harness: `.venv/bin/factory doctor`
@@ -22,18 +22,18 @@ El objetivo de una sesión no es producir más código, sino dejar el repositori
 
 ## Inicio de sesión
 
-1. Ejecuta `pwd` y confirma que estás en la raíz del repositorio.
-2. Lee `progress.md` para conocer el estado verificado más reciente y el siguiente paso.
-3. Ejecuta `.venv/bin/factory features list` y elige la feature `in_progress` o, si no hay, la de mayor prioridad sin terminar.
-4. Revisa los commits recientes con `git log --oneline -5`.
-5. Ejecuta `./init.sh`. Si la verificación de referencia falla, arréglala antes de empezar trabajo nuevo.
+1. Lee de `progress.md` solo "Estado verificado actual" y la última entrada de sesión (el resto vive en `docs/historial/`).
+2. Ejecuta `.venv/bin/factory features list` y elige la feature `in_progress` o, si no hay, la de mayor prioridad sin terminar.
+3. Ejecuta `.venv/bin/factory doctor`. Corre `./init.sh` solo si falta `.venv` o el doctor falla; si la referencia está rota, arréglala antes de empezar trabajo nuevo.
+
+El directorio de trabajo y los commits recientes ya vienen en el contexto de la sesión. `./scripts/check.sh` completo corre antes de cerrar y antes de un PR, no al empezar.
 
 ## Restricciones duras
 
 - **WIP=1**: solo una feature en `in_progress`. Actívala con `factory features start <id>`.
 - **Nunca edites a mano `status` ni `evidence`** de `feature_list.json`. Solo `factory features verify <id>` promueve a `passing`, y solo si la verificación pasa.
 - **No debilites, borres ni omitas tests** para que algo pase. Si un test es incorrecto, documéntalo en `progress.md` y pide revisión.
-- **No hagas push, merge ni PRs** desde un agente. `factory land` y `factory goal promote --yes` son decisiones humanas: no los ejecutes sin una petición explícita.
+- **Push y PRs solo cuando el usuario los pide en la sesión.** El merge, `factory land` y `factory goal promote --yes` son decisiones humanas: nunca sin una petición explícita.
 - **No cambies las reglas de verificación** (`scripts/check.sh` y la configuración de ruff/pytest) sin una petición explícita.
 - **No uses modos que omiten permisos** (`bypassPermissions`, `--dangerously-skip-permissions`).
 - **Consulta a los expertos antes de proponer.** Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta contra la biblioteca técnica (`factory brain search "<consulta en inglés>"`) y se **cita** (`Libro · cap. N · pp. A–B`), sin copiar su texto. Si no hay nada aplicable, se dice. Mandan `AGENTS.md`, `docs/harness/` y `openspec/specs/` sobre cualquier nota que los contradiga; la contradicción se anota (`docs/harness/cerebros.md`).
@@ -63,6 +63,7 @@ Sigue la [lista de clean state](docs/harness/clean-state-checklist.md):
 
 Léelos solo cuando la tarea lo requiera:
 
+- [Cifra](docs/harness/cifra.md): servicios Go de cifra: feature-flags, recorrido contra el servicio, apertura y límite de PRs.
 - [Verificación](docs/harness/verificacion.md): qué ejecuta `check.sh`, cómo leer un fallo y las capas de verificación.
 - [Features](docs/harness/features.md): formato de `feature_list.json`, máquina de estados y evidencia.
 - [Sesiones](docs/harness/sesiones.md): inicio, cierre, handoff y clean state.
@@ -85,7 +86,7 @@ Léelos solo cuando la tarea lo requiera:
 - `init.sh` y `scripts/check.sh`: rutas estándar de arranque y verificación.
 - `scripts/pre-pr.sh` y `.coderabbit.yaml`: la puerta previa a un pull request y las reglas con las que el bot revisa.
 - `feature_list.json`, `progress.md` y `session-handoff.md`: estado del harness.
-- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por `entrega-qa`. Se versionan: nunca llevan secretos ni datos reales.
+- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por `entrega-qa`. Se entregan directo a QA y no van en el PR; como salen del equipo, nunca llevan secretos ni datos reales.
 - `openspec/`: specs y cambios. No edites specs fuera del flujo de OpenSpec.
 
 ---

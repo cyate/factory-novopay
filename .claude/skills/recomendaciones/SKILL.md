@@ -78,7 +78,7 @@ Reglas duras:
 
 - **una por una, con aprobación del humano**: publicar es salir hacia fuera y no se deshace;
 - **no resuelvas los hilos** (`resolve`): esa es la señal del revisor, no tuya;
-- **no hagas push, merge ni PR** (AGENTS.md). Dejas el commit hecho; el push lo decide el humano.
+- **push y PR solo si el usuario lo pide en la sesión; merge, solo con petición explícita** (AGENTS.md). Dejas el commit hecho.
 
 ## 6. Cerrar
 
