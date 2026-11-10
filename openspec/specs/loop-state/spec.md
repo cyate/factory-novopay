@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Da a los loops una memoria externa durable y observable: estado por ejecución, registro acumulado de resultados, eventos de cada invocación y una bandeja de entradas para el humano. Así cada ronda parte de lo ya aprendido, el humano audita sin leer transcripciones y los costes silenciosos quedan a la vista.
+Da a los loops una memoria externa durable y observable: estado por ejecución, registro acumulado de resultados, eventos de cada invocación y una bandeja de entradas para el humano. Así cada ronda parte de lo ya aprendido, el humano audita sin leer transcripciones y los costes de cada ejecución quedan registrados.
 
 ## Requirements
 

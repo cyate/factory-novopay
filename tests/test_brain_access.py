@@ -157,10 +157,25 @@ def test_huella_inicial_fallida_no_da_falso_aviso(tmp_path, vault, monkeypatch):
     assert not any("integridad" in b for b in state.blockers)
 
 
-def test_knowledge_con_claves_ajenas_es_un_error():
+def _goal_con_knowledge(bloque: str):
     text = (
         '---\nid: g\nobjective: x\nacceptance:\n  - name: t\n    run: "true"\n'
-        "knowledge:\n  otro: 1\n---\ncuerpo\n"
+        f"knowledge:\n{bloque}---\ncuerpo\n"
     )
-    with pytest.raises(GoalError, match="knowledge"):
-        parse_goal_text(text, LoopConfig())
+    return parse_goal_text(text, LoopConfig())
+
+
+def test_knowledge_valido_se_acepta_aunque_no_tenga_efecto():
+    goal = _goal_con_knowledge('  queries: ["rate limiting"]\n  enabled: false\n')
+    assert goal.knowledge_queries == ["rate limiting"]
+    assert goal.knowledge_enabled is False
+
+
+def test_knowledge_con_claves_ajenas_es_un_error():
+    with pytest.raises(GoalError, match="`knowledge` admite solo"):
+        _goal_con_knowledge("  otro: 1\n")
+
+
+def test_knowledge_enabled_no_booleano_es_un_error():
+    with pytest.raises(GoalError, match="knowledge.enabled debe ser true o false"):
+        _goal_con_knowledge('  enabled: "no"\n')

@@ -1,7 +1,7 @@
 # Cerebro diario
 
 Aprendizajes del día a día (decisiones, gotchas, patrones), escritos a mano con
-`factory brain learn` o aceptados desde las capturas de los loops (`factory brain accept`).
+`factory brain learn`.
 Lo genera y mantiene factory: edita las notas si quieres y luego ejecuta `factory brain reindex`.
 
 ## Estructura
@@ -15,7 +15,7 @@ AGENTS.md                      <- esta guía
 ```
 
 Tipos: `learning`, `decision`, `gotcha` (trampa o error a evitar) y `pattern`.
-`source`: `manual`, `run:<run-id>` (captura de un loop) o `intake:<request-id>`.
+`source`: `manual` u otra etiqueta libre que indique el origen de la nota.
 
 ## Cómo consultar
 

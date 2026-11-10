@@ -1,4 +1,4 @@
-"""Escenarios de `brain-retrieval`: búsqueda en los cerebros y consultas declaradas."""
+"""Escenarios de `brain-retrieval`: búsqueda en los cerebros."""
 
 import json
 
@@ -80,24 +80,6 @@ def test_acentos_y_palabras_vacias(tmp_path, capsys):
 
     assert search(config, "migracion")[0].entry.title == "La migración de la base de datos"
     assert search(config, "la de el") == []
-
-
-GOAL = """---
-id: g
-objective: Limitar peticiones por usuario
-acceptance:
-  - name: t
-    run: "true"
-{knowledge}---
-cuerpo
-"""
-
-
-def _goal(knowledge=""):
-    from factory.config import LoopConfig
-    from factory.goal import parse_goal_text
-
-    return parse_goal_text(GOAL.format(knowledge=knowledge), LoopConfig())
 
 
 def test_cobertura_de_la_consulta(tmp_path):

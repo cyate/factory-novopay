@@ -77,7 +77,7 @@ class RunState:
     base_commit: str = ""
     worktree: str = ""
     feature: str | None = None
-    kind: str = "goal"  # goal | tick
+    kind: str = "goal"  # siempre goal desde que se retiró `factory tick`
     pid: int = field(default_factory=os.getpid)
     criteria_total: int = 0
     manual_checks: int = 0
@@ -91,7 +91,7 @@ class RunState:
     summary: str = ""
     parent_run_id: str = ""  # ejecución de la que parte un retrabajo
     start_commit: str = ""  # punta de la que parte la rama (= base salvo en retrabajo)
-    landed_commit: str = ""  # commit de main tras `factory land`
+    landed_commit: str = ""  # lo rellenaba `factory land` (retirado); se lee de state.json antiguos
     human_answer: str = ""  # retrabajo: respuesta humana recibida
     parent_question: str = ""  # retrabajo: pregunta que hizo la ejecución padre
 

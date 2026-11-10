@@ -249,8 +249,11 @@ RETIRED = {"tick", "alerts", "roles.intake", "brain.inject_max_tokens"}
 def _check_retired(data: dict) -> None:
     for key in sorted(RETIRED):
         section, _, name = key.partition(".")
-        value = data.get(section)
-        found = name in value if name and isinstance(value, dict) else section in data and not name
+        if not name:
+            found = section in data
+        else:
+            value = data.get(section)
+            found = isinstance(value, dict) and name in value
         if found:
             raise ConfigError(f"`{key}` se retiró; bórrala de {CONFIG_FILE}")
 
