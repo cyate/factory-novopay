@@ -140,7 +140,7 @@ Reducen el riesgo, pero no aíslan el sistema. Para ejecuciones largas o desaten
 
 ## Estado y observabilidad
 
-Dónde queda la memoria de cada ejecución, la bandeja de revisión y los indicadores de costes silenciosos: ver [observabilidad.md](observabilidad.md).
+Dónde queda la memoria de cada ejecución, la bandeja `.factory/inbox/` y los costes de cada ejecución: ver [observabilidad.md](observabilidad.md).
 
 ---
 Adaptado de walkinglabs/learn-harness-engineering (MIT), lección 13 y proyecto 07.

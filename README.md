@@ -214,7 +214,7 @@ Integrar es una decisión humana: `factory` no tiene comando para hacerlo. Para 
 
 ### H. Cerebros de conocimiento (opcional)
 
-Dos bibliotecas en Markdown que se consultan con `factory brain search`; los loops no las leen ni las modifican. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
+Dos bibliotecas en Markdown que se consultan con `factory brain search`; los loops reciben acceso de solo lectura a sus rutas (`--add-dir`) y nunca pueden modificarlas. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
 
 **Qué trae el repo al clonarlo:**
 - el **mapa de la biblioteca** (`brain-mapa/`): libros, capítulos, secciones, páginas y keywords, sin texto. `factory brain search` funciona desde el primer momento y devuelve citas.
@@ -291,7 +291,7 @@ El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independ
 | `factory features list \| validate \| start <id> \| verify <id>` | ver, validar, activar y promover features | 0 |
 | `factory goal validate <goal.md>` | valida un objetivo y muestra los límites | 0 |
 | `factory goal run <goal.md> [--dry-run]` | loop maker/checker hasta cumplir o parar | `claude` |
-| `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
+| `factory brain import \| status \| search \| learn \| reindex \| commit` | cerebros de conocimiento | 0 |
 | `factory complexity [rutas] [--base REF] [--max N] [--json]` | complejidad ciclomática por función y delta frente a `REF` | 0 |
 | `factory feedback <pr> [--repo …] [--revisor …] [--resueltos] [--json]` | recomendaciones de los revisores de un pull request | 0 |
 
@@ -324,7 +324,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | Ruta | Qué es |
 |---|---|
 | `AGENTS.md` / `CLAUDE.md` | instrucciones de entrada (router corto) para cualquier agente / para Claude Code |
-| `docs/harness/` | documentos temáticos: verificación, features, sesiones, roles, loops, revisión, recomendaciones, cerebros |
+| `docs/harness/` | documentos temáticos: verificación, features, sesiones, roles, loops, recomendaciones, cerebros |
 | `feature_list.json` | fuente de verdad del trabajo: comportamiento, comandos de verificación, estado y evidencia |
 | `progress.md`, `session-handoff.md` | continuidad entre sesiones |
 | `init.sh`, `scripts/check.sh` | rutas estándar de arranque y verificación |
@@ -340,7 +340,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `.factory/` | estado local de las ejecuciones (no se versiona) |
 | `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso J) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
 | `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. Van **directo a QA**, no en el PR; nunca llevan secretos ni datos reales |
-| `openspec/` | specs principales en `openspec/specs/` (18 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |
+| `openspec/` | specs principales en `openspec/specs/` (10 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |
 
 ## Reglas clave
 

@@ -70,7 +70,7 @@ Cada valor del mapa SHALL cumplir un formato estricto: identificadores, tipo, ca
 - **THEN** la comprobación del mapa pasa
 
 ### Requirement: El mapa sustituye al principal ausente
-Si el cerebro principal no está importado y el mapa existe, la búsqueda, la inyección y el intake SHALL usar el catálogo del mapa. Si el principal está importado, el mapa MUST ignorarse. Las notas del mapa MUST aparecer solo como cita y ruta, y la salida MUST indicar que el texto no está en este equipo y cómo importarlo.
+Si el cerebro principal no está importado y el mapa existe, la búsqueda SHALL usar el catálogo del mapa. Si el principal está importado, el mapa MUST ignorarse. Las notas del mapa MUST aparecer solo como cita y ruta, y la salida MUST indicar que el texto no está en este equipo y cómo importarlo.
 
 #### Scenario: Clon nuevo sin libros
 - **WHEN** en un clon sin `brain-principal/` se busca "rate limiting"
@@ -80,13 +80,9 @@ Si el cerebro principal no está importado y el mapa existe, la búsqueda, la in
 - **WHEN** en un clon sin `brain-principal/` se busca con `--json`
 - **THEN** la salida estándar es JSON válido y el aviso va a la salida de errores
 
-#### Scenario: Inyección solo con el mapa
-- **WHEN** un objetivo con `knowledge.queries` se ejecuta en un clon sin el principal
-- **THEN** el prompt del maker cita las notas encontradas sin texto completo de ningún libro
-
 #### Scenario: Principal y mapa presentes
 - **WHEN** el principal está importado y el mapa existe
-- **THEN** cada nota aparece una sola vez en los resultados, con su texto disponible
+- **THEN** cada nota aparece una sola vez en los resultados
 
 ### Requirement: Protección del mapa frente a los loops
 La ruta del mapa SHALL ser ruta prohibida en todo objetivo, con denegaciones de edición y escritura en cada invocación. Su huella MUST compararse al inicio y al final de cada ejecución, con aviso si cambia.

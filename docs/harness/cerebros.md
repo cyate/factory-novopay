@@ -77,7 +77,7 @@ en un gesto. `factory brain status` dice en qué estado está.
 .venv/bin/factory brain commit -m "notas"    # commit SOLO de brain-diario/ (sin push)
 ```
 
-- **Formato.** Cada aprendizaje es `brain-diario/AAAA/MM/AAAA-MM-DD-<slug>.md`. Su frontmatter lleva `id`, `type` (`learning`, `decision`, `gotcha` o `pattern`), `title`, `date`, `tags`, `keywords`, `abstract`, `source` (`manual`, `run:<id>` o `intake:<id>`) y `tokens`, con el mismo formato que el principal.
+- **Formato.** Cada aprendizaje es `brain-diario/AAAA/MM/AAAA-MM-DD-<slug>.md`. Su frontmatter lleva `id`, `type` (`learning`, `decision`, `gotcha` o `pattern`), `title`, `date`, `tags`, `keywords`, `abstract`, `source` (`manual` u otra etiqueta de origen) y `tokens`, con el mismo formato que el principal.
 - **Índices.** factory regenera `_catalog.jsonl`, `AGENTS.md` y `llms.txt` en cada alta. `reindex` los reconstruye tras editar notas a mano e informa de las que tienen el frontmatter roto.
 - **Protegido de los loops.** `brain-diario/**` es una ruta prohibida en **todo** objetivo: si una ronda crea, modifica o borra algo ahí, se revierte. Ni `factory.toml` ni `goal.md` pueden levantar la prohibición.
 - **Fichas propias.** Es la base de conocimiento que compartes: escribe con tus palabras patrones, decisiones y checklists, también lo que saques de un libro, citándolo por capítulo y página en vez de copiar su texto. Viene sembrado con algunos aprendizajes de la construcción de factory (macOS, zsh, `claude -p`, búsqueda).

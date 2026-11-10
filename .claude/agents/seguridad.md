@@ -48,7 +48,7 @@ Lee también los archivos que toca el diff, y lo que haga falta alrededor, antes
 
 ## Frontera de confianza en este repositorio
 
-`factory` orquesta Claude Code en modo headless: loops (`factory goal run`, `factory tick`), worktrees y agentes con permisos. Muchos valores que llegan a `subprocess`, a rutas o a prompts no los escribe el operador. Así ocurre con los nombres de rama, el `goal.md` y las peticiones que entran por intake, los cerebros, los diffs, la salida de los modelos y los argumentos del CLI con los que loops, agentes y `factory tick` lanzan comandos.
+`factory` orquesta Claude Code en modo headless: loops (`factory goal run`), worktrees y agentes con permisos. Muchos valores que llegan a `subprocess`, a rutas o a prompts no los escribe el operador. Así ocurre con los nombres de rama, el `goal.md`, los cerebros, los diffs, la salida de los modelos y los argumentos del CLI con los que loops y agentes lanzan comandos.
 
 Interpolar uno de esos valores en un comando de shell cruza una frontera real: va de contenido no confiable a ejecución en la máquina del operador. Quien escribe el valor no es el mismo principal que lo ejecuta. **No lo descartes como self-impact** (anti-patrón 5 de `SKILL.md`): una inyección de comandos con la traza completa es, como mínimo, un hallazgo `medium`. Esto vale también cuando la entrada es un argumento del CLI (`sys.argv`, `argparse`) y el diff no limita quién lo invoca.
 

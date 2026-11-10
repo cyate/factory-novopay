@@ -21,11 +21,11 @@ stop:
 
 ## Contexto
 
-`src/factory/cli.py` define los subcomandos `init`, `features`, `goal`, `inbox`, `tick`, `schedule`, `status` y `doctor` con argparse. Hoy ningún test garantiza que aparezcan en la ayuda.
+`src/factory/cli.py` define los subcomandos `init`, `features`, `goal`, `brain`, `feedback`, `complexity` y `doctor` con argparse. Hoy ningún test garantiza que aparezcan en la ayuda.
 
 ## Cómo trabajar
 
 1. Crea **solo** `tests/test_cli_help.py`. No toques ningún otro archivo.
-2. El test ejecuta `factory.cli.main(["--help"])`, captura la salida con `capsys` (argparse sale con `SystemExit` 0) y comprueba que aparece cada uno de los 8 subcomandos.
+2. El test ejecuta `factory.cli.main(["--help"])`, captura la salida con `capsys` (argparse sale con `SystemExit` 0) y comprueba que aparece cada uno de los 7 subcomandos.
 3. Sigue el estilo de los demás tests de `tests/`: docstring de módulo en español, nombres en español y sin dependencias nuevas.
 4. Ejecuta `python -m pytest -q tests/test_cli_help.py` y `python -m ruff check tests/test_cli_help.py` antes de terminar.

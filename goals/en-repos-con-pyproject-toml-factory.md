@@ -49,7 +49,7 @@ Pasos sugeridos:
 
 ## Origen
 
-Borrador generado por `factory intake` a partir de la petición `20261028-051056-cuando-factory-init-se-aplica-bb12`. Revisa los comandos de `acceptance` antes de promoverlo con `factory goal promote <este archivo> --yes`.
+Borrador generado por `factory intake` a partir de la petición `20261028-051056-cuando-factory-init-se-aplica-bb12`. Revisa los comandos de `acceptance` antes de ejecutarlo y quita `status: draft` del frontmatter.
 
 ## Fuera de alcance
 

@@ -167,4 +167,4 @@ def test_revisor_pr_higiene_de_commits_del_repo():
         assert resto in cuerpo
     assert "formato `factory/<run-id>`" in cuerpo
     # Las instantáneas del motor no se juzgan como commits humanos.
-    assert "exentos" in _linea_con(cuerpo, "promover feature <id>` y `factory: integrar")
+    assert "exentos" in _linea_con(cuerpo, "promover feature <id>`")

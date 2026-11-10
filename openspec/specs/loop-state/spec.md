@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Da a los loops una memoria externa durable y observable: estado por ejecución, registro acumulado de resultados, eventos de cada invocación y una bandeja de revisión humana. Así cada ronda parte de lo ya aprendido, el humano audita sin leer transcripciones y los costes silenciosos quedan a la vista.
+Da a los loops una memoria externa durable y observable: estado por ejecución, registro acumulado de resultados, eventos de cada invocación y una bandeja de entradas para el humano. Así cada ronda parte de lo ya aprendido, el humano audita sin leer transcripciones y los costes silenciosos quedan a la vista.
 
 ## Requirements
 
@@ -51,16 +51,12 @@ El orquestador SHALL registrar en un archivo de eventos (una línea JSON por eve
 - **WHEN** un humano investiga por qué falló la ronda 2
 - **THEN** el archivo de eventos le muestra qué comandos se ejecutaron, con qué código de salida y qué devolvió el checker, sin leer la transcripción del agente
 
-### Requirement: Bandeja de revisión humana
-Al terminar cada ejecución, cualquiera que sea su resultado, el sistema SHALL añadir una entrada pendiente a la bandeja de revisión humana. La entrada incluye resultado, motivo de parada, rama, resumen de archivos cambiados, qué se hizo y por qué, hallazgos sin resolver, preguntas abiertas y coste total. El humano MUST poder listar las entradas pendientes y marcarlas como revisadas.
+### Requirement: Bandeja de entradas para el humano
+Al terminar cada ejecución, cualquiera que sea su resultado, el sistema SHALL añadir una entrada pendiente a la bandeja (`.factory/inbox/`). La entrada incluye resultado, motivo de parada, rama, resumen de archivos cambiados, qué se hizo y por qué, hallazgos sin resolver, preguntas abiertas y coste total. No hay comando para listarlas ni marcarlas: se leen directamente en `.factory/inbox/`.
 
 #### Scenario: Ejecución bloqueada
 - **WHEN** una ejecución termina con resultado `blocked`
 - **THEN** la bandeja contiene una entrada pendiente con la pregunta que requiere decisión humana y la rama afectada
-
-#### Scenario: Marcar como revisada
-- **WHEN** el humano marca una entrada como revisada
-- **THEN** deja de aparecer entre las pendientes y conserva la fecha de revisión
 
 ### Requirement: Artefactos legibles por ronda
 Por cada ronda, el orquestador SHALL escribir en `.factory/runs/<run-id>/rounds/<n>/`:

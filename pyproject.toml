@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "factory-yate"
 dynamic = ["version"]
-description = "Harness y motor de loops (goal, maker-checker, tick) para agentes de codificación con Claude Code."
+description = "Harness y motor de loops (goal, maker-checker) para agentes de codificación con Claude Code."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["pyyaml>=6.0"]

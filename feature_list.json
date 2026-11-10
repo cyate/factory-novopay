@@ -60,7 +60,7 @@
       "priority": 3,
       "area": "loop",
       "title": "Estado externo y observabilidad",
-      "user_visible_behavior": "Cada ejecución deja loop-state.md, events.jsonl y filas en results.tsv; la bandeja lista lo pendiente y `factory status` avisa de los costes silenciosos.",
+      "user_visible_behavior": "Cada ejecución deja loop-state.md, events.jsonl, filas en results.tsv y una entrada en la bandeja `.factory/inbox/`; no hay comando que las liste.",
       "status": "passing",
       "verification": [
         "python -m pytest -q tests/test_state.py tests/test_summary.py tests/test_records.py tests/test_inbox.py"
@@ -207,7 +207,7 @@
       "priority": 15,
       "area": "brain",
       "title": "Búsqueda e inyección de conocimiento",
-      "user_visible_behavior": "`factory brain search` cita libro y capítulo; el maker y el intake reciben conocimiento citado dentro de un presupuesto de tokens y el checker no recibe nada.",
+      "user_visible_behavior": "`factory brain search` cita libro y capítulo; el maker y el checker reciben acceso de solo lectura a las rutas de los cerebros (`--add-dir`) con la escritura denegada, y nada se inyecta en sus prompts.",
       "status": "passing",
       "verification": [
         "python -m pytest -q tests/test_brain_search.py tests/test_brain_access.py tests/test_claude_runner.py"
@@ -375,7 +375,7 @@
       "priority": 27,
       "area": "harness",
       "title": "Reglas de oficio de los roles",
-      "user_visible_behavior": "Los prompts de maker, checker e intake, el subagente `checker` y la documentación del harness fijan cinco reglas: la prueba de mutación que cierra un hallazgo, la revisión de lo que el diff no muestra, comprobar contra `origin/main` antes de afirmar que algo no existe, separar lo contado de lo supuesto, y la precedencia entre los cerebros y la documentación del repositorio.",
+      "user_visible_behavior": "Los prompts de maker y checker, el subagente `checker` y la documentación del harness fijan cinco reglas: la prueba de mutación que cierra un hallazgo, la revisión de lo que el diff no muestra, comprobar contra `origin/main` antes de afirmar que algo no existe, separar lo contado de lo supuesto, y la precedencia entre los cerebros y la documentación del repositorio.",
       "status": "passing",
       "verification": [
         "python -m pytest -q tests/test_reglas_de_oficio.py"
@@ -396,7 +396,7 @@
       "priority": 28,
       "area": "equipo",
       "title": "Arquitecto de APIs e integraciones (#10)",
-      "user_visible_behavior": "El equipo ideal tiene un jugador en la mediapunta, `arquitecto-api`, revisor de solo lectura con opus: revisa el contrato de una API, la seguridad de la frontera, la concurrencia contra servicios externos y bases de datos, y el encaje con AWS, citando el cerebro principal. `factory team list` lo muestra en el dorsal 10 y `factory team lineup` lo convoca por rutas.",
+      "user_visible_behavior": "El equipo ideal tiene un jugador en la mediapunta, `arquitecto-api`, revisor de solo lectura con opus: revisa el contrato de una API, la seguridad de la frontera, la concurrencia contra servicios externos y bases de datos, y el encaje con AWS, citando el cerebro principal. Ocupa el dorsal 10 de la tabla de `docs/harness/equipo.md` y se convoca por las rutas de su frontmatter.",
       "status": "passing",
       "verification": [
         "python -m pytest -q tests/test_team_arquitecto_api.py tests/test_team_tecnico.py"
@@ -461,7 +461,7 @@
       "priority": 32,
       "area": "revision",
       "title": "Puerta previa al pull request y consulta a la biblioteca",
-      "user_visible_behavior": "`./scripts/pre-pr.sh [base]` corre contra el diff, antes de abrir un pull request, lo mismo que correrá el revisor: árbol limpio y commits sobre la base, `./scripts/check.sh`, tamaño del PR, complejidad ciclomática con umbral y `coderabbit review --base <base> --gate major`. Termina en 0 solo si el PR se puede abrir; sin el CLI de CodeRabbit lo dice, y `PRE_PR_STRICT=1` convierte esa ausencia en fallo. `.coderabbit.yaml` lleva las reglas con las que el bot revisa este repositorio. El maker, el intake y los diez jugadores del equipo contrastan su propuesta contra la biblioteca técnica y la citan (`Libro · cap. N · pp. A–B`); el `checker` queda fuera a propósito.",
+      "user_visible_behavior": "`./scripts/pre-pr.sh [base]` corre contra el diff, antes de abrir un pull request, lo mismo que correrá el revisor: árbol limpio y commits sobre la base, `./scripts/check.sh`, tamaño del PR, complejidad ciclomática con umbral y `coderabbit review --base <base> --gate major`. Termina en 0 solo si el PR se puede abrir; sin el CLI de CodeRabbit lo dice, y `PRE_PR_STRICT=1` convierte esa ausencia en fallo. `.coderabbit.yaml` lleva las reglas con las que el bot revisa este repositorio. El maker y los diez jugadores del equipo contrastan su propuesta contra la biblioteca técnica y la citan (`Libro · cap. N · pp. A–B`); el `checker` queda fuera a propósito.",
       "status": "not_started",
       "verification": [
         "python -m pytest -q tests/test_reglas_de_oficio.py tests/test_pre_pr.py"

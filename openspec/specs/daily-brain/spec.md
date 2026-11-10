@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Acumula el conocimiento que se aprende en el día a día, a mano o a partir de lo que ocurre en los loops, como notas Markdown versionables y compatibles con cualquier LLM. Toda captura automática pasa por una revisión humana antes de formar parte del cerebro.
+Acumula el conocimiento que se aprende en el día a día, a mano, como notas Markdown versionables y compatibles con cualquier LLM. Ningún loop escribe en él.
 
 ## Requirements
 
