@@ -143,30 +143,6 @@ def test_commit_con_otros_cambios_en_el_checkout(tmp_path, capsys):
     assert "no tiene cambios" in capsys.readouterr().out
 
 
-def test_land_sugiere_brain_commit(tmp_path, capsys):
-    from conftest import make_loop_repo, write_goal
-
-    from factory.agents.fake import FakeRunner, maker_done
-    from factory.config import load_config
-    from factory.engine import LoopEngine
-    from factory.goal import load_goal
-    from factory.util import git
-
-    root = make_loop_repo(tmp_path)
-    DailyBrain(root / "brain-diario").add("nota versionada", day="2026-10-28")
-    git(root, "add", "-A")
-    git(root, "commit", "-qm", "diario")
-    config = load_config(root)
-    goal = load_goal(write_goal(root), config.loop)
-    state = LoopEngine(
-        config, goal, FakeRunner(maker=[maker_done("a", **{"a.txt": "1"})]), echo=lambda _: None
-    ).run()
-    DailyBrain(root / "brain-diario").add("nota nueva sin commitear", day="2026-10-28")
-    capsys.readouterr()
-    assert main(["--root", str(root), "land", state.run_id]) == 1
-    assert "factory brain commit" in capsys.readouterr().err
-
-
 def test_commit_del_diario_y_el_mapa_juntos(tmp_path, vault, capsys):
     from factory.util import git
 

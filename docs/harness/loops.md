@@ -110,9 +110,9 @@ Qué pasa en cada ronda:
 | 7 | `agent_error` | `agent_error_rounds` rondas seguidas con error del CLI (no instalado, timeout, salida ilegible) |
 | 130 | `interrupted` | Ctrl+C: el estado queda legible y marcado como interrumpido |
 
-### Revisar, retrabajar e integrar
+### Revisar e integrar
 
-Cómo leer el resultado, continuar una ejecución atascada con `factory goal rework` e integrarla con `factory land`: ver [revision.md](revision.md).
+El resultado queda en `.factory/runs/<run-id>/` (`decision.md`, `rounds/<n>/`); integrar la rama `factory/<run-id>` es decisión humana y a mano.
 
 ## Peticiones: `factory intake`
 

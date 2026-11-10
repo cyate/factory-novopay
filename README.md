@@ -182,7 +182,6 @@ factory goal validate goals/exportar-csv.md       # errores de formato y límite
 ```bash
 factory goal run goals/exportar-csv.md --dry-run   # plan completo, sin agentes ni coste
 factory goal run goals/exportar-csv.md             # ejecución real (cuesta dinero)
-factory inbox list                                 # resultado pendiente de tu revisión
 ```
 
 Qué pasa en cada ronda:
@@ -197,7 +196,6 @@ Antes de lanzarlo: `main` necesita al menos un commit, y la ejecución parte del
 ### G. Revisar el resultado y continuar
 
 ```bash
-factory inbox list                                     # qué terminó y por qué
 cat .factory/runs/<run-id>/decision.md                 # RESULT, REASON, BRANCH, BEST_ROUND
 cat .factory/runs/<run-id>/rounds/1/checks.md          # verificación de cada ronda (también maker.md y review.md)
 git diff main...factory/<run-id>                       # qué cambió
@@ -207,20 +205,13 @@ Según el resultado (código de salida entre paréntesis):
 
 | Resultado | Qué significa | Qué hacer |
 |---|---|---|
-| `completed` (0) | criterios en verde y checker conforme | revisar el diff e integrar con `factory land` |
-| `blocked` (6) | el maker te hizo una pregunta | contestar con `factory goal rework <run-id> --answer "…"` |
-| `max_rounds` (4), `stalled` (3) | se acabaron las rondas / sin progreso | leer `decision.md`; rework con una pista, o reescribir el objetivo |
-| `budget_exhausted` (5) | se alcanzó el presupuesto | rework con `--budget`, o acotar el objetivo |
-| `agent_error` (7), `interrupted` (130) | falló `claude` o se interrumpió | revisar la sesión de `claude` y repetir con rework |
+| `completed` (0) | criterios en verde y checker conforme | revisar el diff e integrar la rama a mano, como cualquier otra |
+| `blocked` (6) | el maker te hizo una pregunta | contestar en un objetivo nuevo, con la respuesta como pista |
+| `max_rounds` (4), `stalled` (3) | se acabaron las rondas / sin progreso | leer `decision.md` y reescribir el objetivo |
+| `budget_exhausted` (5) | se alcanzó el presupuesto | acotar el objetivo |
+| `agent_error` (7), `interrupted` (130) | falló `claude` o se interrumpió | revisar la sesión de `claude` y repetir |
 
-```bash
-factory goal rework <run-id> --answer "tu respuesta"   # continúa desde su rama (también --rounds y --budget)
-factory land <run-id> --dry-run                        # solo completed: verifica el merge sobre el main actual
-factory land <run-id>                                  # integra en main (merge --no-ff, sin push; marca la bandeja)
-factory land <run-id> --delete-branch                  # además borra la rama ya integrada
-```
-
-`land` exige que el checkout principal esté en `main` y sin cambios en archivos versionados. Para descartar una ejecución: `git branch -D factory/<run-id>` y `factory inbox ack <run-id>`. Detalle en [docs/harness/revision.md](docs/harness/revision.md).
+Integrar es una decisión humana: `factory` no tiene comando para hacerlo. Para descartar una ejecución: `git branch -D factory/<run-id>`.
 
 ### H. De una idea a un objetivo, con triaje (opcional)
 
@@ -229,12 +220,9 @@ Si prefieres describir lo que quieres en lenguaje natural en lugar de escribir e
 ```bash
 factory intake "Añade la función restar con su test"          # ACCEPT → borrador en goals/drafts/
 factory intake --answer <request-id> "tu respuesta"           # si contestó NEEDS-INFO
-factory goal promote goals/drafts/<id>.md                     # revisa los comandos que se ejecutarían
-factory goal promote goals/drafts/<id>.md --yes               # crea goals/<id>.md
-factory goal run goals/<id>.md --dry-run                      # y sigue con el paso F
 ```
 
-El intake usa `claude` (cuesta dinero, 1 USD como máximo por defecto; cámbialo con `--budget`), solo lee el repo y nunca ejecuta comandos. Un borrador no se puede ejecutar hasta que lo promueves.
+El intake usa `claude` (cuesta dinero, 1 USD como máximo por defecto; cámbialo con `--budget`), solo lee el repo y nunca ejecuta comandos. Un borrador (`status: draft`) no se puede ejecutar.
 
 ### J. Cerebros de conocimiento (opcional)
 
@@ -336,11 +324,8 @@ El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independ
 | `factory features list \| validate \| start <id> \| verify <id>` | ver, validar, activar y promover features | 0 |
 | `factory goal validate <goal.md>` | valida un objetivo y muestra los límites | 0 |
 | `factory goal run <goal.md> [--dry-run]` | loop maker/checker hasta cumplir o parar | `claude` |
-| `factory goal rework <run-id> --answer …` | continúa una ejecución no completada | `claude` |
-| `factory goal promote <borrador> [--yes]` | convierte un borrador del intake en objetivo | 0 |
 | `factory intake "<petición>"` | triaje: ACCEPT, NEEDS-INFO o REJECT | `claude` |
 | `factory inbox list [--all] \| ack <run-id>` | bandeja de revisión humana | 0 |
-| `factory land <run-id> [--dry-run] [--delete-branch]` | integra en `main` una ejecución completed | 0 |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
 | `factory team list \| validate \| lineup` | plantilla del equipo ideal y convocatoria sugerida | 0 |
 | `factory complexity [rutas] [--base REF] [--max N] [--json]` | complejidad ciclomática por función y delta frente a `REF` | 0 |
@@ -353,8 +338,8 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 - **Empieza en seco.** Primero `--dry-run` y presupuestos pequeños; súbelos cuando el objetivo funcione.
 - **Criterios que se ejecutan.** Si un criterio no es un comando que termina en 0, el loop no puede saber si terminó.
 - **Alcance estrecho.** Un `scope.allow` pequeño reduce rondas y coste. Protege los tests existentes con `protected_paths`.
-- **Commitea antes de lanzar.** Los loops y `land` parten de `main`, no de tu árbol de trabajo.
-- **Revisa antes de integrar.** `land` y `goal promote --yes` son decisiones tuyas; ningún agente las toma.
+- **Commitea antes de lanzar.** Los loops parten de `main`, no de tu árbol de trabajo.
+- **Revisa antes de integrar.** Integrar es decisión tuya; ningún agente lo hace.
 - **Nunca omitas permisos.** `bypassPermissions` se rechaza al cargar la configuración; no uses `--dangerously-skip-permissions`.
 
 ## Problemas frecuentes
@@ -368,7 +353,6 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `doctor` marca una feature `passing` sin evidencia | alguien editó `status` o `evidence` a mano: deshaz ese cambio (`git diff feature_list.json`) y promuévela con `verify` |
 | `goal validate` rechaza el objetivo | el mensaje nombra la clave; compara con `goals/_template.md` |
 | el loop termina `completed` sin cambios | los criterios ya pasaban en el último commit de `main`: lo que fallaba estaba sin commitear |
-| `land` se niega a integrar | no estás en `main`, hay cambios sin commitear o la ejecución no es `completed`; el mensaje dice cuál |
 | `doctor` falla por el mapa de la biblioteca | alguien lo editó a mano: `git restore brain-mapa/` o `factory brain import` |
 
 ## Cómo está organizado

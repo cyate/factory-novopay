@@ -33,7 +33,7 @@ El directorio de trabajo y los commits recientes ya vienen en el contexto de la 
 - **WIP=1**: solo una feature en `in_progress`. Actívala con `factory features start <id>`.
 - **Nunca edites a mano `status` ni `evidence`** de `feature_list.json`. Solo `factory features verify <id>` promueve a `passing`, y solo si la verificación pasa.
 - **No debilites, borres ni omitas tests** para que algo pase. Si un test es incorrecto, documéntalo en `progress.md` y pide revisión.
-- **Push y PRs solo cuando el usuario los pide en la sesión.** El merge, `factory land` y `factory goal promote --yes` son decisiones humanas: nunca sin una petición explícita.
+- **Push y PRs solo cuando el usuario los pide en la sesión.** El merge es una decisión humana: nunca sin una petición explícita.
 - **No cambies las reglas de verificación** (`scripts/check.sh` y la configuración de ruff/pytest) sin una petición explícita.
 - **No uses modos que omiten permisos** (`bypassPermissions`, `--dangerously-skip-permissions`).
 - **Consulta a los expertos antes de proponer.** Un enfoque, un arreglo o un hallazgo que no sea evidente desde el código se contrasta contra la biblioteca técnica (`factory brain search "<consulta en inglés>"`) y se **cita** (`Libro · cap. N · pp. A–B`), sin copiar su texto. Si no hay nada aplicable, se dice. Mandan `AGENTS.md`, `docs/harness/` y `openspec/specs/` sobre cualquier nota que los contradiga; la contradicción se anota (`docs/harness/cerebros.md`).
@@ -71,7 +71,6 @@ Léelos solo cuando la tarea lo requiera:
 - [Loops](docs/harness/loops.md): `goal.md`, `factory goal run`, anti-patrones y seguridad.
 - [Observabilidad](docs/harness/observabilidad.md): estado de cada ejecución, bandeja y costes silenciosos.
 - [Intake](docs/harness/intake.md): triaje de peticiones, borradores y `factory goal promote`.
-- [Revisión](docs/harness/revision.md): leer resultados, `factory goal rework` y `factory land`.
 - [Recomendaciones](docs/harness/recomendaciones.md): `factory feedback` y la skill `recomendaciones`, para atender los hilos de los revisores de un pull request.
 - [Cerebros](docs/harness/cerebros.md): cerebro principal (libros, fuera de git) y diario; `factory brain …`.
 - [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo` y `factory team …`.

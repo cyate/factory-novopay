@@ -4,14 +4,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
-import shlex
-import shutil
 import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from factory import __version__, doctor, features, scaffold, schedule
+from factory import __version__, doctor, features, scaffold
 from factory import intake as intake_mod
 from factory.agents.base import AgentRunner
 from factory.agents.claude_code import ClaudeCodeRunner
@@ -24,12 +21,10 @@ from factory.brain.libmap import build_map
 from factory.config import Config, ConfigError, load_config
 from factory.engine import EngineError, Limits, LoopEngine, exit_code
 from factory.gitops import PreflightError
-from factory.goal import Goal, GoalError, load_goal, parse_goal_text
+from factory.goal import Goal, GoalError, load_goal
 from factory.inbox import Inbox, InboxError
-from factory.land import LandError, land
-from factory.requests import RequestError, RequestStore, advance
-from factory.state import RunStore
-from factory.util import atomic_write_text, command_env, find_root, git
+from factory.requests import RequestError
+from factory.util import find_root
 
 EXIT_OK = 0
 EXIT_FAIL = 1
@@ -180,111 +175,8 @@ def describe_plan(config: Config, goal: Goal, limits: Limits) -> str:
     return "\n".join(lines)
 
 
-REWORKABLE = ("blocked", "max_rounds", "stalled", "budget_exhausted", "agent_error", "interrupted")
-
-
-def cmd_rework(args: argparse.Namespace, config: Config) -> int:
-    answer = args.answer
-    if args.answer_file:
-        answer = Path(args.answer_file).read_text(encoding="utf-8")
-    if not answer or not answer.strip():
-        raise GoalError(
-            "La respuesta humana es obligatoria para un retrabajo: usa --answer o --answer-file."
-        )
-    store = RunStore(config.state_path)
-    run_dir = store.run_dir(args.run_id)
-    if not (run_dir / "state.json").exists():
-        raise GoalError(f"No existe la ejecución '{args.run_id}' en {store.runs_dir}")
-    parent = store.load(args.run_id)
-    if parent.status == "completed":
-        raise GoalError(
-            f"'{parent.run_id}' terminó completed: no necesita retrabajo. Intégrala con "
-            f"`factory land {parent.run_id}`."
-        )
-    if parent.status not in REWORKABLE:
-        raise GoalError(
-            f"'{parent.run_id}' está en estado '{parent.status}'; el retrabajo solo aplica a "
-            f"{', '.join(REWORKABLE)}."
-        )
-    if not git(config.root, "branch", "--list", parent.branch):
-        raise GoalError(f"La rama {parent.branch} de la ejecución ya no existe.")
-    goal_copy = run_dir / "goal.md"
-    goal = parse_goal_text(goal_copy.read_text(encoding="utf-8"), config.loop, goal_copy)
-    limits = Limits.from_goal(goal, max_rounds=args.rounds, budget=args.budget)
-    print(f"Retrabajo de {parent.run_id} ({parent.status}) desde {parent.branch}")
-    print(describe_plan(config, goal, limits))
-    engine = LoopEngine(
-        config, goal, make_runner(config), limits=limits, parent=parent, answer=answer.strip()
-    )
-    state = engine.run()
-    print(f"Revisión: factory inbox list · rama {state.branch} · {state.summary}")
-    return exit_code(state)
-
-
-def _missing_executables(goal: Goal, root: Path) -> list[str]:
-    missing = []
-    path_env = command_env(root)["PATH"]
-    for criterion in goal.acceptance:
-        try:
-            first = shlex.split(criterion.run)[0]
-        except (ValueError, IndexError):
-            missing.append(f"{criterion.name}: comando ilegible `{criterion.run}`")
-            continue
-        found = (root / first).exists() if "/" in first else shutil.which(first, path=path_env)
-        if not found:
-            missing.append(f"{criterion.name}: no se encuentra `{first}`")
-    return missing
-
-
-def cmd_promote(args: argparse.Namespace, config: Config) -> int:
-    path = _goal_path(args)
-    goal = load_goal(path, config.loop)
-    if not goal.is_draft:
-        raise GoalError(
-            f"{path} no es un borrador (no tiene status: draft); no hay nada que promover."
-        )
-    prot = goal.protection_for(
-        config.root, config.loop.protected_paths, config.effective_verify_command()
-    )
-    print(goal.describe(prot))
-    for warning in _missing_executables(goal, config.root):
-        print(f"AVISO: {warning}")
-    target = config.root / "goals" / f"{goal.id}.md"
-    if not args.yes:
-        print(
-            "\nNada cambió. Estos son los comandos que se ejecutarían; si estás de acuerdo, "
-            "repite con --yes para promover el borrador."
-        )
-        return EXIT_OK
-    if target.exists():
-        raise GoalError(f"Ya existe {target.relative_to(config.root)}: no se sobrescribe.")
-    text = path.read_text(encoding="utf-8")
-    end = text.index("\n---", 3)
-    front = re.sub(r"(?m)^status:\s*draft\s*\n", "", text[:end] + "\n", count=1).rstrip("\n")
-    promoted = front + text[end:]
-    if parse_goal_text(promoted, config.loop, target).is_draft:
-        raise GoalError("No se pudo quitar `status: draft` del borrador.")
-    atomic_write_text(target, promoted)
-    rel = target.relative_to(config.root)
-    if goal.request:
-        store = RequestStore(config.state_path)
-        try:
-            req = store.load(goal.request)
-            if req.stage == "accepted":
-                req.goal = str(rel)
-                advance(store, req, "promoted", f"objetivo {rel}", root=config.root)
-        except RequestError as exc:
-            print(f"AVISO: no se actualizó la petición {goal.request}: {exc}")
-    print(f"\nPromovido: {rel}. Siguiente: factory goal run {rel} --dry-run")
-    return EXIT_OK
-
-
 def cmd_goal(args: argparse.Namespace) -> int:
     config = load_config(args.root)
-    if args.goal_cmd == "rework":
-        return cmd_rework(args, config)
-    if args.goal_cmd == "promote":
-        return cmd_promote(args, config)
     goal = load_goal(_goal_path(args), config.loop)
     prot = goal.protection_for(
         config.root, config.loop.protected_paths, config.effective_verify_command()
@@ -329,17 +221,6 @@ def cmd_inbox(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
-def cmd_schedule(args: argparse.Namespace) -> int:
-    config = load_config(args.root)
-    goal_path = _goal_path(args)
-    goal = load_goal(goal_path, config.loop)
-    if goal.mode != "monitor":
-        raise GoalError(f"'{goal.id}' no es de vigilancia (mode: monitor); no se programa.")
-    interval = schedule.parse_interval(args.every)
-    print(schedule.render(config.root, goal_path, goal.id, interval))
-    return EXIT_OK
-
-
 def cmd_init(args: argparse.Namespace) -> int:
     target = (args.target or Path.cwd()).resolve()
     commands = [c.strip() for c in args.commands.split(",") if c.strip()] if args.commands else None
@@ -351,19 +232,6 @@ def cmd_init(args: argparse.Namespace) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return EXIT_USAGE
     print(result.render())
-    return EXIT_OK
-
-
-def cmd_land(args: argparse.Namespace) -> int:
-    config = load_config(args.root)
-    try:
-        result = land(config, args.run_id, dry_run=args.dry_run, delete_branch=args.delete_branch)
-    except LandError as exc:
-        print(f"integración rechazada: {exc}", file=sys.stderr)
-        return EXIT_FAIL
-    print(f"Informe: {result.checks_path}")
-    if result.branch_deleted:
-        print("Rama de la ejecución borrada.")
     return EXIT_OK
 
 
@@ -635,21 +503,6 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--dry-run", action="store_true", help="muestra el plan sin invocar agentes ni crear ramas"
     )
-    promote = goal_sub.add_parser(
-        "promote", help="convierte un borrador del intake en objetivo ejecutable (con --yes)"
-    )
-    promote.add_argument("goal", help="ruta al borrador (goals/drafts/<id>.md)")
-    promote.add_argument("--yes", action="store_true", help="confirma la promoción")
-    rework = goal_sub.add_parser(
-        "rework", help="continúa una ejecución atascada desde su rama, con tu respuesta"
-    )
-    rework.add_argument("run_id", help="identificador de la ejecución (factory status)")
-    rework.add_argument("--answer", default=None, help="respuesta humana para el maker")
-    rework.add_argument("--answer-file", default=None, help="archivo con la respuesta humana")
-    rework.add_argument(
-        "--rounds", type=int, default=None, help="rondas máximas (por defecto, las del objetivo)"
-    )
-    rework.add_argument("--budget", type=float, default=None, help="presupuesto en USD")
     goal.set_defaults(handler=cmd_goal)
 
     inbox = sub.add_parser("inbox", help="bandeja de revisión humana")
@@ -659,11 +512,6 @@ def build_parser() -> argparse.ArgumentParser:
     ack = inbox_sub.add_parser("ack", help="marca una entrada como revisada")
     ack.add_argument("id")
     inbox.set_defaults(handler=cmd_inbox)
-
-    sched = sub.add_parser("schedule", help="imprime cómo programar los ticks (no instala nada)")
-    sched.add_argument("goal", help="goal.md con mode: monitor")
-    sched.add_argument("--every", required=True, help="intervalo: Nm, Nh o 1d (p. ej. 30m)")
-    sched.set_defaults(handler=cmd_schedule)
 
     intake_p = sub.add_parser(
         "intake", help="triaje de una petición: ACCEPT (borrador), NEEDS-INFO o REJECT"
@@ -736,18 +584,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
     team_lineup.add_argument("--json", action="store_true", help="salida estructurada (JSON)")
     team.set_defaults(handler=cmd_team)
-
-    land_p = sub.add_parser(
-        "land", help="integra en main una ejecución completed, tras verificar el merge exacto"
-    )
-    land_p.add_argument("run_id", help="identificador de la ejecución")
-    land_p.add_argument(
-        "--dry-run", action="store_true", help="solo verifica; no cambia ramas ni la bandeja"
-    )
-    land_p.add_argument(
-        "--delete-branch", action="store_true", help="borra la rama de la ejecución al integrar"
-    )
-    land_p.set_defaults(handler=cmd_land)
 
     fb = sub.add_parser(
         "feedback", help="recomendaciones de los revisores de un pull request (solo lectura)"
@@ -822,7 +658,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         InboxError,
         PreflightError,
         EngineError,
-        schedule.ScheduleError,
         RequestError,
         BrainError,
     ) as exc:

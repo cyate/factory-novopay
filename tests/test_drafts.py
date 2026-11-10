@@ -9,7 +9,6 @@ from factory.cli import main
 from factory.config import load_config
 from factory.engine import LoopEngine
 from factory.goal import GoalError, load_goal
-from factory.requests import RequestStore
 
 DRAFT = """---
 id: {id}
@@ -55,48 +54,3 @@ def test_el_motor_tambien_rechaza_borradores(tmp_path):
     with pytest.raises(GoalError, match="BORRADOR"):
         LoopEngine(config, goal, FakeRunner(), echo=lambda _: None).run()
     assert not (root / "marcador-ejecutado").exists()
-
-
-def test_promocion_sin_confirmacion(tmp_path, capsys):
-    root = make_loop_repo(tmp_path)
-    draft = _draft(root)
-    before = draft.read_text()
-    assert main(["--root", str(root), "goal", "promote", str(draft)]) == 0
-    out = capsys.readouterr().out
-    assert "marca: touch marcador-ejecutado" in out and "Nada cambió" in out
-    assert "AVISO: inexistente: no se encuentra `herramienta-que-no-existe`" in out
-    assert not (root / "goals" / "x.md").exists() and draft.read_text() == before
-    assert not (root / "marcador-ejecutado").exists()
-
-
-def test_promocion_confirmada(tmp_path, capsys):
-    root = make_loop_repo(tmp_path)
-    store = RequestStore(load_config(root).state_path)
-    req = store.create("crea el marcador")
-    (store.dir(req.id) / "intake.md").write_text("DECISION: ACCEPT\n\nok\n")
-    draft = _draft(root, request=req.id)
-    req.draft = str(draft.relative_to(root))
-    from factory.requests import advance
-
-    advance(store, req, "accepted", root=root)
-    assert main(["--root", str(root), "goal", "promote", str(draft), "--yes"]) == 0
-    promoted = root / "goals" / "x.md"
-    assert promoted.exists() and "status: draft" not in promoted.read_text()
-    assert "request: " + req.id in promoted.read_text()
-    assert store.load(req.id).stage == "promoted"
-    capsys.readouterr()
-    assert main(["--root", str(root), "goal", "run", str(promoted), "--dry-run"]) == 0
-    assert "Simulación" in capsys.readouterr().out
-    assert main(["--root", str(root), "goal", "promote", str(draft), "--yes"]) == 2
-    assert "no se sobrescribe" in capsys.readouterr().err
-
-
-def test_promover_algo_que_no_es_borrador(tmp_path, capsys):
-    root = make_loop_repo(tmp_path)
-    goal = root / "goals" / "normal.md"
-    goal.parent.mkdir(exist_ok=True)
-    goal.write_text(
-        DRAFT.format(id="normal", mode="finite", request="").replace("status: draft\n", "")
-    )
-    assert main(["--root", str(root), "goal", "promote", str(goal), "--yes"]) == 2
-    assert "no es un borrador" in capsys.readouterr().err
