@@ -1,8 +1,7 @@
 # Recomendaciones de los revisores
 
 Un pull request vuelve con hilos de CodeRabbit, de Orca, de un revisor humano y de un agente
-revisor como `sam-pc-novo`. El panel ya dice **que** hay revisiones; esto dice **qué** piden y
-deja el camino hecho para contestarlas.
+revisor como `sam-pc-novo`. Esto dice **qué** piden y deja el camino hecho para contestarlas.
 
 Dos piezas:
 

@@ -6,8 +6,7 @@ Una "fábrica" para que los agentes de codificación (Claude Code) trabajen **de
 - **Fase 2: motor de loops `factory`.** Un CLI Python que orquesta `claude -p` con un rol maker y un rol checker separados. Ofrece:
   - `factory goal run`: ejecuta un objetivo hasta cumplirlo o detenerse por un motivo explícito;
   - `factory tick`: vigilancia periódica que solo gasta tokens si algo falla;
-  - `factory init` y `factory doctor`: aplican y auditan el harness en otros repos;
-  - `factory panel`: panel local de tokens, revisiones, tareas y pull requests.
+  - `factory init` y `factory doctor`: aplican y auditan el harness en otros repos.
 
 El humano pasa de escribir cada instrucción a definir objetivos y revisar resultados. Los loops nunca integran en `main` ni hacen push.
 
@@ -343,25 +342,6 @@ factory complexity --base main --max 10            # solo lo cambiado; termina e
 
 El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independiente y obligatorio antes de dar por terminada una feature.
 
-### M. Ver tokens, revisiones, tareas y pull requests en el panel (opcional)
-
-`factory panel` sirve en `http://127.0.0.1:8765` una página de solo lectura con cuatro pestañas:
-
-- **Tokens:** consumo de los loops y de tus sesiones de Claude Code (por día, modelo, tipo de agente y sesión).
-- **Revisiones:** revisiones del `checker` y de los jugadores revisores en tiempo real, con veredicto y severidades.
-- **Tareas:** features, avance de los cambios OpenSpec, ejecuciones y bandeja.
-- **Pull requests:** los que abriste y los que te toca revisar, con su estado, sus tiempos (abierto, sin actividad, hasta la primera revisión y de ciclo) y las alertas: checks en rojo, cambios pedidos, conflictos, sin revisor, parado, sin `@coderabbitai review`, sin el equipo `cifra` y pasado de tamaño.
-
-Se actualiza sola cuando cambian los archivos, sin recargar.
-
-```bash
-factory panel --open                 # sirve y abre el navegador (Ctrl+C para salir)
-factory panel --json | python -m json.tool   # la misma instantánea, en JSON
-factory panel --no-pulls             # sin consultar GitHub
-```
-
-Las revisiones en tiempo real llegan por los hooks de `.claude/settings.json`, que ejecutan el mismo código que `factory hook`. No gasta tokens. La única salida a la red son las consultas de pull requests, de solo lectura y con tu sesión de `gh` (requiere `gh auth login`); se apagan con `--no-pulls`. Detalle, privacidad y seguridad en [docs/harness/panel.md](docs/harness/panel.md).
-
 ## Referencia rápida de comandos
 
 | Comando | Qué hace | Coste |
@@ -377,8 +357,6 @@ Las revisiones en tiempo real llegan por los hooks de `.claude/settings.json`, q
 | `factory tick <goal.md> [--reset-breaker]` | vigilancia; agentes solo si falla | 0 o `claude` |
 | `factory schedule <goal.md> --every 30m` | imprime cómo programar los ticks | 0 |
 | `factory status` | ejecuciones, ticks, avisos y costes silenciosos | 0 |
-| `factory panel [--port 8765] [--open] [--json] [--no-pulls] [--projects-dir DIR]` | panel local de tokens, revisiones, tareas y pull requests | 0 |
-| `factory hook` | registra un evento de hook de Claude Code leído de stdin (siempre sale con 0) | 0 |
 | `factory inbox list [--all] \| ack <run-id>` | bandeja de revisión humana | 0 |
 | `factory land <run-id> [--dry-run] [--delete-branch]` | integra en `main` una ejecución completed | 0 |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
@@ -429,7 +407,6 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `prompts/` | prompts de los roles maker y checker |
 | `src/factory/` | paquete y CLI `factory` |
 | `.claude/agents/checker.md` | revisor independiente de solo lectura para sesiones interactivas |
-| `.claude/settings.json`, `.claude/hooks/` | hooks que registran las revisiones para `factory panel` |
 | `brain-mapa/`, `brain-diario/` | mapa de la biblioteca (sin texto) y cerebro diario, versionados |
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
 | `.factory/` | estado local de ejecuciones, ticks y bandeja (no se versiona) |

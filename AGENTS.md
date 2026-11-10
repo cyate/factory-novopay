@@ -76,7 +76,6 @@ Léelos solo cuando la tarea lo requiera:
 - [Vigilancia](docs/harness/vigilancia.md): `factory tick`, guardas y programación.
 - [Cerebros](docs/harness/cerebros.md): cerebro principal (libros, fuera de git) y diario; `factory brain …`.
 - [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo` y `factory team …`.
-- [Panel](docs/harness/panel.md): `factory panel` (tokens, revisiones, tareas y pull requests en tiempo real), los hooks que registran las revisiones y `--no-pulls`.
 - [Cambios OpenSpec](openspec/changes/): requisitos y tareas del cambio en curso.
 
 ## Estructura
