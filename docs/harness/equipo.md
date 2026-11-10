@@ -22,7 +22,7 @@ No hay registro central: fichar es añadir un archivo y dar de baja es borrarlo.
 | 7 | extremo-derecho | `entrega-qa` | constructor | sonnet | `entregas/**` | paquete de entrega al QA humano y briefing del plan de desarrollo |
 | 8 | interior-derecho | *vacante* | — | — | — | — |
 | 9 | delantero-centro | `ingeniero-software` | constructor | sonnet | `peticion` | implementa siguiendo AGENTS.md |
-| 10 | mediapunta | `arquitecto-api` | revisor | opus | `src/factory/panel/**, src/factory/agents/**, src/factory/engine.py, src/factory/tick.py, src/factory/gitops.py, **/*.go, **/*.java, **/*.tf, **/*.sql, **/openapi*.yaml, **/openapi*.yml` | contrato de la API, seguridad de la frontera, concurrencia con servicios externos y bases de datos, y encaje con AWS |
+| 10 | mediapunta | `arquitecto-api` | revisor | opus | `src/factory/agents/**, src/factory/engine.py, src/factory/gitops.py, **/*.go, **/*.java, **/*.tf, **/*.sql, **/openapi*.yaml, **/openapi*.yml` | contrato de la API, seguridad de la frontera, concurrencia con servicios externos y bases de datos, y encaje con AWS |
 | 11 | extremo-izquierdo | *vacante* | — | — | — | — |
 
 - **Revisores:** solo lectura (`Read, Grep, Glob`); nunca ejecutan comandos.
@@ -74,7 +74,7 @@ Los dorsales 8 y 11 están libres y se irán llenando a medida que lleguen nueva
    - `tipo`: `revisor` (`tools` ⊆ `Read, Grep, Glob`) o `constructor` (sin `Agent`).
    - `convocatoria`: globs relativos al repo (`**`, `*`, `?`) y los tokens `siempre` y `peticion`, separados por comas.
    - Un revisor responde con el formato común: `## Jugador: <name> (#<dorsal>)`, una línea de veredicto y hallazgos con `archivo:línea` y evidencia (como el `checker`).
-2. **Valida la plantilla:** `factory doctor` y los tests `tests/test_team_*.py` comprueban el frontmatter.
+2. **Valida la plantilla:** los tests `tests/test_team_*.py` comprueban el frontmatter de cada jugador (`factory doctor` no lo audita).
 3. **Haz una prueba real barata con haiku** y comprueba que el agente carga y que respeta su terreno. El modo de permisos depende del tipo:
 
    ```bash
@@ -94,7 +94,7 @@ Los dorsales 8 y 11 están libres y se irán llenando a medida que lleguen nueva
    - este documento: plantilla, formación, vacantes y costes;
    - `.claude/skills/equipo/SKILL.md`: la línea de vacantes de la alineación y la sección "Coste";
    - `docs/harness/roles.md`: la enumeración de revisores o de constructores.
-6. **Propónlo como cambio OpenSpec** (`/opsx:propose`) si el fichaje toca un requisito de `team-match` — por ejemplo, ocupar un dorsal que la spec daba por vacante. Solo es opcional cuando ningún requisito cambia.
+6. **Propónlo como cambio OpenSpec** (`/opsx:propose`) si el fichaje toca un requisito de una spec de `openspec/specs/`. Solo es opcional cuando ningún requisito cambia.
 
 ## El partido
 
@@ -124,7 +124,7 @@ Para una rama ya hecha: propia, ajena o una `factory/<run-id>`.
 - El diff usa tres puntos, contra la merge-base: `git diff main...<rama>` y `git log main..<rama>`.
 - Cada revisor recibe la lista de archivos cambiados (`git diff --name-only main...<rama>`) y lee cada archivo completo, no solo los hunks.
 - La verificación se ejecuta sobre el código de la rama: en el checkout si es esa rama o, si no, en un worktree temporal fuera del repo.
-- En una rama de un loop, los criterios salen de su `goal.md`. Los revisores reciben solo `goal.md`, `rounds/<n>/checks.md` y `land/checks.md`; nunca `decision.md`, `loop-state.md`, `rounds/<n>/maker.md` ni `rounds/<n>/review.md`.
+- En una rama de un loop, los criterios salen de su `goal.md`. Los revisores reciben solo `goal.md`, y `rounds/<n>/checks.md`; nunca `decision.md`, `loop-state.md`, `rounds/<n>/maker.md` ni `rounds/<n>/review.md`.
 
 ## Árbitro frente a equipo
 
@@ -158,7 +158,7 @@ No lances al técnico como subagente (`subagent_type: tecnico`). Un subagente no
 
 Las definiciones del equipo son archivos críticos del harness en los loops (D7):
 
-- `.claude/agents/**` y `.claude/skills/**` están en `STATIC_CRITICAL`, junto con el resto de la configuración de Claude Code (`.claude/commands/**`, `.claude/hooks/**` y `.claude/settings.json`). Si el maker de `factory goal run` o `factory tick` modifica, borra o renombra un agente o una skill existentes, el orquestador lo revierte.
+- `.claude/agents/**` y `.claude/skills/**` están en `STATIC_CRITICAL`, junto con el resto de la configuración de Claude Code (`.claude/commands/**`, `.claude/hooks/**` y `.claude/settings.json`). Si el maker de `factory goal run` modifica, borra o renombra un agente o una skill existentes, el orquestador lo revierte.
 - Nadie puede liberarlos: siguen protegidos en cada ronda aunque un objetivo los nombre. Además, para avisar antes de gastar rondas, `goal validate` rechaza un `scope.allow_modify` que case con una ruta de muestra (`.claude/**`, `**/SKILL.md`) o que apunte dentro de ellos (`.claude/agents/qa.md`, con o sin `./`). Es una heurística: otros comodines (`**/LICENSE`) pasan la validación, pero tampoco los liberan.
 - Crear archivos nuevos en esas rutas sigue permitido, como en el resto de rutas protegidas. Ver [Loops](loops.md#rutas-protegidas).
 

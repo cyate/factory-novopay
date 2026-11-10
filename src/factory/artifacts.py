@@ -141,39 +141,3 @@ def render_decision(state: RunState) -> str:
     if state.blockers:
         lines += ["", "## Bloqueos y avisos", "", *[f"- {b}" for b in state.blockers]]
     return "\n".join(lines).rstrip() + "\n"
-
-
-def render_land_checks(
-    gate: str,
-    commit: str,
-    main: str,
-    branch_tip: str,
-    verification: Verification | None,
-    protected: list[str],
-    conflicts: list[str],
-) -> str:
-    """Informe de `factory land` en land/checks.md (spec run-landing)."""
-    lines = [
-        header(gate=gate, commit=commit, main=main, branch=branch_tip),
-        "# Integración: verificación del merge exacto",
-        "",
-        "## Conflictos",
-        "",
-        *([f"- {path}" for path in conflicts] or ["Ninguno."]),
-        "",
-        "## Rutas protegidas (lado de la rama)",
-        "",
-        *([f"- {v}" for v in protected] or ["Sin cambios en rutas protegidas."]),
-        "",
-        "## Criterios sobre el merge",
-        "",
-    ]
-    if verification is None:
-        lines.append("No se ejecutaron.")
-    else:
-        for name, result in verification.results.items():
-            mark = "✅" if result.ok else "❌"
-            lines.append(f"- {mark} {name}: `{result.command}` → código {result.exit_code}")
-            if not result.ok:
-                lines += ["", "```", truncate(result.output.strip(), OUTPUT_TAIL), "```", ""]
-    return "\n".join(lines).rstrip() + "\n"

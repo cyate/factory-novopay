@@ -188,15 +188,15 @@ def test_documento_del_equipo_lista_las_vacantes():
 
 
 def test_como_fichar_nombra_las_superficies_y_el_cambio_openspec():
-    """La spec `team-match` ("Fichajes posteriores") exige coherencia en cuatro superficies."""
+    """Fichar exige coherencia en las superficies del equipo."""
     texto = EQUIPO.read_text(encoding="utf-8")
     pasos = texto.split("## Cómo fichar", 1)[1].split("## El partido", 1)[0]
     superficies = ("`README.md`", "`.claude/skills/equipo/SKILL.md`", "`docs/harness/roles.md`")
     for superficie in superficies:
         assert superficie in pasos, superficie
     assert "Coste" in pasos and "vacantes" in pasos
-    # El cambio OpenSpec deja de ser opcional si el fichaje toca un requisito de `team-match`.
-    assert "toca un requisito de `team-match`" in pasos
+    # El cambio OpenSpec deja de ser opcional si el fichaje toca un requisito de una spec.
+    assert "toca un requisito de una spec de `openspec/specs/`" in pasos
     assert "Solo es opcional cuando ningún requisito cambia." in pasos
 
 

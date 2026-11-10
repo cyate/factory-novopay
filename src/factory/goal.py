@@ -73,7 +73,7 @@ class Goal:
     raw: str = ""
     protected: list[str] = field(default_factory=list)
     allow_modify: list[str] = field(default_factory=list)
-    status: str = ""  # "draft": generado por `factory intake`, no ejecutable hasta promoverlo
+    status: str = ""  # "draft": borrador no ejecutable hasta quitarle esta línea a mano
     request: str = ""
     risk: str = ""
     surfaces: list[str] = field(default_factory=list)
@@ -86,11 +86,11 @@ class Goal:
 
     def require_executable(self) -> None:
         """Los borradores no se ejecutan: ningún comando propuesto por un agente corre sin
-        revisión humana (spec request-intake)."""
+        revisión humana."""
         if self.is_draft:
             where = self.path or self.id
             raise GoalError(
-                f"'{self.id}' es un BORRADOR (status: draft) generado por el intake: no se "
+                f"'{self.id}' es un BORRADOR (status: draft): no se "
                 "ejecuta. Revisa sus comandos y quítale la línea `status: draft` del "
                 f"frontmatter de {where} para poder ejecutarlo."
             )

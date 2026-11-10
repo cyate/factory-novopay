@@ -51,7 +51,7 @@ AGENTS.md                      <- esta guía
 ```
 
 Tipos: `learning`, `decision`, `gotcha` (trampa o error a evitar) y `pattern`.
-`source`: `manual`, `run:<run-id>` (captura de un loop) o `intake:<request-id>`.
+`source`: `manual` u otra etiqueta libre que indique el origen de la nota.
 
 ## Cómo consultar
 

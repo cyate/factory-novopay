@@ -16,9 +16,8 @@ README = REPO / "README.md"
 ROLES = REPO / "docs" / "harness" / "roles.md"
 SOLO_LECTURA = {"Read", "Grep", "Glob"}
 CONVOCATORIA = (
-    "src/factory/panel/**, src/factory/agents/**, src/factory/engine.py, "
-    "src/factory/tick.py, src/factory/gitops.py, **/*.go, **/*.java, **/*.tf, "
-    "**/*.sql, **/openapi*.yaml, **/openapi*.yml"
+    "src/factory/agents/**, src/factory/engine.py, src/factory/gitops.py, "
+    "**/*.go, **/*.java, **/*.tf, **/*.sql, **/openapi*.yaml, **/openapi*.yml"
 )
 
 
@@ -164,7 +163,7 @@ def test_la_convocatoria_casa_un_contrato_anidado():
     patrones = [p.strip() for p in CONVOCATORIA.split(",")]
     assert matches("services/pagos/openapi.yaml", patrones)
     assert matches("docs/api/openapi-v2.yml", patrones)
-    assert matches("src/factory/panel/server.py", patrones)
+    assert matches("src/factory/agents/claude_code.py", patrones)
     assert not matches("src/factory/cli.py", patrones)
 
 

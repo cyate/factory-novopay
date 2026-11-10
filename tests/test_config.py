@@ -117,3 +117,18 @@ def test_brain_valores_no_positivos(tmp_path, key):
     _write(tmp_path, f"[brain]\n{key} = 0\n")
     with pytest.raises(ConfigError, match="mayor que 0"):
         load_config(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("text", "clave"),
+    [
+        ("[tick]\nmax_rounds = 3\n", "tick"),
+        ("[alerts]\ninbox_pending_max = 3\n", "alerts"),
+        ("[brain]\ninject_max_tokens = 3000\n", "brain.inject_max_tokens"),
+        ('[roles.intake]\nmodel = "opus"\n', "roles.intake"),
+    ],
+)
+def test_claves_retiradas_dicen_que_se_borren(tmp_path, text, clave):
+    _write(tmp_path, text)
+    with pytest.raises(ConfigError, match=f"`{clave}` se retiró; bórrala de factory.toml"):
+        load_config(tmp_path)

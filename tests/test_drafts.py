@@ -1,4 +1,4 @@
-"""Escenarios de `request-intake`: los borradores no se ejecutan y la promoción es explícita."""
+"""Los borradores (`status: draft`) no se ejecutan hasta quitarles esa línea."""
 
 import pytest
 from conftest import make_loop_repo

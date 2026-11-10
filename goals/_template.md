@@ -3,7 +3,7 @@
 # Cuanto más específico y verificable, mejor el loop. Copia este archivo a goals/<id>.md.
 id: plantilla
 objective: "Describe en una frase qué cuenta como terminado"
-mode: finite            # finite: tarea con línea de meta (goal run) · monitor: vigilancia (tick)
+mode: finite            # finite: tarea con línea de meta (goal run) · monitor: sin comando que lo ejecute
 # feature: loop-config  # opcional: id de feature_list.json que se promueve al completar
 
 # Criterios verificables por máquina: cada uno es un comando que termina en 0 cuando se cumple.

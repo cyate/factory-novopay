@@ -242,6 +242,19 @@ def check_permission_mode(mode: str, where: str) -> None:
         )
 
 
+# Secciones y claves que existieron y ya no hacen nada: se rechazan con un mensaje claro.
+RETIRED = {"tick", "alerts", "roles.intake", "brain.inject_max_tokens"}
+
+
+def _check_retired(data: dict) -> None:
+    for key in sorted(RETIRED):
+        section, _, name = key.partition(".")
+        value = data.get(section)
+        found = name in value if name and isinstance(value, dict) else section in data and not name
+        if found:
+            raise ConfigError(f"`{key}` se retiró; bórrala de {CONFIG_FILE}")
+
+
 def load_config(root: Path) -> Config:
     """Carga `factory.toml` de `root`; si no existe, devuelve los valores por defecto."""
     config = Config(root=root)
@@ -252,6 +265,7 @@ def load_config(root: Path) -> Config:
         except tomllib.TOMLDecodeError as exc:
             raise ConfigError(f"{CONFIG_FILE} no es TOML válido: {exc}") from exc
         config.source = path
+        _check_retired(data)
         known = {"harness", "loop", "agent", "roles", "brain"}
         unknown = set(data) - known
         if unknown:

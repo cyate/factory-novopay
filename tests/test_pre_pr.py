@@ -106,3 +106,31 @@ def _repo_sobre(root: Path, tmp_path: Path) -> Path:
     _commit(root, "stubs")
     subprocess.run(["git", "branch", "base"], cwd=root, check=True)
     return root
+
+
+def test_borrar_un_archivo_y_editar_otro_cuenta_cada_uno_a_su_manera(tmp_path):
+    root = init_git_repo(tmp_path / "r")
+    (root / "viejo.py").write_text("x = 1\n" * 300)
+    (root / "vivo.py").write_text("x = 1\n" * 10)
+    _commit(root, "base")
+    root = _repo_sobre(root, tmp_path)
+    (root / "viejo.py").unlink()
+    (root / "vivo.py").write_text("y = 2\n" * 10)
+    _commit(root, "borra y edita")
+    r = _correr(root, tmp_path, 0)
+    assert r.returncode == 0, r.stderr
+    assert "2 archivos, 20 líneas" in r.stdout  # las ediciones cuentan; lo borrado, 0 líneas
+    assert "borrados enteros: 1" in r.stdout
+
+
+def test_borrar_un_md_cuenta_como_documentacion(tmp_path):
+    root = init_git_repo(tmp_path / "r")
+    (root / "nota.md").write_text("texto\n" * 600)
+    _commit(root, "nota")
+    root = _repo_sobre(root, tmp_path)
+    (root / "nota.md").unlink()
+    _commit(root, "borra")
+    r = _correr(root, tmp_path, 0)
+    assert r.returncode == 0, r.stderr
+    assert "borrados enteros: 0" in r.stdout
+    assert "documentación (sin límite): 1 archivos, 600 líneas" in r.stdout
