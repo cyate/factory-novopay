@@ -98,26 +98,17 @@ Defensas que no dependen de los permisos del CLI:
 
 Se configuran en `[roles.<rol>]` de `factory.toml`, y se pueden ajustar por objetivo con `roles:` en `goal.md`.
 
-## Árbitro y equipo
+## Agentes interactivos
 
-En las sesiones interactivas, el [equipo ideal](equipo.md) suma un técnico y jugadores especialistas. Eso no cambia la regla de este documento: quien construye nunca aprueba.
+En las sesiones interactivas hay tres agentes en `.claude/agents/`. La regla de este documento no cambia: quien construye nunca aprueba.
 
-- **El `checker` es el árbitro.** Es independiente, no forma parte de la plantilla y sigue siendo **obligatorio** antes de dar por terminada una feature. Un acta del equipo en verde no lo sustituye.
-- **Los jugadores revisores** (`seguridad`, `qa`, `revisor-pr`, `metricas`, `producto` y `arquitecto-api`) siguen las mismas reglas que el checker:
-  - solo lectura;
-  - reciben criterios, diff y resultado de la verificación (en el pre-partido, `producto` y `qa` reciben la petición), nunca el razonamiento de un constructor;
-  - devuelven el mismo formato de veredicto, precedido de `## Jugador: <name> (#<dorsal>)`.
-
-  La diferencia es que son especialistas: cada uno mira el diff desde su faceta.
-- **Los constructores** (`ingeniero-software`, `documentador` y `entrega-qa`) editan, pero **nunca** aprueban su propio trabajo. Cada uno tiene su terreno: código y tests, documentación del repositorio, y la carpeta `entregas/<TICKET>/`.
-
-| | Herramientas | Quién los invoca | ¿Decide? |
+| Agente | Herramientas | Cuándo | ¿Decide? |
 |---|---|---|---|
-| Árbitro (`checker`) | solo lectura (Read, Grep, Glob) | la sesión principal, antes de dar por terminada una feature | sí: con un `critical` o un `medium` abierto, la feature no está terminada |
-| Revisores del equipo | solo lectura (Read, Grep, Glob) | el técnico, si los convoca | no: su veredicto entra en el acta; un `critical` o un `medium` devuelve el trabajo a construcción |
-| Constructores del equipo | leer y editar, sin `Agent` (`documentador`: solo `*.md`; `entrega-qa`: solo `entregas/<TICKET>/`) | el técnico | nunca: los juzgan los revisores y el árbitro |
+| `ingeniero-software` | leer, editar y Bash | implementa código y tests | nunca aprueba su propio trabajo |
+| `checker` | solo lectura (Read, Grep, Glob) | antes de dar por terminada una feature; ejes spec y estándares | sí: con un `critical` o un `medium` abierto, la feature no está terminada |
+| `seguridad` | solo lectura (Read, Grep, Glob) | cuando el diff toca autenticación, secretos, entradas externas o permisos | sus hallazgos `critical`/`medium` devuelven el trabajo a construcción |
 
-La verificación determinista (`./scripts/check.sh` y, si hace falta, `factory complexity`) la ejecuta el técnico, nunca un revisor.
+La verificación determinista (`./scripts/check.sh` y, si hace falta, `factory complexity`) la ejecuta la sesión principal, nunca un revisor.
 
 ---
 Adaptado de walkinglabs/learn-harness-engineering (MIT), lecciones 09, 11 y 13 (prompts maker/checker).

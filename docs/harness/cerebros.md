@@ -43,8 +43,7 @@ Cada `factory brain import` regenera `brain-mapa/` desde el catálogo importado:
 ## Consulta obligatoria antes de proponer
 
 La biblioteca no está para leerla al final, cuando el código ya está escrito: está para decidir el
-enfoque. Es una regla de `AGENTS.md`, y la llevan en su contrato el maker y los diez
-jugadores del equipo (el `checker` no: juzga solo con los criterios, el diff y la verificación).
+enfoque. Es una regla de `AGENTS.md`, y la llevan en su contrato el maker, `ingeniero-software` y `seguridad` (el `checker` no: juzga solo con los criterios, el diff y la verificación).
 
 - **Qué se contrasta**: un enfoque, un arreglo o un hallazgo que no sea evidente desde el código.
   Un cambio mecánico —renombrar, mover un archivo, corregir una errata— no necesita cita.

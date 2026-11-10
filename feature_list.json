@@ -227,127 +227,22 @@
       "id": "complexity-metrics",
       "priority": 17,
       "area": "team",
-      "title": "Complejidad ciclomática y jugador de métricas",
-      "user_visible_behavior": "`factory complexity [rutas] [--base REF] [--max N] [--json]` mide la complejidad ciclomática por función con rangos A–F y delta frente a una referencia; el jugador `metricas` (#5) interpreta el informe.",
+      "title": "Complejidad ciclomática",
+      "user_visible_behavior": "`factory complexity [rutas] [--base REF] [--max N] [--json]` mide la complejidad ciclomática por función con rangos A–F y delta frente a una referencia; `pre-pr.sh` lo usa como puerta (`--max`).",
       "status": "passing",
       "verification": [
-        "python -m pytest -q tests/test_complexity.py tests/test_team_metricas.py"
+        "python -m pytest -q tests/test_complexity.py"
       ],
       "manual_checks": [],
       "evidence": [
         {
-          "command": "python -m pytest -q tests/test_complexity.py tests/test_team_metricas.py",
+          "command": "python -m pytest -q tests/test_complexity.py",
           "exit_code": 0,
-          "date": "2026-10-30T05:46:38+00:00",
-          "commit": "7800a7961cf56e85d21bf2708c2a5f18c6c288c6"
+          "date": "2026-11-10T22:05:10+00:00",
+          "commit": "61d683821095b4b6f477458785693ea81375ca9e"
         }
       ],
       "notes": "OpenSpec add-equipo-ideal, grupo 3"
-    },
-    {
-      "id": "team-security",
-      "priority": 18,
-      "area": "team",
-      "title": "Jugador de seguridad (portero)",
-      "user_visible_behavior": "El jugador `seguridad` (#1) revisa diffs en modo guía con la skill `security-audit` copiada literal de cloudflare/security-audit-skill (MIT), con hallazgos probados desde el código y pistas `needs_validation`.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_seguridad.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_seguridad.py",
-          "exit_code": 0,
-          "date": "2026-10-30T05:46:38+00:00",
-          "commit": "7800a7961cf56e85d21bf2708c2a5f18c6c288c6"
-        }
-      ],
-      "notes": "OpenSpec add-equipo-ideal, grupo 4"
-    },
-    {
-      "id": "team-coach",
-      "priority": 19,
-      "area": "team",
-      "title": "Técnico y reglamento del partido",
-      "user_visible_behavior": "`/equipo` y `claude --agent tecnico` publican la convocatoria justificada, dirigen el partido por fases y cierran con un acta; `docs/harness/equipo.md` documenta la plantilla, las vacantes y cómo fichar.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_tecnico.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_tecnico.py",
-          "exit_code": 0,
-          "date": "2026-10-30T05:46:38+00:00",
-          "commit": "7800a7961cf56e85d21bf2708c2a5f18c6c288c6"
-        }
-      ],
-      "notes": "OpenSpec add-equipo-ideal, grupo 5"
-    },
-    {
-      "id": "team-builders",
-      "priority": 20,
-      "area": "team",
-      "title": "Constructores: ingeniero de software y documentador",
-      "user_visible_behavior": "`ingeniero-software` (#9) implementa siguiendo AGENTS.md y `documentador` (#3) actualiza solo documentación `*.md`.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_constructores.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_constructores.py",
-          "exit_code": 0,
-          "date": "2026-10-30T05:46:38+00:00",
-          "commit": "7800a7961cf56e85d21bf2708c2a5f18c6c288c6"
-        }
-      ],
-      "notes": "OpenSpec add-equipo-ideal, grupo 6"
-    },
-    {
-      "id": "team-reviewers",
-      "priority": 21,
-      "area": "team",
-      "title": "Revisores: QA, producto y revisor de PR",
-      "user_visible_behavior": "`qa` (#2), `producto` (#6) y `revisor-pr` (#4) revisan en solo lectura con el formato común del equipo: plan de pruebas y cobertura, preguntas y respuestas frente a la petición, y revisión de ramas propias o ajenas.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_revisores.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_revisores.py",
-          "exit_code": 0,
-          "date": "2026-10-30T05:46:39+00:00",
-          "commit": "7800a7961cf56e85d21bf2708c2a5f18c6c288c6"
-        }
-      ],
-      "notes": "OpenSpec add-equipo-ideal, grupo 7"
-    },
-    {
-      "id": "team-integration",
-      "priority": 22,
-      "area": "team",
-      "title": "Integración y protección del equipo",
-      "user_visible_behavior": "`.claude/agents/**` y `.claude/skills/**` son archivos críticos que ningún loop puede modificar; AGENTS.md, CLAUDE.md, README y roles.md documentan el equipo y el árbitro.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_protected_config.py tests/test_protected_paths.py tests/test_doctor.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_protected_config.py tests/test_protected_paths.py tests/test_doctor.py",
-          "exit_code": 0,
-          "date": "2026-10-30T06:01:56+00:00",
-          "commit": "fed72fde528435f9856ca9165bf893078ee66125"
-        }
-      ],
-      "notes": "OpenSpec add-equipo-ideal, grupo 8"
     },
     {
       "id": "library-map",
@@ -390,48 +285,6 @@
         }
       ],
       "notes": "OpenSpec add-reglas-de-oficio"
-    },
-    {
-      "id": "team-arquitecto-api",
-      "priority": 28,
-      "area": "equipo",
-      "title": "Arquitecto de APIs e integraciones (#10)",
-      "user_visible_behavior": "El equipo ideal tiene un jugador en la mediapunta, `arquitecto-api`, revisor de solo lectura con opus: revisa el contrato de una API, la seguridad de la frontera, la concurrencia contra servicios externos y bases de datos, y el encaje con AWS, citando el cerebro principal. Ocupa el dorsal 10 de la tabla de `docs/harness/equipo.md` y se convoca por las rutas de su frontmatter.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_arquitecto_api.py tests/test_team_tecnico.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_arquitecto_api.py tests/test_team_tecnico.py",
-          "exit_code": 0,
-          "date": "2026-10-30T16:44:35+00:00",
-          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
-        }
-      ],
-      "notes": "OpenSpec fichar-arquitecto-api"
-    },
-    {
-      "id": "team-entrega-qa",
-      "priority": 29,
-      "area": "equipo",
-      "title": "Preparador de entregas a QA (#7)",
-      "user_visible_behavior": "El equipo ideal tiene un constructor en el extremo derecho, `entrega-qa`, que tras aprobarse el PR de una API escribe `entregas/<TICKET>/` con el briefing para Cowork design, los escenarios ejecutables en Python de la biblioteca estándar y el README para el QA humano, sin tocar nada fuera de esa carpeta.",
-      "status": "passing",
-      "verification": [
-        "python -m pytest -q tests/test_team_entrega_qa.py tests/test_team_tecnico.py"
-      ],
-      "manual_checks": [],
-      "evidence": [
-        {
-          "command": "python -m pytest -q tests/test_team_entrega_qa.py tests/test_team_tecnico.py",
-          "exit_code": 0,
-          "date": "2026-10-30T17:33:00+00:00",
-          "commit": "fbdf2069842abb170b29b80765c0509ef1e5c155"
-        }
-      ],
-      "notes": "OpenSpec fichar-entrega-qa"
     },
     {
       "id": "pr-feedback",

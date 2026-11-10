@@ -1,7 +1,7 @@
 # complexity-metrics Specification
 
 ## Purpose
-Mide de forma determinista y sin dependencias la complejidad ciclomática de las funciones Python, también como delta frente a una referencia. Así el jugador `metricas` y cualquier persona pueden detectar las funciones que un cambio vuelve más difíciles de probar y de mantener.
+Mide de forma determinista y sin dependencias la complejidad ciclomática de las funciones Python, también como delta frente a una referencia. Así el `checker`, `pre-pr.sh` y cualquier persona pueden detectar las funciones que un cambio vuelve más difíciles de probar y de mantener.
 
 ## Requirements
 

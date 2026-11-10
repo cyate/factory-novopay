@@ -20,7 +20,7 @@ Siempre, incluido un PR en borrador o apilado sobre otro que aún no se ha integ
 
 Un test que ejerce el router en proceso prueba el enrutado y la forma de la respuesta; no prueba que el binario arranque, lea su configuración y conteste. Ese recorrido va **en la misma rebanada**, no en una tarea final de certificación: al final ya no evita nada, solo lo constata.
 
-- El agente `entrega-qa` escribe esos escenarios en `entregas/<TICKET>/`. Si ese directorio está vacío mientras hay rutas construidas, el recorrido no se ha hecho, da igual lo verde que esté la compuerta.
+- El agente global `entrega-qa` (`~/.claude/agents/`) escribe esos escenarios en `entregas/<TICKET>/`. Si ese directorio está vacío mientras hay rutas construidas, el recorrido no se ha hecho, da igual lo verde que esté la compuerta.
 - **Decisión del usuario:** el paquete `entregas/<TICKET>/` se entrega **directo a QA** y **no va en un pull request**; no es un bloqueo de aprobación.
 
 ## Un PR nace en borrador

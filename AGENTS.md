@@ -73,7 +73,6 @@ Léelos solo cuando la tarea lo requiera:
 - [Observabilidad](docs/harness/observabilidad.md): estado y artefactos de cada ejecución.
 - [Recomendaciones](docs/harness/recomendaciones.md): `factory feedback` y la skill `recomendaciones`, para atender los hilos de los revisores de un pull request.
 - [Cerebros](docs/harness/cerebros.md): cerebro principal (libros, fuera de git) y diario; `factory brain …`.
-- [Equipo](docs/harness/equipo.md): el equipo ideal de sub-agentes (técnico, jugadores y árbitro); `/equipo`.
 - [Cambios OpenSpec](openspec/changes/): requisitos y tareas del cambio en curso.
 
 ## Estructura
@@ -83,7 +82,7 @@ Léelos solo cuando la tarea lo requiera:
 - `init.sh` y `scripts/check.sh`: rutas estándar de arranque y verificación.
 - `scripts/pre-pr.sh` y `.coderabbit.yaml`: la puerta previa a un pull request y las reglas con las que el bot revisa.
 - `feature_list.json`, `progress.md` y `session-handoff.md`: estado del harness.
-- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por `entrega-qa`. Se entregan directo a QA y no van en el PR; como salen del equipo, nunca llevan secretos ni datos reales.
+- `entregas/<TICKET>/`: paquetes de entrega al QA humano (briefing, escenarios y README), escritos por el agente global `entrega-qa` (`~/.claude/agents/`). Se entregan directo a QA y no van en el PR; como salen del equipo, nunca llevan secretos ni datos reales.
 - `openspec/`: specs y cambios. No edites specs fuera del flujo de OpenSpec.
 
 ---

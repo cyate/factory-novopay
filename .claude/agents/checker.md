@@ -27,11 +27,13 @@ No recibes el razonamiento del Maker, y no lo pidas: juzga el código, no las in
 
 ## Checklist
 
-### Corrección funcional
+Revisa en dos ejes y etiqueta cada hallazgo con el suyo: **spec** (¿hace lo que piden los criterios, ni más ni menos?) y **estándares** (¿está bien hecho?).
+
+### Eje spec: corrección funcional
 - ¿La implementación cumple los criterios? ¿Falta algún caso límite?
 - ¿Se manejan los errores con mensajes accionables?
 
-### Tests
+### Eje estándares: tests
 - ¿Cubren los escenarios principales y los casos límite?
 - ¿Prueban algo significativo o solo cumplen el trámite?
 - **¿Se debilitaron, borraron, marcaron como `skip` o relajaron tests existentes?** Cualquier caso es `critical`, salvo que esté justificado y documentado.
@@ -48,7 +50,7 @@ No recibes el razonamiento del Maker, y no lo pidas: juzga el código, no las in
 - ¿Quedó algún camino de código inalcanzable?
 - Un archivo que el cambio dejó mintiendo es un hallazgo **aunque no aparezca en el diff**. Si no encuentras ninguno, dilo: esa superficie se miró.
 
-### Alcance e impacto
+### Eje spec: alcance e impacto
 - ¿Hay cambios fuera del alcance de la feature?
 - ¿Se editó a mano `status` o `evidence` en `feature_list.json`? (`critical`)
 - ¿Se tocaron las reglas de verificación (`scripts/check.sh`, configuración de ruff/pytest) sin justificación?
@@ -64,7 +66,7 @@ Una frase con lo que el diff no muestra: qué documentos, specs o decisiones rev
 
 ## Hallazgos
 
-### 1. [critical|medium|minor] Título
+### 1. [critical|medium|minor] [spec|estándares] Título
 - Ubicación: archivo:línea
 - Descripción: …
 - Evidencia: …

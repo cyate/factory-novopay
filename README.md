@@ -33,7 +33,7 @@ Elige el paso según lo que quieras hacer. A y D son la base; el resto se añade
 | delegar una tarea completa a un loop | [E](#e-escribir-un-buen-objetivo-goalmd) → [F](#f-ejecutar-un-objetivo-con-un-loop) → [G](#g-revisar-el-resultado-y-continuar) | sí (`goal run`) |
 | consultar los libros y guardar lo aprendido | [H](#h-cerebros-de-conocimiento-opcional) | no |
 | planificar un cambio grande con specs | [I](#i-planificar-cambios-grandes-con-openspec-opcional) | solo si usas Claude Code |
-| repartir el trabajo entre sub-agentes especialistas (seguridad, QA, documentación…) | [J](#j-el-equipo-ideal-opcional) | sí (Claude Code) |
+| construir y revisar con los agentes interactivos (`ingeniero-software`, `checker`, `seguridad`) | [J](#j-agentes-interactivos-opcional) | sí (Claude Code) |
 
 > Los ejemplos escriben `factory`. Si no activaste el entorno ni lo instalaste (paso B), usa `.venv/bin/factory`.
 
@@ -251,36 +251,9 @@ Para algo que ocupa varias features, primero escribe la spec y después implemen
 
 `openspec validate <cambio> --strict` comprueba el formato en cualquier momento.
 
-### J. El equipo ideal (opcional)
+### J. Agentes interactivos (opcional)
 
-Un equipo de sub-agentes de Claude Code, como uno de fútbol: un **técnico** (el orquestador) y hasta 11 jugadores especialistas en `.claude/agents/`. El técnico lee el contexto y decide si convoca a todos o solo a algunos. Detalle en [docs/harness/equipo.md](docs/harness/equipo.md).
-
-| Dorsal | Jugador | Qué hace |
-|---|---|---|
-| — | `tecnico` | orquesta: convoca, reparte el trabajo y redacta el acta |
-| 1 | `seguridad` | revisa la seguridad del diff (solo lectura) |
-| 2 | `qa` | plan de pruebas y cobertura (solo lectura) |
-| 3 | `documentador` | actualiza la documentación (solo `*.md`) |
-| 4 | `revisor-pr` | revisa ramas y PR propios o ajenos (solo lectura) |
-| 5 | `metricas` | complejidad ciclomática del cambio (solo lectura) |
-| 6 | `producto` | preguntas y respuestas frente a la petición de producto (solo lectura) |
-| 7 | `entrega-qa` | prepara el paquete para el QA humano y el briefing del plan de desarrollo |
-| 9 | `ingeniero-software` | implementa el código y los tests |
-| 10 | `arquitecto-api` | contrato de la API, seguridad de la frontera, concurrencia con servicios externos y bases de datos, y AWS (solo lectura) |
-
-Los dorsales 8 y 11 están vacantes: fichar es añadir un archivo en `.claude/agents/`.
-
-```bash
-# 1. Jugar un partido desde Claude Code (cuesta dinero)
-/equipo "Añade la función restar con su test"      # en la sesión principal: técnico + convocados
-claude --agent tecnico                             # o una sesión con el técnico al mando
-
-# 2. Complejidad ciclomática (la usa el jugador metricas)
-factory complexity src/                            # funciones ordenadas por complejidad
-factory complexity --base main --max 10            # solo lo cambiado; termina en 1 si algo nuevo o empeorado supera 10
-```
-
-El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independiente y obligatorio antes de dar por terminada una feature.
+Tres agentes en `.claude/agents/`: `ingeniero-software` construye, `checker` revisa en dos ejes (spec y estándares) y `seguridad` revisa los diffs sensibles. Detalle en [docs/harness/roles.md](docs/harness/roles.md#agentes-interactivos).
 
 ## Referencia rápida de comandos
 
@@ -338,7 +311,7 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `brain-mapa/`, `brain-diario/` | mapa de la biblioteca (sin texto) y cerebro diario, versionados |
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
 | `.factory/` | estado local de las ejecuciones (no se versiona) |
-| `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso J) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
+| `.claude/agents/`, `.claude/skills/` | los tres agentes interactivos (paso J) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
 | `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. Van **directo a QA**, no en el PR; nunca llevan secretos ni datos reales |
 | `openspec/` | specs principales en `openspec/specs/` (10 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |
 

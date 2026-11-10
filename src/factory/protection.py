@@ -2,7 +2,7 @@
 existentes protegidos, aunque sí crear archivos nuevos en esas rutas.
 
 Los archivos críticos del harness (lo que define cómo se juzga una rama, y la configuración de
-Claude Code: sub-agentes, skills, comandos, hooks y `.claude/settings.json`, como el equipo ideal)
+Claude Code: sub-agentes, skills, comandos, hooks y `.claude/settings.json`)
 están siempre protegidos y ningún objetivo ni configuración puede liberarlos.
 """
 
