@@ -116,5 +116,39 @@ else
   esac
 fi
 
+# 5. Los ajustes que el bot anuncia y no convierte en hilo. CodeRabbit abre su
+#    revisión con "Actionable comments posted: N" y a veces abre menos de N
+#    hilos: la diferencia vive solo en el cuerpo de la revisión, no aparece en
+#    la pestaña de conversación y se mergea con el PR sin que nadie la lea.
+#    Medido sobre el PR 120: tres de sus doce revisiones anunciaron 7, 6 y 4 y
+#    abrieron 5, 3 y 3 — seis ajustes que ningún hilo recogió.
+#
+#    Solo cuentan las revisiones posteriores al último commit: si ya se empujó
+#    algo después, el bot volverá a revisar y esa cuenta queda superada.
+if ! command -v gh >/dev/null 2>&1; then
+  echo "==> [ajustes del bot] gh no está instalado; se salta." >&2
+elif ! PR=$(gh pr view --json number --jq .number 2>/dev/null) || [ -z "$PR" ]; then
+  echo "==> [ajustes del bot] esta rama no tiene PR todavía; no hay revisión que leer."
+else
+  REPO=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+  ULTIMO_COMMIT=$(git log -1 --format=%cI)
+  PERDIDOS=0
+  while IFS=$'\t' read -r REV_ID REV_FECHA ANUNCIADOS; do
+    [ -z "$REV_ID" ] && continue
+    [ "$REV_FECHA" \> "$ULTIMO_COMMIT" ] || continue
+    EN_HILOS=$(gh api "repos/$REPO/pulls/$PR/reviews/$REV_ID/comments" --paginate --jq 'length' 2>/dev/null || echo 0)
+    [ "$ANUNCIADOS" -gt "$EN_HILOS" ] && PERDIDOS=$((PERDIDOS + ANUNCIADOS - EN_HILOS))
+  done <<EOF
+$(gh api "repos/$REPO/pulls/$PR/reviews" --paginate --jq '
+  .[] | select(.user.login | test("coderabbit"; "i"))
+      | select(.body | test("Actionable comments posted"))
+      | "\(.id)\t\(.submitted_at)\t\(.body | capture("Actionable comments posted: (?<n>[0-9]+)").n)"' 2>/dev/null)
+EOF
+  if [ "$PERDIDOS" -gt 0 ]; then
+    fallo "CodeRabbit anunció $PERDIDOS ajuste(s) que no abrieron hilo en #$PR: están solo en el cuerpo de la revisión y nadie los ve en la conversación. Léelos ahí, arréglalos o descarta cada uno con su motivo, y vuelve a correr esta puerta."
+  fi
+  echo "==> [ajustes del bot] #$PR: ningún ajuste anunciado se quedó fuera de un hilo"
+fi
+
 [ "${SIN_CODERABBIT:-0}" = "1" ] && echo "==> Puerta abierta SIN la revisión de CodeRabbit." >&2
 echo "==> Puerta abierta: el PR se puede publicar."
