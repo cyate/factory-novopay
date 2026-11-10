@@ -5,7 +5,6 @@ Una "fábrica" para que los agentes de codificación (Claude Code) trabajen **de
 - **Fase 1: harness.** Instrucciones, estado, verificación, alcance y ciclo de vida. Hace fiable cada ejecución individual: el agente sabe cómo arrancar, qué hacer, cómo comprobar que terminó y cómo dejar el repo listo para la siguiente sesión.
 - **Fase 2: motor de loops `factory`.** Un CLI Python que orquesta `claude -p` con un rol maker y un rol checker separados. Ofrece:
   - `factory goal run`: ejecuta un objetivo hasta cumplirlo o detenerse por un motivo explícito;
-  - `factory tick`: vigilancia periódica que solo gasta tokens si algo falla;
   - `factory init` y `factory doctor`: aplican y auditan el harness en otros repos.
 
 El humano pasa de escribir cada instrucción a definir objetivos y revisar resultados. Los loops nunca integran en `main` ni hacen push.
@@ -17,7 +16,7 @@ El humano pasa de escribir cada instrucción a definir objetivos y revisar resul
 | macOS o Linux | — | `bash`, `flock` y worktrees de git (Windows solo con WSL) | — |
 | Python | ≥ 3.12 | el CLI `factory` y sus tests | `python3 --version` |
 | git | ≥ 2.30 | ramas y worktrees de cada ejecución | `git --version` |
-| Claude Code (`claude`) | ≥ 2.1, con sesión iniciada | **solo** para los loops reales (`goal run`, `tick` con fallo, `intake`); cuestan dinero | `claude --version` |
+| Claude Code (`claude`) | ≥ 2.1, con sesión iniciada | **solo** para los loops reales (`goal run`, `intake`); cuestan dinero | `claude --version` |
 | OpenSpec (`openspec`) | opcional | planificar cambios con `/opsx:*` | `openspec --version` |
 | uv | opcional | si está instalado, `init.sh` lo usa en lugar de `pip` | `uv --version` |
 
@@ -33,7 +32,6 @@ Elige el paso según lo que quieras hacer. A y D son la base; el resto se añade
 | trabajar una tarea en una sesión, con o sin Claude Code | [D](#d-trabajar-una-feature-en-una-sesión) | solo si usas Claude Code |
 | delegar una tarea completa a un loop | [E](#e-escribir-un-buen-objetivo-goalmd) → [F](#f-ejecutar-un-objetivo-con-un-loop) → [G](#g-revisar-el-resultado-y-continuar) | sí (`goal run`) |
 | describir la tarea en lenguaje natural | [H](#h-de-una-idea-a-un-objetivo-con-triaje-opcional) | sí (`intake`) |
-| vigilar que el repo siga en verde | [I](#i-vigilancia-con-factory-tick-opcional) | solo si algo falla |
 | consultar los libros y guardar lo aprendido | [J](#j-cerebros-de-conocimiento-opcional) | no |
 | planificar un cambio grande con specs | [K](#k-planificar-cambios-grandes-con-openspec-opcional) | solo si usas Claude Code |
 | repartir el trabajo entre sub-agentes especialistas (seguridad, QA, documentación…) | [L](#l-el-equipo-ideal-opcional) | sí (Claude Code) |
@@ -162,7 +160,7 @@ Campos del frontmatter:
 |---|---|---|
 | `id` | minúsculas, dígitos y guiones | igual que el nombre del archivo |
 | `objective` | una frase: qué cuenta como terminado | si no cabe en una frase, divídelo en varios objetivos |
-| `mode` | `finite` (para `goal run`) o `monitor` (para `tick`) | |
+| `mode` | `finite` (para `goal run`) o `monitor` (sin comando que lo ejecute) | |
 | `feature` | id de `feature_list.json` (opcional) | al completar, la feature se promueve a `passing` en la rama |
 | `acceptance` | lista de `{name, run}`: comandos que terminan en 0 cuando se cumple | el orquestador los ejecuta él mismo; lo que diga el agente no cuenta |
 | `scope.allow` / `scope.deny` | globs de lo que el maker puede y no puede tocar | lo más estrecho posible |
@@ -184,7 +182,6 @@ factory goal validate goals/exportar-csv.md       # errores de formato y límite
 ```bash
 factory goal run goals/exportar-csv.md --dry-run   # plan completo, sin agentes ni coste
 factory goal run goals/exportar-csv.md             # ejecución real (cuesta dinero)
-factory status                                     # ejecuciones en curso y costes silenciosos
 factory inbox list                                 # resultado pendiente de tu revisión
 ```
 
@@ -239,18 +236,6 @@ factory goal run goals/<id>.md --dry-run                      # y sigue con el p
 
 El intake usa `claude` (cuesta dinero, 1 USD como máximo por defecto; cámbialo con `--budget`), solo lee el repo y nunca ejecuta comandos. Un borrador no se puede ejecutar hasta que lo promueves.
 
-### I. Vigilancia con `factory tick` (opcional)
-
-Un objetivo con `mode: monitor`, como `goals/vigilancia-check.md`, vigila que unos criterios sigan en verde. Cada tick **verifica primero sin agentes y con coste 0**; solo si algo falla lanza un loop acotado, que deja una rama para revisar (paso G).
-
-```bash
-factory tick goals/vigilancia-check.md                    # un tick: noop si todo pasa
-factory schedule goals/vigilancia-check.md --every 30m    # imprime cron, launchd y /loop (no instala nada)
-factory tick goals/vigilancia-check.md --reset-breaker    # tras revisar un escalado (circuit_open)
-```
-
-Copia la opción de `schedule` que prefieras: cron o launchd para que corra solo, o `/loop` mientras tienes Claude Code abierto. Los límites están en `[tick]` de `factory.toml`: rondas, presupuesto por tick y por día, y cuántos fallos seguidos abren el cortacircuitos. Vigila sobre un árbol limpio: el tick verifica tu árbol de trabajo, pero el loop parte del último commit. Detalle en [docs/harness/vigilancia.md](docs/harness/vigilancia.md).
-
 ### J. Cerebros de conocimiento (opcional)
 
 Dos bibliotecas en Markdown que los loops consultan en solo lectura. Detalle en [docs/harness/cerebros.md](docs/harness/cerebros.md).
@@ -276,7 +261,7 @@ factory brain learn "En macOS no existe timeout; usar el de la herramienta" --ki
 factory brain reindex                                 # si editas una ficha a mano
 
 # 4. Revisar lo que proponen los loops al terminar
-factory brain pending                                 # capturas pendientes (también en factory status)
+factory brain pending                                 # capturas pendientes 
 factory brain accept <id>                             # o: factory brain reject <id>
 
 # 5. Commitear SOLO el cerebro diario y el mapa (sin push)
@@ -354,9 +339,6 @@ El acta del equipo no sustituye al `checker`: sigue siendo el árbitro, independ
 | `factory goal rework <run-id> --answer …` | continúa una ejecución no completada | `claude` |
 | `factory goal promote <borrador> [--yes]` | convierte un borrador del intake en objetivo | 0 |
 | `factory intake "<petición>"` | triaje: ACCEPT, NEEDS-INFO o REJECT | `claude` |
-| `factory tick <goal.md> [--reset-breaker]` | vigilancia; agentes solo si falla | 0 o `claude` |
-| `factory schedule <goal.md> --every 30m` | imprime cómo programar los ticks | 0 |
-| `factory status` | ejecuciones, ticks, avisos y costes silenciosos | 0 |
 | `factory inbox list [--all] \| ack <run-id>` | bandeja de revisión humana | 0 |
 | `factory land <run-id> [--dry-run] [--delete-branch]` | integra en `main` una ejecución completed | 0 |
 | `factory brain import \| status \| search \| learn \| reindex \| pending \| accept \| reject \| commit` | cerebros de conocimiento | 0 |
@@ -373,7 +355,6 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 - **Alcance estrecho.** Un `scope.allow` pequeño reduce rondas y coste. Protege los tests existentes con `protected_paths`.
 - **Commitea antes de lanzar.** Los loops y `land` parten de `main`, no de tu árbol de trabajo.
 - **Revisa antes de integrar.** `land` y `goal promote --yes` son decisiones tuyas; ningún agente las toma.
-- **Mira `factory status` a menudo.** Avisa de bandejas acumuladas, crecimiento de tokens y cambios sin commitear en los cerebros.
 - **Nunca omitas permisos.** `bypassPermissions` se rechaza al cargar la configuración; no uses `--dangerously-skip-permissions`.
 
 ## Problemas frecuentes
@@ -388,7 +369,6 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | `goal validate` rechaza el objetivo | el mensaje nombra la clave; compara con `goals/_template.md` |
 | el loop termina `completed` sin cambios | los criterios ya pasaban en el último commit de `main`: lo que fallaba estaba sin commitear |
 | `land` se niega a integrar | no estás en `main`, hay cambios sin commitear o la ejecución no es `completed`; el mensaje dice cuál |
-| `tick` responde `circuit_open` | varios ticks seguidos sin resolverlo: revisa la bandeja y usa `--reset-breaker` |
 | `doctor` falla por el mapa de la biblioteca | alguien lo editó a mano: `git restore brain-mapa/` o `factory brain import` |
 
 ## Cómo está organizado
@@ -396,20 +376,20 @@ Todos aceptan `--root <repo>` antes del subcomando. Más detalle en [docs/harnes
 | Ruta | Qué es |
 |---|---|
 | `AGENTS.md` / `CLAUDE.md` | instrucciones de entrada (router corto) para cualquier agente / para Claude Code |
-| `docs/harness/` | documentos temáticos: verificación, features, sesiones, roles, loops, revisión, recomendaciones, vigilancia, cerebros |
+| `docs/harness/` | documentos temáticos: verificación, features, sesiones, roles, loops, revisión, recomendaciones, cerebros |
 | `feature_list.json` | fuente de verdad del trabajo: comportamiento, comandos de verificación, estado y evidencia |
 | `progress.md`, `session-handoff.md` | continuidad entre sesiones |
 | `init.sh`, `scripts/check.sh` | rutas estándar de arranque y verificación |
 | `scripts/hooks/` | `pre-commit` (ruff) y `pre-push` (`check.sh`); los activa `./init.sh` o `git config core.hooksPath scripts/hooks` |
 | `scripts/pre-pr.sh`, `.coderabbit.yaml` | puerta previa a un pull request y reglas con las que CodeRabbit revisa este repositorio |
-| `factory.toml` | configuración de factory: límites del loop, ticks, roles y cerebros |
+| `factory.toml` | configuración de factory: límites del loop, roles y cerebros |
 | `goals/` | objetivos para los loops (`_template.md`, ejemplos y `drafts/` del intake) |
 | `prompts/` | prompts de los roles maker y checker |
 | `src/factory/` | paquete y CLI `factory` |
 | `.claude/agents/checker.md` | revisor independiente de solo lectura para sesiones interactivas |
 | `brain-mapa/`, `brain-diario/` | mapa de la biblioteca (sin texto) y cerebro diario, versionados |
 | `brain-principal/` | texto de los libros, solo local (en `.gitignore`) |
-| `.factory/` | estado local de ejecuciones, ticks y bandeja (no se versiona) |
+| `.factory/` | estado local de ejecuciones y bandeja (no se versiona) |
 | `.claude/agents/`, `.claude/skills/` | el equipo ideal (técnico, jugadores y reglamento de `/equipo`, paso L) y las skills de la casa, como `recomendaciones`; los loops no pueden modificarlos |
 | `entregas/<TICKET>/` | paquetes de entrega al QA humano: briefing, escenarios y README. Van **directo a QA**, no en el PR; nunca llevan secretos ni datos reales |
 | `openspec/` | specs principales en `openspec/specs/` (18 capacidades); los cambios que construyeron todo esto están en `openspec/changes/archive/` |

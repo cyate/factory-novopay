@@ -1,11 +1,9 @@
 """Escenarios de `run-landing`: integración asistida con `factory land`."""
 
 import subprocess
-from pathlib import Path
 
 from conftest import make_loop_repo, write_goal
 
-import factory.cli as cli
 import factory.land as land_module
 from factory.agents.fake import FakeRunner, FakeStep, maker_done
 from factory.artifacts import read_header
@@ -171,20 +169,3 @@ def test_borrar_rama_al_integrar(tmp_path, capsys):
 
 
 # ---------------------------------------------------------------- solo por orden humana (5.4)
-def test_ejecucion_completada_sin_integrar(tmp_path, monkeypatch):
-    root = make_loop_repo(tmp_path)
-    before = git(root, "rev-parse", "main")
-    monkeypatch.setattr(
-        cli, "make_runner", lambda _c: FakeRunner(maker=[maker_done("a", **{"a.txt": "1"})])
-    )
-    assert main(["--root", str(root), "goal", "run", str(write_goal(root))]) == 0
-    monitor = write_goal(root, extra="mode: monitor\n")
-    assert main(["--root", str(root), "tick", str(monitor)]) == 0
-    assert git(root, "rev-parse", "main") == before
-    src = Path(__file__).resolve().parents[1] / "src" / "factory"
-    for module in ("engine.py", "tick.py"):
-        assert "land" not in "".join(
-            line
-            for line in (src / module).read_text().splitlines()
-            if line.startswith(("from", "import"))
-        )

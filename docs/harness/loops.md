@@ -2,15 +2,7 @@
 
 El harness hace fiable cada ejecución. El loop hace que las ejecuciones continuas no necesiten que un humano dé cada instrucción (L13). Loop engineering no sustituye al harness: se construye encima.
 
-`factory` ofrece dos formas de loop:
-
-| | `factory goal run` | `factory tick` |
-|---|---|---|
-| Para | una tarea **finita** con línea de meta | **vigilancia** periódica sin fin definido |
-| `mode` en goal.md | `finite` | `monitor` |
-| Se detiene | al cumplir los criterios o por un límite | en cada tick (verifica primero; solo invoca agentes si algo falla) |
-
-**Anti-patrón**: programar una tarea finita como tick. El loop repetiría el mismo trabajo cada vez sin acumular progreso. Por eso `tick` rechaza los objetivos `finite`.
+`factory goal run` ejecuta una tarea **finita** con línea de meta (`mode: finite`): se detiene al cumplir los criterios o por un límite. Los objetivos de vigilancia (`mode: monitor`) ya no tienen comando que los ejecute.
 
 ## Formato de `goal.md`
 
@@ -125,10 +117,6 @@ Cómo leer el resultado, continuar una ejecución atascada con `factory goal rew
 ## Peticiones: `factory intake`
 
 Triaje de peticiones en lenguaje natural (aceptar con borrador, pedir información o rechazar) y promoción explícita de borradores: ver [intake.md](intake.md).
-
-## Vigilancia: `factory tick`
-
-Objetivos `mode: monitor`: verifican sin coste y solo lanzan un loop acotado si algo falla. Bloqueo, guardas, cortacircuitos y programación: ver [vigilancia.md](vigilancia.md).
 
 ## Anti-patrones (L13)
 

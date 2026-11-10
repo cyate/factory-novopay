@@ -13,7 +13,6 @@ from pathlib import Path
 
 from factory import __version__, doctor, features, scaffold, schedule
 from factory import intake as intake_mod
-from factory import tick as ticks
 from factory.agents.base import AgentRunner
 from factory.agents.claude_code import ClaudeCodeRunner
 from factory.brain import BrainError
@@ -296,7 +295,9 @@ def cmd_goal(args: argparse.Namespace) -> int:
         return EXIT_OK
     goal.require_executable()
     if goal.mode != "finite":
-        raise GoalError(f"'{goal.id}' es de vigilancia (mode: monitor): usa `factory tick`.")
+        raise GoalError(
+            f"'{goal.id}' es de vigilancia (mode: monitor): ya no tiene comando que lo ejecute."
+        )
     limits = Limits.from_goal(goal)
     print(describe_plan(config, goal, limits))
     if args.dry_run:
@@ -326,27 +327,6 @@ def cmd_inbox(args: argparse.Namespace) -> int:
         if e.question:
             print(f"          pregunta: {e.question}")
     return EXIT_OK
-
-
-TICK_FAILURE_RESULTS = (ticks.AWAITING_REVIEW, ticks.BUDGET_EXHAUSTED, ticks.CIRCUIT_OPEN)
-
-
-def cmd_tick(args: argparse.Namespace) -> int:
-    config = load_config(args.root)
-    goal = load_goal(_goal_path(args), config.loop)
-    store = ticks.TickStore(config.state_path)
-    if args.reset_breaker:
-        store.reset_breaker(goal.id)
-        print(f"Cortacircuitos de '{goal.id}' restablecido.")
-        return EXIT_OK
-    record = ticks.tick(config, goal, make_runner)
-    run = f" · ejecución {record.run_id} ({record.run_status})" if record.run_id else ""
-    print(f"tick '{goal.id}': {record.result}{run} · coste {record.cost_usd:.4f} USD")
-    if record.detail:
-        print(f"  {record.detail}")
-    if record.result == ticks.RUN:
-        return 0 if record.run_status == "completed" else EXIT_FAIL
-    return EXIT_FAIL if record.result in TICK_FAILURE_RESULTS else EXIT_OK
 
 
 def cmd_schedule(args: argparse.Namespace) -> int:
@@ -679,15 +659,6 @@ def build_parser() -> argparse.ArgumentParser:
     ack = inbox_sub.add_parser("ack", help="marca una entrada como revisada")
     ack.add_argument("id")
     inbox.set_defaults(handler=cmd_inbox)
-
-    tick = sub.add_parser(
-        "tick", help="vigilancia: verifica y, solo si falla, lanza un loop acotado"
-    )
-    tick.add_argument("goal", help="goal.md con mode: monitor")
-    tick.add_argument(
-        "--reset-breaker", action="store_true", help="restablece el cortacircuitos del objetivo"
-    )
-    tick.set_defaults(handler=cmd_tick)
 
     sched = sub.add_parser("schedule", help="imprime cómo programar los ticks (no instala nada)")
     sched.add_argument("goal", help="goal.md con mode: monitor")

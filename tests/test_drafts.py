@@ -48,14 +48,6 @@ def test_ejecutar_un_borrador_con_goal_run(tmp_path, monkeypatch, capsys):
     assert not (root / "marcador-ejecutado").exists()
 
 
-def test_ejecutar_un_borrador_con_tick(tmp_path, monkeypatch, capsys):
-    root = make_loop_repo(tmp_path)
-    monkeypatch.setattr(cli, "make_runner", _no_runner)
-    assert main(["--root", str(root), "tick", str(_draft(root, mode="monitor"))]) == 2
-    assert "BORRADOR" in capsys.readouterr().err
-    assert not (root / "marcador-ejecutado").exists()
-
-
 def test_el_motor_tambien_rechaza_borradores(tmp_path):
     root = make_loop_repo(tmp_path)
     config = load_config(root)

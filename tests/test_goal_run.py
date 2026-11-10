@@ -82,4 +82,4 @@ def test_objetivo_de_vigilancia_se_rechaza(tmp_path, capsys):
     root = make_loop_repo(tmp_path)
     goal = write_goal(root, extra="mode: monitor\n")
     assert main(["--root", str(root), "goal", "run", str(goal), "--dry-run"]) == 2
-    assert "factory tick" in capsys.readouterr().err
+    assert "mode: monitor" in capsys.readouterr().err

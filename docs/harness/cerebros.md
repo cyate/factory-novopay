@@ -37,7 +37,7 @@ Cada `factory brain import` regenera `brain-mapa/` desde el catálogo importado:
 - `_map.json` (huella del catálogo de origen), `llms.txt`, `AGENTS.md` y un `.gitignore` propio, escritos por factory. El `.gitignore` hace que `.DS_Store` u `.obsidian/` nunca se versionen.
 
 - **Sin texto de los libros.** Cada línea se construye desde una lista blanca de campos con formatos estrictos (keywords e identificadores sin espacios), así que nunca entra un `abstract`, un subtítulo, un cuerpo de nota ni las guías del vault. Un título de más de 20 palabras se recorta. `factory doctor` falla (crítica) si el texto de algún archivo del mapa no es exactamente el que generaría factory: un campo de más, un valor fuera de formato, una clave repetida, una guía editada o un archivo de más o de menos. Los títulos de hasta 20 palabras se aceptan como encabezados. Comprobado con el vault real: no aparece ninguno de sus 10.822 resúmenes, ni ninguno de los 45.011 fragmentos de 8 palabras de una muestra de 1.500 notas.
-- **Determinista.** Reimportar el mismo vault no cambia ni un byte. Si cambió, `import` lo indica y `factory status` avisa hasta que hagas `factory brain commit`.
+- **Determinista.** Reimportar el mismo vault no cambia ni un byte. Si cambió, `import` lo indica y avisa hasta que hagas `factory brain commit`.
 - **Uso.** Si `brain-principal/` no está importado, la búsqueda, la inyección y el intake usan el mapa. Las notas salen solo como cita y ruta ("texto no disponible en este equipo"). Si el principal está importado, el mapa se ignora y no hay resultados duplicados. Sin `abstract`, la puntuación pierde ese peso, pero los resultados principales coinciden.
 
 ## Consulta obligatoria antes de proponer
@@ -95,7 +95,7 @@ Al terminar cada ejecución, factory **propone** aprendizajes a partir de lo que
 | ejecución `stalled` (firma de fallo repetida) | `gotcha` |
 
 ```bash
-.venv/bin/factory brain pending          # lista de capturas pendientes (también la cuenta factory status)
+.venv/bin/factory brain pending          # lista de capturas pendientes
 .venv/bin/factory brain accept <id>      # la convierte en nota del cerebro diario (source: run:<id>)
 .venv/bin/factory brain reject <id>      # la descarta; queda constancia en .factory/brain/rejected/
 ```

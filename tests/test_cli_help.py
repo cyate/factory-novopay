@@ -11,7 +11,6 @@ SUBCOMANDOS = [
     "features",
     "goal",
     "inbox",
-    "tick",
     "schedule",
     "intake",
     "brain",
